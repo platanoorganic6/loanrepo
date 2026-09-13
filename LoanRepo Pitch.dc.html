@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>LoanRepo — pre-seed</title>
+<link rel="stylesheet" href="_ds/industry-0aee6b66-0396-4d31-a389-4f4990a07af6/styles.css">
+<script src="_ds/industry-0aee6b66-0396-4d31-a389-4f4990a07af6/_ds_bundle.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&text=%E2%82%B9&display=swap');
+  :root {
+    --font-heading: "Barlow Condensed", "Noto Sans", system-ui, sans-serif;
+    --font-body: "Barlow", "Noto Sans", system-ui, sans-serif;
+  }
+  body { margin: 0; }
+  a { color: var(--color-accent-700); text-decoration: none; }
+  a:hover { color: var(--color-accent-900); text-decoration: underline; }
+</style>
+</helmet>
+
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%">
+
+  <section data-label="Cover" data-screen-label="01" data-speaker-notes="Open on the mechanism, not the company. Everyone in the room has a floating-rate loan or knows someone who does." style="background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); padding:110px 130px; display:grid; grid-template-rows:auto 1fr auto;">
+    <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.04em; font-weight:600;">LOAN<span style="color:var(--color-accent-700);">REPO</span></div>
+    <div style="align-self:center;">
+      <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.18em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:34px;">The loan you signed is not the loan you have</div>
+      <h1 style="font-family:var(--font-heading); font-size:126px; line-height:0.94; letter-spacing:-0.015em; margin:0; font-weight:600; max-width:22ch;">Your bank never told you this changed.</h1>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:40px; border-top:1px solid var(--color-text); padding-top:26px;">
+      <div style="font-size:26px; max-width:52ch; line-height:1.5;">Real rate history. No lender affiliation. No stake in what you decide.</div>
+      <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.1em; text-transform:uppercase; white-space:nowrap;">Pre-seed · Ravi · Founder &amp; CEO · September 2026</div>
+    </div>
+  </section>
+
+  <section data-label="The mechanism" data-screen-label="02" data-speaker-notes="This is the whole product in one slide. The EMI is the only number a borrower watches, and it is the one number engineered not to move." style="background:var(--color-accent-900); color:var(--color-bg); font-family:var(--font-body); padding:110px 130px; display:grid; grid-template-rows:auto 1fr;">
+    <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.18em; text-transform:uppercase; opacity:0.72;">01 · The mechanism</div>
+    <div style="align-self:center; display:grid; grid-template-columns:1.05fr 0.95fr; gap:100px; align-items:center;">
+      <div>
+        <h2 style="font-family:var(--font-heading); font-size:80px; line-height:1.02; margin:0 0 34px; font-weight:600;">When rates rise, banks extend your tenure instead of raising your EMI.</h2>
+        <p style="font-size:28px; line-height:1.5; margin:0; max-width:40ch;">Extending the term needs no consent and no conversation. Raising the EMI needs both. So the default is the silent one, and the borrower's only monitoring instrument — the amount leaving their account each month — is the one thing engineered not to change.</p>
+      </div>
+      <div style="border:1px solid rgba(242,242,243,0.35); padding:52px;">
+        <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.14em; text-transform:uppercase; opacity:0.72; margin-bottom:34px;">A ₹50L loan taken June 2021</div>
+        <div style="display:grid; gap:30px; font-variant-numeric:tabular-nums;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; gap:30px; border-top:1px solid rgba(242,242,243,0.25); padding-top:22px;">
+            <span style="font-size:26px; opacity:0.8;">EMI then</span><span style="font-family:var(--font-heading); font-size:46px;">₹37,722</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; gap:30px; border-top:1px solid rgba(242,242,243,0.25); padding-top:22px;">
+            <span style="font-size:26px; opacity:0.8;">EMI now</span><span style="font-family:var(--font-heading); font-size:46px;">₹37,722</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; gap:30px; border-top:1px solid rgba(242,242,243,0.25); padding-top:22px;">
+            <span style="font-size:26px; opacity:0.8;">Tenure then</span><span style="font-family:var(--font-heading); font-size:46px;">20 yrs</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; gap:30px; border-top:1px solid rgba(242,242,243,0.25); padding-top:22px;">
+            <span style="font-size:26px;">Tenure now</span><span style="font-family:var(--font-heading); font-size:60px; letter-spacing:-0.01em;">27.4 yrs</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-label="The problem" data-screen-label="03" data-speaker-notes="Two sourced numbers. The 76% is the demand-side gap; the 36% on MCLR is the supply-side one — those borrowers barely see rate cuts at all." style="background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); padding:110px 130px; display:grid; grid-template-rows:auto 1fr;">
+    <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.18em; text-transform:uppercase; color:var(--color-accent-700);">02 · The problem</div>
+    <div style="align-self:center; display:grid; grid-template-columns:1fr 1fr; gap:100px; align-items:center;">
+      <div>
+        <h2 style="font-family:var(--font-heading); font-size:76px; line-height:1.04; margin:0 0 32px; max-width:20ch; font-weight:600;">Borrowers can't see what their own loan is doing to them.</h2>
+        <p style="font-size:27px; line-height:1.55; margin:0; max-width:44ch;">A bank statement shows this month's balance. It never shows the counterfactual — what your tenure would have been if the rate hadn't moved, or what you should ask for. That gap sits there for the entire life of the loan.</p>
+      </div>
+      <div style="display:grid; gap:0; border-top:1px solid var(--color-text);">
+        <div style="padding:44px 0; border-bottom:1px solid var(--color-divider);">
+          <div style="font-family:var(--font-heading); font-size:128px; line-height:0.9; font-variant-numeric:tabular-nums; color:var(--color-accent-800);">76%</div>
+          <div style="font-size:26px; line-height:1.5; margin-top:18px; max-width:40ch;">of Indian home loan borrowers don't know the interest amount on their own loan — only the EMI.</div>
+          <div style="font-size:24px; color:var(--color-neutral-700); margin-top:10px;">Home Credit India financial literacy survey</div>
+        </div>
+        <div style="padding:44px 0;">
+          <div style="font-family:var(--font-heading); font-size:128px; line-height:0.9; font-variant-numeric:tabular-nums; color:var(--color-accent-800);">36%</div>
+          <div style="font-size:26px; line-height:1.5; margin-top:18px; max-width:40ch;">of floating-rate loans are still on MCLR, an internal bank benchmark that barely tracks RBI cuts.</div>
+          <div style="font-size:24px; color:var(--color-neutral-700); margin-top:10px;">RBI, December 2024</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-label="The insight" data-screen-label="04" data-speaker-notes="This is the finding that makes the product more than a calculator. The trap is not universal — it is specific to when you bought, and that is provable." style="background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); padding:110px 130px; display:grid; grid-template-rows:auto 1fr;">
+    <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.18em; text-transform:uppercase; color:var(--color-accent-700);">03 · The insight</div>
+    <div style="align-self:center;">
+      <h2 style="font-family:var(--font-heading); font-size:82px; line-height:1.04; margin:0 0 56px; max-width:24ch; font-weight:600;">The trap isn't universal. It's cohort-specific — and provable.</h2>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:70px;">
+        <div class="blueprint" style="padding:52px;">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="font-family:var(--font-heading); font-size:25px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:24px;">Bought 2020–22, at the rate floor</div>
+          <div style="font-family:var(--font-heading); font-size:104px; line-height:0.92; font-variant-numeric:tabular-nums;">+6 to +8</div>
+          <div style="font-family:var(--font-heading); font-size:38px; margin-top:10px;">years of tenure added</div>
+        </div>
+        <div class="blueprint" style="padding:52px;">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="font-family:var(--font-heading); font-size:25px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:24px;">Bought 2023–24, at the rate peak</div>
+          <div style="font-family:var(--font-heading); font-size:104px; line-height:0.92; font-variant-numeric:tabular-nums;">1.6–2.8</div>
+          <div style="font-family:var(--font-heading); font-size:38px; margin-top:10px;">years ahead of schedule</div>
+        </div>
+      </div>
+      <div style="margin-top:48px; font-size:27px; line-height:1.5; max-width:90ch;">Five real purchase dates, walked month by month through actual RBI repo history — not a single before-and-after estimate. Same product, opposite verdicts, and the borrower has no way to know which one they are without being shown.</div>
+    </div>
+  </section>
+
+  <section data-label="Show, don't tell" data-screen-label="05" data-speaker-notes="Every claim on the platform looks like this. Walk the three dates slowly — the EMI column is the point." style="background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); padding:110px 130px; display:grid; grid-template-rows:auto 1fr;">
+    <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.18em; text-transform:uppercase; color:var(--color-accent-700);">04 · Show, don't tell</div>
+    <div style="align-self:center;">
+      <h2 style="font-family:var(--font-heading); font-size:72px; line-height:1.04; margin:0 0 36px; max-width:26ch; font-weight:600;">Every claim on the platform looks like this.</h2>
+      <div class="blueprint" style="padding:44px 52px;">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div style="display:flex; justify-content:space-between; gap:40px; font-family:var(--font-heading); font-size:25px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-700); padding-bottom:22px; border-bottom:1px solid var(--color-text);">
+          <span>Loan journey — sourced from RBI MPC records</span><span>₹50,00,000 · 20 yr</span>
+        </div>
+        <div style="display:grid; grid-template-columns:auto 1fr auto; gap:40px 60px; padding:30px 0; font-size:27px; align-items:baseline;">
+          <div style="font-family:var(--font-heading); font-size:34px; font-variant-numeric:tabular-nums; white-space:nowrap;">Jun 2021</div>
+          <div>Loan disbursed at 6.65%</div>
+          <div style="font-variant-numeric:tabular-nums; white-space:nowrap;">EMI ₹37,722</div>
+          <div style="font-family:var(--font-heading); font-size:34px; font-variant-numeric:tabular-nums; white-space:nowrap;">Feb 2023</div>
+          <div>Repo hits 6.50% → effective 9.15%</div>
+          <div style="font-variant-numeric:tabular-nums; white-space:nowrap;">EMI ₹37,722</div>
+          <div style="font-family:var(--font-heading); font-size:34px; font-variant-numeric:tabular-nums; white-space:nowrap;">Sep 2026</div>
+          <div>Still on the original EMI, still floating</div>
+          <div style="font-variant-numeric:tabular-nums; white-space:nowrap;">₹47.3L owed</div>
+        </div>
+        <div style="border-top:1px solid var(--color-text); padding-top:28px; display:grid; grid-template-columns:1.15fr 0.85fr; gap:60px; align-items:center;">
+          <div style="font-size:29px; line-height:1.45;">EMI never moved. <b>Tenure quietly extended by 88.7 months</b> — a 20-year loan is now a ~27-year one, and no statement ever said so.</div>
+          <div style="border-left:3px solid var(--color-accent-700); padding-left:28px;">
+            <div style="font-family:var(--font-heading); font-size:76px; line-height:0.95; font-variant-numeric:tabular-nums; color:var(--color-accent-800);">₹33.5L</div>
+            <div style="font-size:25px; line-height:1.45; margin-top:10px;">lifetime extra cost from this rate timing alone — worse than overpaying 30% on the property itself.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-label="Why we win trust" data-screen-label="06" data-speaker-notes="The incentive slide. Not a conspiracy — nobody in the chain is paid to explain it at the moment it matters. Name the competitors." style="background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); padding:110px 130px; display:grid; grid-template-rows:auto 1fr;">
+    <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.18em; text-transform:uppercase; color:var(--color-accent-700);">05 · Why this wins trust</div>
+    <div style="align-self:center;">
+      <div style="border-left:3px solid var(--color-accent-700); padding-left:34px; margin-bottom:56px;">
+        <p style="font-family:var(--font-heading); font-size:56px; line-height:1.18; margin:0; font-weight:400; max-width:32ch;">"Anytime is a good time to buy" survives because everyone positioned to correct it profits from you believing it.</p>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--color-text);">
+        <div style="padding:36px 44px 0 0; border-right:1px solid var(--color-divider);">
+          <div style="font-family:var(--font-heading); font-size:25px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:16px;">Banks &amp; comparison sites</div>
+          <div style="font-size:26px; line-height:1.5;">Earn on disbursal. The incentive is to say yes, and to say now.</div>
+        </div>
+        <div style="padding:36px 44px 0; border-right:1px solid var(--color-divider);">
+          <div style="font-family:var(--font-heading); font-size:25px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:16px;">Builders &amp; agents</div>
+          <div style="font-size:26px; line-height:1.5;">Paid on the transaction, not on the outcome that follows it.</div>
+        </div>
+        <div style="padding:36px 0 0 44px;">
+          <div style="font-family:var(--font-heading); font-size:25px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:16px;">LoanRepo</div>
+          <div style="font-size:26px; line-height:1.5;">Earns the same whether you buy, wait, prepay or refinance.</div>
+        </div>
+      </div>
+      <div style="margin-top:48px; font-size:27px; line-height:1.5; max-width:92ch;">No competitor calculator — RupayWise, ET Money, Groww, MoneyKarma — runs against real repo and MCLR history, and most earn lender referral commissions. The moat is the conflict of interest, not the code.</div>
+    </div>
+  </section>
+
+  <section data-label="Market" data-screen-label="07" data-speaker-notes="All four figures are sourced. Lead with the base, close on the EBLR share — that is the addressable slice for the flagship diagnostic." style="background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); padding:110px 130px; display:grid; grid-template-rows:auto 1fr;">
+    <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.18em; text-transform:uppercase; color:var(--color-accent-700);">06 · Market</div>
+    <div style="align-self:center;">
+      <h2 style="font-family:var(--font-heading); font-size:76px; line-height:1.04; margin:0 0 56px; max-width:30ch; font-weight:600;">A ₹33.5 lakh crore market, and almost nobody serving the borrower after the loan is signed.</h2>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:50px; border-top:1px solid var(--color-text); padding-top:40px;">
+        <div>
+          <div style="font-family:var(--font-heading); font-size:82px; line-height:0.95; font-variant-numeric:tabular-nums; color:var(--color-accent-800);">₹33.5L Cr</div>
+          <div style="font-size:25px; line-height:1.5; margin-top:18px;">outstanding individual housing loans in India, September 2024</div>
+          <div style="font-size:24px; color:var(--color-neutral-700); margin-top:10px;">National Housing Bank</div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-heading); font-size:82px; line-height:0.95; font-variant-numeric:tabular-nums; color:var(--color-accent-800);">14%</div>
+          <div style="font-size:25px; line-height:1.5; margin-top:18px;">year-on-year growth in outstanding housing loans — a widening base every year</div>
+          <div style="font-size:24px; color:var(--color-neutral-700); margin-top:10px;">NHB</div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-heading); font-size:82px; line-height:0.95; font-variant-numeric:tabular-nums; color:var(--color-accent-800);">64.7%</div>
+          <div style="font-size:25px; line-height:1.5; margin-top:18px;">of home loan borrowers are salaried — the urban, EMI-anxious segment we target</div>
+          <div style="font-size:24px; color:var(--color-neutral-700); margin-top:10px;">NHB</div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-heading); font-size:82px; line-height:0.95; font-variant-numeric:tabular-nums; color:var(--color-accent-800);">61%</div>
+          <div style="font-size:25px; line-height:1.5; margin-top:18px;">of floating-rate loans are EBLR-linked — the addressable base for the flagship diagnostic</div>
+          <div style="font-size:24px; color:var(--color-neutral-700); margin-top:10px;">RBI, December 2024</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-label="Product" data-screen-label="08" data-speaker-notes="Four tools, in the order a borrower meets them. All descriptive, none prescriptive — that is the design principle, not a limitation." style="background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); padding:110px 130px; display:grid; grid-template-rows:auto 1fr;">
+    <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.18em; text-transform:uppercase; color:var(--color-accent-700);">07 · The product</div>
+    <div style="align-self:center;">
+      <h2 style="font-family:var(--font-heading); font-size:76px; line-height:1.04; margin:0 0 54px; max-width:28ch; font-weight:600;">Four tools. All descriptive, none prescriptive.</h2>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:40px;">
+        <div class="blueprint" style="padding:42px 36px;">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="font-family:var(--font-heading); font-size:58px; line-height:1; color:var(--color-accent-700); margin-bottom:24px; font-variant-numeric:tabular-nums;">01</div>
+          <div style="font-family:var(--font-heading); font-size:34px; line-height:1.15; margin-bottom:16px;">Your loan journey</div>
+          <div style="font-size:25px; line-height:1.5;">Enter a purchase date and amount. We walk it through every real repo change since, on the correct EBLR or MCLR reset schedule.</div>
+        </div>
+        <div class="blueprint" style="padding:42px 36px;">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="font-family:var(--font-heading); font-size:58px; line-height:1; color:var(--color-accent-700); margin-bottom:24px; font-variant-numeric:tabular-nums;">02</div>
+          <div style="font-family:var(--font-heading); font-size:34px; line-height:1.15; margin-bottom:16px;">Rate-cycle position</div>
+          <div style="font-size:25px; line-height:1.5;">Where today's repo rate sits against its historical range — near a floor, a ceiling, or mid-cycle. No buy or wait recommendation.</div>
+        </div>
+        <div class="blueprint" style="padding:42px 36px;">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="font-family:var(--font-heading); font-size:58px; line-height:1; color:var(--color-accent-700); margin-bottom:24px; font-variant-numeric:tabular-nums;">03</div>
+          <div style="font-family:var(--font-heading); font-size:34px; line-height:1.15; margin-bottom:16px;">Price-equivalent damage</div>
+          <div style="font-size:25px; line-height:1.5;">Rate-timing impact in a unit people already understand: the equivalent of overpaying ₹X on the home itself.</div>
+        </div>
+        <div class="blueprint" style="padding:42px 36px; background:var(--color-accent-100);">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="font-family:var(--font-heading); font-size:58px; line-height:1; color:var(--color-accent-700); margin-bottom:24px; font-variant-numeric:tabular-nums;">04</div>
+          <div style="font-family:var(--font-heading); font-size:34px; line-height:1.15; margin-bottom:16px;">Examples library</div>
+          <div style="font-size:25px; line-height:1.5;">A growing set of sourced, computed case studies across purchase years and cities — the evidence behind every claim.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-label="Retention" data-screen-label="09" data-speaker-notes="The honest weakness of a calculator, and the answer. Every floating loan has a reset date — a calendar we did not have to invent." style="background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); padding:110px 130px; display:grid; grid-template-rows:auto 1fr;">
+    <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.18em; text-transform:uppercase; color:var(--color-accent-700);">08 · The retention problem, and the answer</div>
+    <div style="align-self:center; display:grid; grid-template-columns:0.9fr 1.1fr; gap:100px; align-items:center;">
+      <div>
+        <h2 style="font-family:var(--font-heading); font-size:72px; line-height:1.04; margin:0 0 30px; max-width:20ch; font-weight:600;">A shock is not a habit.</h2>
+        <p style="font-size:27px; line-height:1.55; margin:0 0 24px; max-width:44ch;">Someone runs their loan, sees +7.4 years, feels the floor move — and has no reason to return. That is the honest weakness of a calculator, and pretending otherwise would be the wrong way to build this.</p>
+        <p style="font-size:27px; line-height:1.55; margin:0; max-width:44ch;">The answer was already in the product: every floating loan has a reset date, and it is the borrower's alone. That date is a calendar we did not have to invent.</p>
+      </div>
+      <div class="blueprint" style="padding:52px;">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div style="font-family:var(--font-heading); font-size:25px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:34px;">Four contacts a year, each one earned</div>
+        <div style="display:grid; gap:28px;">
+          <div style="border-top:1px solid var(--color-divider); padding-top:22px;"><div style="font-family:var(--font-heading); font-size:32px; margin-bottom:8px;">The MPC decides</div><div style="font-size:25px; line-height:1.45; color:var(--color-neutral-800);">National news. We say what it means for this loan, and when it arrives.</div></div>
+          <div style="border-top:1px solid var(--color-divider); padding-top:22px;"><div style="font-family:var(--font-heading); font-size:32px; margin-bottom:8px;">Their reset lands</div><div style="font-size:25px; line-height:1.45; color:var(--color-neutral-800);">A week's notice, and two things to check on the statement that follows.</div></div>
+          <div style="border-top:1px solid var(--color-divider); padding-top:22px;"><div style="font-family:var(--font-heading); font-size:32px; margin-bottom:8px;">They log what they saw</div><div style="font-size:25px; line-height:1.45; color:var(--color-neutral-800);">Thirty seconds. Their figures beat our model wherever the two disagree.</div></div>
+          <div style="border-top:1px solid var(--color-divider); padding-top:22px;"><div style="font-family:var(--font-heading); font-size:32px; margin-bottom:8px;">The year in review</div><div style="font-size:25px; line-height:1.45; color:var(--color-neutral-800);">Of every ₹100 paid this year, how much actually bought the house.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-label="Business model" data-screen-label="10" data-speaker-notes="Four lines, one principle. The bottom line is the one investors should push on — we are leaving the most lucrative model on the table deliberately." style="background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); padding:110px 130px; display:grid; grid-template-rows:auto 1fr;">
+    <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.18em; text-transform:uppercase; color:var(--color-accent-700);">09 · Business model</div>
+    <div style="align-self:center;">
+      <h2 style="font-family:var(--font-heading); font-size:76px; line-height:1.04; margin:0 0 50px; max-width:30ch; font-weight:600;">Revenue that never depends on which choice you make.</h2>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:44px; border-top:1px solid var(--color-text); padding-top:38px;">
+        <div>
+          <div style="font-family:var(--font-heading); font-size:34px; margin-bottom:14px;">Tracked loans</div>
+          <div style="font-size:25px; line-height:1.5; color:var(--color-neutral-800);">One loan free forever. ₹149/month for as many as you have — a spouse's, a parent's, a second property. Live today.</div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-heading); font-size:34px; margin-bottom:14px;">MPC-day alerts</div>
+          <div style="font-size:25px; line-height:1.5; color:var(--color-neutral-800);">The RBI meets about six times a year. Subscribers get "what just changed for your loan" — the recurring hook.</div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-heading); font-size:34px; margin-bottom:14px;">B2B licensing</div>
+          <div style="font-size:25px; line-height:1.5; color:var(--color-neutral-800);">License the rate-history engine to fee-only RIAs, HR wellness platforms and finance creators.</div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-heading); font-size:34px; margin-bottom:14px;">Corporate workshops</div>
+          <div style="font-size:25px; line-height:1.5; color:var(--color-neutral-800);">Loan-literacy sessions sold to employers, drawing directly on ten years of client-facing advisory work.</div>
+        </div>
+      </div>
+      <div style="margin-top:46px; border-left:3px solid var(--color-accent-700); padding-left:32px; font-size:29px; line-height:1.45; max-width:80ch;">Explicitly avoided: lender lead-generation, builder advertising, and loan-comparison affiliate links — the exact model most competitors run on, and the most lucrative one available to us.</div>
+    </div>
+  </section>
+
+  <section data-label="Where we are" data-screen-label="11" data-speaker-notes="Be precise about what exists. The engine and the full backend are built; the audience is not. That is the ask." style="background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); padding:110px 130px; display:grid; grid-template-rows:auto 1fr;">
+    <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.18em; text-transform:uppercase; color:var(--color-accent-700);">10 · Where we are</div>
+    <div style="align-self:center; display:grid; grid-template-columns:1.05fr 0.95fr; gap:90px; align-items:center;">
+      <div>
+        <h2 style="font-family:var(--font-heading); font-size:72px; line-height:1.04; margin:0 0 40px; max-width:22ch; font-weight:600;">The hard part is built. The audience isn't, yet.</h2>
+        <div style="display:grid; gap:0; border-top:1px solid var(--color-text);">
+          <div style="padding:24px 0; border-bottom:1px solid var(--color-divider); font-size:26px; line-height:1.5;">Rate-history engine walking any loan through real RBI repo data, with EBLR quarterly and MCLR annual reset logic modelled separately</div>
+          <div style="padding:24px 0; border-bottom:1px solid var(--color-divider); font-size:26px; line-height:1.5;">A live working product, not a mockup — six screens on a Postgres backend with row-level security on every table</div>
+          <div style="padding:24px 0; border-bottom:1px solid var(--color-divider); font-size:26px; line-height:1.5;">Accounts, tracked loans, statement check-ins and the year in review, shipped</div>
+          <div style="padding:24px 0; font-size:26px; line-height:1.5;">Five sourced case studies across 2020–2024 demonstrating the cohort-specific finding</div>
+        </div>
+      </div>
+      <div class="blueprint" style="padding:52px;">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div style="font-family:var(--font-heading); font-size:25px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:28px;">Not yet built</div>
+        <div style="font-size:29px; line-height:1.5; margin-bottom:34px;">A live audience, and revenue. Payments are wired but unproven against real users.</div>
+        <div style="border-top:1px solid var(--color-text); padding-top:28px;">
+          <div style="font-family:var(--font-heading); font-size:25px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:20px;">The known gap in the model</div>
+          <div style="font-size:25px; line-height:1.5; color:var(--color-neutral-800);">We assume the bank spread rather than asking for it. A quarter-point error moves a 20-year result by about a year. Enter-your-own-spread is the first thing the raise funds, and until it ships the Method page says so plainly.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-label="Founder" data-screen-label="12" data-speaker-notes="The origin is the credibility. A decade of the same phone call is more persuasive than any projection." style="background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); padding:110px 130px; display:grid; grid-template-rows:auto 1fr;">
+    <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.18em; text-transform:uppercase; color:var(--color-accent-700);">11 · Founder</div>
+    <div style="align-self:center; display:grid; grid-template-columns:0.85fr 1.15fr; gap:100px; align-items:center;">
+      <div>
+        <h2 style="font-family:var(--font-heading); font-size:68px; line-height:1.04; margin:0 0 34px; max-width:20ch; font-weight:600;">Built on ten years of watching this happen to real clients.</h2>
+        <div style="font-family:var(--font-heading); font-size:46px; margin-bottom:8px;">Ravi</div>
+        <div style="font-size:27px; color:var(--color-neutral-800);">Founder &amp; CEO, LoanRepo · Bengaluru</div>
+      </div>
+      <div style="display:grid; gap:0; border-top:1px solid var(--color-text);">
+        <div style="display:grid; grid-template-columns:auto 1fr; gap:44px; padding:26px 0; border-bottom:1px solid var(--color-divider); align-items:baseline;">
+          <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--color-accent-700);">2003–2011</div>
+          <div style="font-size:26px; line-height:1.45;">Solutions Architect, Nokia</div>
+        </div>
+        <div style="display:grid; grid-template-columns:auto 1fr; gap:44px; padding:26px 0; border-bottom:1px solid var(--color-divider); align-items:baseline;">
+          <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--color-accent-700);">2011–2013</div>
+          <div style="font-size:26px; line-height:1.45;">Solutions Architect, Accenture</div>
+        </div>
+        <div style="display:grid; grid-template-columns:auto 1fr; gap:44px; padding:26px 0; border-bottom:1px solid var(--color-divider); align-items:baseline;">
+          <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--color-accent-700);">2014–2020</div>
+          <div style="font-size:26px; line-height:1.45;">Financial Advisor, Motilal Oswal — a decade watching retail clients discover, years too late, what their own loans and portfolios were actually doing</div>
+        </div>
+        <div style="display:grid; grid-template-columns:auto 1fr; gap:44px; padding:26px 0; border-bottom:1px solid var(--color-divider); align-items:baseline;">
+          <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--color-accent-700);">2020–now</div>
+          <div style="font-size:26px; line-height:1.45;">Founder &amp; CEO, NutMobi AI / NaatiBru</div>
+        </div>
+        <div style="display:grid; grid-template-columns:auto 1fr; gap:44px; padding:26px 0; align-items:baseline;">
+          <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--color-accent-700);">2026</div>
+          <div style="font-size:26px; line-height:1.45;">Founder, LoanRepo</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-label="The ask" data-screen-label="13" data-speaker-notes="Land the allocation, then the milestone. Content is 25% because the case-study library is the actual moat." style="background:var(--color-accent-900); color:var(--color-bg); font-family:var(--font-body); padding:110px 130px; display:grid; grid-template-rows:auto 1fr;">
+    <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.18em; text-transform:uppercase; opacity:0.72;">12 · The ask</div>
+    <div style="align-self:center;">
+      <h2 style="font-family:var(--font-heading); font-size:80px; line-height:1.04; margin:0 0 56px; max-width:28ch; font-weight:600;">₹25–50L pre-seed to take the engine to real users.</h2>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:50px; border-top:1px solid rgba(242,242,243,0.35); padding-top:40px;">
+        <div>
+          <div style="font-family:var(--font-heading); font-size:96px; line-height:0.9; font-variant-numeric:tabular-nums;">40%</div>
+          <div style="font-family:var(--font-heading); font-size:30px; margin-top:16px; margin-bottom:12px;">Product</div>
+          <div style="font-size:25px; line-height:1.5; opacity:0.85;">MCLR precision, enter-your-own-spread, and mobile build-out of the diagnostic suite</div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-heading); font-size:96px; line-height:0.9; font-variant-numeric:tabular-nums;">25%</div>
+          <div style="font-family:var(--font-heading); font-size:30px; margin-top:16px; margin-bottom:12px;">Content</div>
+          <div style="font-size:25px; line-height:1.5; opacity:0.85;">Case-study library across cities and purchase years — the platform's actual moat</div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-heading); font-size:96px; line-height:0.9; font-variant-numeric:tabular-nums;">20%</div>
+          <div style="font-family:var(--font-heading); font-size:30px; margin-top:16px; margin-bottom:12px;">Distribution</div>
+          <div style="font-size:25px; line-height:1.5; opacity:0.85;">SEO and content marketing, plus a credibility anchor in press or a known finance voice</div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-heading); font-size:96px; line-height:0.9; font-variant-numeric:tabular-nums;">15%</div>
+          <div style="font-family:var(--font-heading); font-size:30px; margin-top:16px; margin-bottom:12px;">Legal</div>
+          <div style="font-size:25px; line-height:1.5; opacity:0.85;">Disclaimers, terms, and an early trademark filing under Class 36</div>
+        </div>
+      </div>
+      <div style="margin-top:48px; border-top:1px solid rgba(242,242,243,0.35); padding-top:28px; font-size:29px; line-height:1.45; max-width:86ch;">Twelve-month milestone: MCLR-accurate diagnostic live, 5,000+ organic loan-journey runs, first B2B licensing conversation, seed-ready traction.</div>
+    </div>
+  </section>
+
+  <section data-label="Close" data-screen-label="14" data-speaker-notes="End on the origin, then contact. Do not add anything after this." style="background:var(--color-bg); color:var(--color-text); font-family:var(--font-body); padding:110px 130px; display:grid; grid-template-rows:auto 1fr auto;">
+    <div style="font-family:var(--font-heading); font-size:26px; letter-spacing:0.04em; font-weight:600;">LOAN<span style="color:var(--color-accent-700);">REPO</span></div>
+    <div style="align-self:center;">
+      <p style="font-family:var(--font-heading); font-size:88px; line-height:1.1; margin:0 0 40px; font-weight:600; max-width:20ch;">Real facts. No stake. Every home loan buyer deserves both.</p>
+      <p style="font-size:28px; line-height:1.55; margin:0; max-width:56ch; color:var(--color-neutral-800);">The information always existed. It was never assembled into something a borrower could act on at the moment it mattered. That assembly is the entire product.</p>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:40px; border-top:1px solid var(--color-text); padding-top:26px;">
+      <div style="font-family:var(--font-heading); font-size:32px; letter-spacing:0.04em;">Ravi · Founder &amp; CEO</div>
+      <div style="font-size:26px; color:var(--color-neutral-800);">platanoorganic6@gmail.com · +91 96865 68585</div>
+    </div>
+  </section>
+
+</x-import>
+
+</x-dc>
+</body>
+</html>
