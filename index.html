@@ -4,22 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
-<template id="__bundler_thumbnail" data-bg-color="#f2f2f3">
-  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
-    <rect width="1200" height="800" fill="#f2f2f3"/>
-    <g stroke="#5980a6" stroke-width="10" fill="none">
-      <path d="M180 560 L420 560 L420 400 L660 400 L660 300 L900 300 L900 220 L1020 220"/>
-    </g>
-    <path d="M180 560 L420 560 L420 470 L660 470 L660 430 L900 430 L900 410 L1020 410" stroke="#9aa3ad" stroke-width="8" stroke-dasharray="26 18" fill="none"/>
-    <g fill="#1d1f20" font-family="Barlow Condensed, sans-serif" font-weight="600">
-      <text x="180" y="185" font-size="128" letter-spacing="2">LOAN<tspan fill="#41618a">REPO</tspan></text>
-    </g>
-    <g stroke="#1d1f20" stroke-width="6">
-      <path d="M140 120 L140 160 M120 140 L160 140"/>
-      <path d="M1060 640 L1060 680 M1040 660 L1080 660"/>
-    </g>
-  </svg>
-</template>
 </head>
 <body>
 <x-dc>
@@ -396,20 +380,6 @@
         <button type="button" class="btn btn-secondary" onClick="{{ print }}">Save this result as PDF</button>
         <button type="button" class="btn btn-ghost" onClick="{{ goMethod }}">Read the method and assumptions</button>
         <span style="font-size:12px; color:var(--color-neutral-700); max-width:44ch;">{{ confidence }}</span>
-      </div>
-
-      <!-- The free PDF is the diagnosis; the book is the treatment. Naming the
-           line plainly is what makes the paid edition coherent. -->
-      <div style="margin-top:22px; display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:0; border:1px solid var(--color-divider);">
-        <div style="padding:20px 22px; border-right:1px solid var(--color-divider);">
-          <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:8px;">The PDF above — free, always</div>
-          <div style="font-size:14px; line-height:1.55; color:var(--color-neutral-800);">Your verdict, the spec sheet, the chart, and every reset that moved your rate. The full diagnosis, and yours without paying for it.</div>
-        </div>
-        <div style="padding:20px 22px; background:var(--color-accent-100);">
-          <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-accent-800); margin-bottom:8px;">The book — ₹299, written on these numbers</div>
-          <div style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin-bottom:12px;">Sixteen chapters on what to do next, with your {{ balTxt }} balance and {{ nowRate }}% rate carried into every worked example, and your four reset dates filled in.</div>
-          <button type="button" onClick="{{ goBook }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-heading); font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-accent-800); border-bottom:1px solid var(--color-accent-800);">Read two chapters free</button>
-        </div>
       </div>
 
     </div>
@@ -910,10 +880,10 @@
         <sc-if value="{{ canPersonalise }}" hint-placeholder-val="{{ false }}">
         <div class="blueprint" style="margin-top:26px; padding:24px; background:var(--color-accent-100);">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-          <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:8px;">Your copy is written against your loan</div>
-          <p style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin:0 0 14px;">Because you've already run your loan, we don't send you the generic book. Chapter one opens on your own tenure drift, chapter eight works the prepayment arithmetic on your actual balance, and chapter fifteen lists your four reset dates instead of leaving blanks. No other book can do that, because no other book knows your loan.</p>
-          <a href="{{ personalHref }}" target="_blank" class="btn btn-secondary" style="text-decoration:none;">Read the first two chapters free</a>
-          <div style="font-size:12px; color:var(--color-neutral-700); margin-top:10px;">Opens in a new tab, with your figures already in it. The remaining fourteen chapters come with the purchase.</div>
+          <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:8px;">A copy written against your loan</div>
+          <p style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin:0 0 14px;">Because you've already run your loan, this copy can be generated with your own figures inside it — chapter one opens on your tenure drift, chapter seven works the prepayment arithmetic on your actual balance, and chapter nine lists your four reset dates rather than leaving blanks.</p>
+          <a href="{{ personalHref }}" target="_blank" class="btn btn-secondary" style="text-decoration:none;">Preview your personalised copy</a>
+          <div style="font-size:12px; color:var(--color-neutral-700); margin-top:10px;">Opens in a new tab. Print it to PDF from there, or buy above and we'll email the general edition.</div>
         </div>
         </sc-if>
 
@@ -927,212 +897,17 @@
   </main>
   </sc-if>
 
-  <!-- ══ SCREEN: LEGAL ══ -->
-  <sc-if value="{{ onLegal }}" hint-placeholder-val="{{ false }}">
-  <main style="max-width:1120px; margin:0 auto; padding:clamp(28px,5vw,44px) clamp(16px,4vw,24px) 88px;">
-    <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">The small print, written plainly</div>
-    <h1 style="font-size:clamp(30px,6vw,42px); line-height:1.04; margin:0 0 16px; max-width:22ch;">About, terms and how we handle your data.</h1>
-    <p style="font-size:16px; line-height:1.6; max-width:66ch; color:var(--color-neutral-800); margin:0 0 34px;">Written to be read rather than clicked past. Where a term affects what you can expect from us, it is stated in the same words we would use on a phone call.</p>
-
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:34px;">
-      <sc-for list="{{ legalTabs }}" as="lt" hint-placeholder-count="6">
-        <button type="button" onClick="{{ lt.go }}" style="background:{{ lt.bg }}; color:{{ lt.fg }}; border:1px solid var(--color-text); padding:9px 16px; cursor:pointer; font-family:var(--font-heading); font-size:13px; letter-spacing:0.06em; text-transform:uppercase;">{{ lt.label }}</button>
-      </sc-for>
-    </div>
-
-    <!-- About -->
-    <sc-if value="{{ legalAbout }}" hint-placeholder-val="{{ true }}">
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:40px; align-items:start;">
-      <div>
-        <h2 style="font-family:var(--font-heading); font-size:24px; margin:0 0 16px; font-weight:600;">What LoanRepo is</h2>
-        <p style="font-size:15.5px; line-height:1.65; color:var(--color-neutral-800);">LoanRepo takes the particulars of a floating-rate home loan and walks them through every actual Reserve Bank of India repo rate decision since disbursal, reset by reset, month by month. It then shows where the tenure and balance really landed against what the loan was contracted to do.</p>
-        <p style="font-size:15.5px; line-height:1.65; color:var(--color-neutral-800);">It exists because that comparison is not available anywhere else. Your bank sends a statement of what you paid. It does not send the schedule you were promised, so there is nothing to hold the statement against.</p>
-        <h2 style="font-family:var(--font-heading); font-size:24px; margin:32px 0 16px; font-weight:600;">Who runs it</h2>
-        <p style="font-size:15.5px; line-height:1.65; color:var(--color-neutral-800);">LoanRepo is built and run by Ravi, its founder, who spent close to a decade advising retail investors as a financial adviser. The platform came out of the same conversation repeated for years: a client calling, puzzled, because their loan balance was not falling the way they expected.</p>
-        <p style="font-size:15.5px; line-height:1.65; color:var(--color-neutral-800);">LoanRepo is not a registered investment adviser, a broker, a lender or a distributor. Nothing on the site is investment, tax or legal advice.</p>
-      </div>
-      <div class="blueprint" style="padding:26px;">
-        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-        <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:16px;">What we do not do</div>
-        <ul style="margin:0; padding:0; list-style:none; font-size:14.5px; line-height:1.6; color:var(--color-neutral-800);">
-          <li style="padding:11px 0; border-top:1px solid var(--color-divider);">Recommend a lender. We hold no lender relationships to recommend from.</li>
-          <li style="padding:11px 0; border-top:1px solid var(--color-divider);">Earn commission, referral fees or spreads on anything you decide.</li>
-          <li style="padding:11px 0; border-top:1px solid var(--color-divider);">Tell you to buy, wait, prepay or refinance. The tool is descriptive.</li>
-          <li style="padding:11px 0; border-top:1px solid var(--color-divider);">Sell, rent or share your data with anyone for marketing.</li>
-          <li style="padding:11px 0; border-top:1px solid var(--color-divider);">Charge to see your own result. The diagnosis is free, always.</li>
-        </ul>
-        <div style="border-top:1px solid var(--color-text); margin-top:18px; padding-top:16px; font-size:13.5px; line-height:1.6; color:var(--color-neutral-700);">Our only revenue is the ₹299 book and the ₹149 monthly tracking subscription, both paid by readers. That is deliberate: it is the only funding model under which the site can say some of what it says.</div>
-      </div>
-    </div>
-    </sc-if>
-
-    <!-- Terms -->
-    <sc-if value="{{ legalTerms }}" hint-placeholder-val="{{ false }}">
-    <div style="max-width:72ch;">
-      <h2 style="font-family:var(--font-heading); font-size:24px; margin:0 0 6px; font-weight:600;">Terms of use</h2>
-      <p style="font-size:13px; color:var(--color-neutral-700); margin:0 0 26px;">Last updated 13 September 2026. Using the site means accepting these.</p>
-      <sc-for list="{{ terms }}" as="t" hint-placeholder-count="8">
-        <div style="display:grid; grid-template-columns:42px minmax(0,1fr); gap:16px; padding:18px 0; border-top:1px solid var(--color-divider);">
-          <span style="font-family:var(--font-heading); font-size:15px; color:var(--color-accent-700); font-variant-numeric:tabular-nums;">{{ t.n }}</span>
-          <div>
-            <div style="font-family:var(--font-heading); font-size:16px; margin-bottom:6px;">{{ t.h }}</div>
-            <div style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-800);">{{ t.b }}</div>
-          </div>
-        </div>
-      </sc-for>
-      <div style="border-top:1px solid var(--color-text); margin-top:26px; padding-top:20px; font-size:14px; line-height:1.6; color:var(--color-neutral-700);">These terms are governed by the laws of India, and the courts at {{ jurisdiction }} have exclusive jurisdiction over any dispute arising from them.</div>
-    </div>
-    </sc-if>
-
-    <!-- Privacy -->
-    <sc-if value="{{ legalPrivacy }}" hint-placeholder-val="{{ false }}">
-    <div style="max-width:76ch;">
-      <h2 style="font-family:var(--font-heading); font-size:24px; margin:0 0 6px; font-weight:600;">Privacy policy</h2>
-      <p style="font-size:13px; color:var(--color-neutral-700); margin:0 0 26px;">Last updated 13 September 2026.</p>
-
-      <div class="blueprint" style="padding:24px; margin-bottom:32px; background:var(--color-accent-100);">
-        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-        <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:10px;">The short version</div>
-        <p style="font-size:15px; line-height:1.6; margin:0; color:var(--color-neutral-800);">The calculator runs entirely in your browser. Your loan amount, dates and rates are never sent to us unless you sign in and deliberately save a loan. If you only use the calculator, we hold nothing about you but an anonymous record that a calculation happened.</p>
-      </div>
-
-      <h3 style="font-family:var(--font-heading); font-size:18px; margin:0 0 12px;">What we hold, and only when</h3>
-      <table class="table">
-        <thead><tr><th>Data</th><th>When it reaches us</th><th>Why</th></tr></thead>
-        <tbody>
-          <sc-for list="{{ privacyRows }}" as="pr" hint-placeholder-count="6">
-            <tr>
-              <td style="font-size:14px;">{{ pr.what }}</td>
-              <td style="font-size:14px; color:var(--color-neutral-700);">{{ pr.when }}</td>
-              <td style="font-size:14px; color:var(--color-neutral-700);">{{ pr.why }}</td>
-            </tr>
-          </sc-for>
-        </tbody>
-      </table>
-
-      <h3 style="font-family:var(--font-heading); font-size:18px; margin:32px 0 12px;">Who else is involved</h3>
-      <p style="font-size:14.5px; line-height:1.65; color:var(--color-neutral-800);">Three processors, each doing one job. <b>Supabase</b> stores accounts and saved loans. <b>Razorpay</b> handles payment — card and bank details go straight to them and never touch our systems. <b>Resend</b> sends email. We share nothing with anyone else, and we do not sell or rent data at any price.</p>
-
-      <h3 style="font-family:var(--font-heading); font-size:18px; margin:32px 0 12px;">What you can ask for</h3>
-      <p style="font-size:14.5px; line-height:1.65; color:var(--color-neutral-800);">A copy of everything we hold about you, correction of anything wrong, or deletion of the lot. Write to {{ contactEmail }} and we will act within thirty days. Deleting your account removes your saved loans and check-ins; anonymous analytics records carry no identifier and cannot be traced back to remove.</p>
-
-      <h3 style="font-family:var(--font-heading); font-size:18px; margin:32px 0 12px;">Security, stated honestly</h3>
-      <p style="font-size:14.5px; line-height:1.65; color:var(--color-neutral-800);">Every table holding your data is protected by row-level security, which means the database itself refuses to return one person's rows to another. Sign-in is by emailed link, so there is no password for us to lose. We hold no card details at any point. No system is beyond compromise, and if one ever affected your data we would tell you rather than wait to be asked.</p>
-
-      <h3 style="font-family:var(--font-heading); font-size:18px; margin:32px 0 12px;">Cookies</h3>
-      <p style="font-size:14.5px; line-height:1.65; color:var(--color-neutral-800);">One, to keep you signed in. No advertising or tracking cookies, and no third-party analytics scripts.</p>
-    </div>
-    </sc-if>
-
-    <!-- Refunds -->
-    <sc-if value="{{ legalRefunds }}" hint-placeholder-val="{{ false }}">
-    <div style="max-width:72ch;">
-      <h2 style="font-family:var(--font-heading); font-size:24px; margin:0 0 6px; font-weight:600;">Refunds and cancellation</h2>
-      <p style="font-size:13px; color:var(--color-neutral-700); margin:0 0 26px;">Last updated 13 September 2026.</p>
-      <p style="font-size:15.5px; line-height:1.65; color:var(--color-neutral-800);">Both things we sell are digital and delivered immediately, so a refund policy has to be about whether you got what was described rather than about changing your mind after reading it. Here is where we draw that line.</p>
-
-      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:0; border:1px solid var(--color-divider); margin:26px 0;">
-        <div style="padding:22px; border-right:1px solid var(--color-divider);">
-          <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:10px;">The book — ₹299, one-time</div>
-          <div style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-800);">If the download fails, the link expires before you use it, or the file is not what the sales page described, write to us within <b>seven days</b> and we will refund in full — no questions and no form to fill.</div>
-          <div style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-700); margin-top:12px;">Beyond that, and where the book was delivered and opened as described, the sale is final. Two chapters are free precisely so you can judge before paying.</div>
-        </div>
-        <div style="padding:22px;">
-          <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:10px;">Tracking — ₹149 a month</div>
-          <div style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-800);">Cancel whenever you like, from your account or by email. Cancellation stops the next charge and you keep access to the end of the month already paid for.</div>
-          <div style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-700); margin-top:12px;">Part-months are not refunded. If you were charged after cancelling, or charged twice, that is our error and we refund it in full.</div>
-        </div>
-      </div>
-
-      <h3 style="font-family:var(--font-heading); font-size:18px; margin:28px 0 12px;">How to ask</h3>
-      <p style="font-size:14.5px; line-height:1.65; color:var(--color-neutral-800);">One email to {{ contactEmail }} with the address you paid from. No form, no phone tree. We reply within two working days, and an approved refund reaches your original payment method within five to seven working days, the timing being Razorpay's and your bank's rather than ours.</p>
-      <p style="font-size:14.5px; line-height:1.65; color:var(--color-neutral-800);">Nothing here limits any right you hold under the Consumer Protection Act, 2019.</p>
-    </div>
-    </sc-if>
-
-    <!-- Contact -->
-    <sc-if value="{{ legalContact }}" hint-placeholder-val="{{ false }}">
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:40px; align-items:start;">
-      <div>
-        <h2 style="font-family:var(--font-heading); font-size:24px; margin:0 0 16px; font-weight:600;">Contact</h2>
-        <p style="font-size:15.5px; line-height:1.65; color:var(--color-neutral-800);">Email reaches a person, not a queue. There is no chatbot and no ticket number.</p>
-        <div style="border-top:1px solid var(--color-text); margin-top:22px;">
-          <div style="padding:18px 0; border-bottom:1px solid var(--color-divider);">
-            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:6px;">Anything at all</div>
-            <div style="font-family:var(--font-heading); font-size:20px;">{{ contactEmail }}</div>
-            <div style="font-size:13px; color:var(--color-neutral-700); margin-top:4px;">Replies within two working days.</div>
-          </div>
-          <div style="padding:18px 0; border-bottom:1px solid var(--color-divider);">
-            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:6px;">Operated by</div>
-            <div style="font-size:15.5px; line-height:1.6;">{{ legalEntity }}</div>
-            <div style="font-size:15.5px; line-height:1.6; color:var(--color-neutral-700);">{{ legalAddress }}</div>
-          </div>
-          <div style="padding:18px 0;">
-            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:6px;">Grievance officer</div>
-            <div style="font-size:15.5px; line-height:1.6;">{{ grievanceOfficer }}</div>
-            <div style="font-size:13px; color:var(--color-neutral-700); margin-top:4px;">For unresolved complaints about data or payments, as required under Indian law.</div>
-          </div>
-        </div>
-      </div>
-      <div class="blueprint" style="padding:26px;">
-        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-        <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:14px;">What we can and cannot help with</div>
-        <div style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-800); margin-bottom:16px;"><b>Yes:</b> a figure that looks wrong, a download that failed, a refund, deleting your data, a correction to the rate history, or a question about how the model works.</div>
-        <div style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-700);"><b>No:</b> whether to buy a particular property, which bank to use, whether to prepay, or anything that amounts to advice on your individual finances. Not evasion — we are not registered to give it, and you should be wary of anyone unregistered who does.</div>
-      </div>
-    </div>
-    </sc-if>
-
-    <!-- Copyright -->
-    <sc-if value="{{ legalCopyright }}" hint-placeholder-val="{{ false }}">
-    <div style="max-width:72ch;">
-      <h2 style="font-family:var(--font-heading); font-size:24px; margin:0 0 26px; font-weight:600;">Copyright and attribution</h2>
-      <div style="display:grid; gap:0; border-top:1px solid var(--color-text);">
-        <div style="padding:20px 0; border-bottom:1px solid var(--color-divider);">
-          <div style="font-family:var(--font-heading); font-size:16px; margin-bottom:6px;">The site and the book</div>
-          <div style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-800);">© 2026 {{ legalEntity }}. All rights reserved. <i>The Quiet Years</i>, its text, charts and templates are our copyright. Buying a copy gives you a licence to read, print and use it personally. It does not allow resale, redistribution, republication or use in training a machine-learning model.</div>
-        </div>
-        <div style="padding:20px 0; border-bottom:1px solid var(--color-divider);">
-          <div style="font-family:var(--font-heading); font-size:16px; margin-bottom:6px;">Your own result</div>
-          <div style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-800);">Yours. Save it, print it, post it, send it to your bank. We claim nothing over the output of a calculation on your own loan, and the shareable graphic exists to be shared.</div>
-        </div>
-        <div style="padding:20px 0; border-bottom:1px solid var(--color-divider);">
-          <div style="font-family:var(--font-heading); font-size:16px; margin-bottom:6px;">The rate history</div>
-          <div style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-800);">Repo rate decisions are published by the Reserve Bank of India and are matters of public record. We claim no ownership of them. We are not affiliated with, endorsed by or acting for the RBI, and errors in our transcription are ours alone — tell us and we will correct rather than defend.</div>
-        </div>
-        <div style="padding:20px 0; border-bottom:1px solid var(--color-divider);">
-          <div style="font-family:var(--font-heading); font-size:16px; margin-bottom:6px;">Bank names and trade marks</div>
-          <div style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-800);">Any bank or lender named anywhere on this site is named for identification only. Those marks belong to their owners, and their appearance implies no relationship in either direction.</div>
-        </div>
-        <div style="padding:20px 0;">
-          <div style="font-family:var(--font-heading); font-size:16px; margin-bottom:6px;">Quoting us</div>
-          <div style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-800);">Journalists, researchers and writers are welcome to quote the site or the book with attribution to LoanRepo and a link. For a figure you want to rely on, write first and we will confirm the method behind it.</div>
-        </div>
-      </div>
-    </div>
-    </sc-if>
-  </main>
-  </sc-if>
-
   <footer style="border-top:1px solid var(--color-divider);">
-    <div style="max-width:1120px; margin:0 auto; padding:30px 24px 40px; display:grid; gap:18px;">
-      <div style="display:flex; justify-content:space-between; gap:18px; flex-wrap:wrap; font-size:12.5px; color:var(--color-neutral-700);">
-        <span>LoanRepo — real rate history, no lender affiliation.</span>
-        <button type="button" onClick="{{ goBook }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-body); font-size:12.5px; color:var(--color-accent-700); text-decoration:underline;">The Quiet Years — our guide for borrowers, ₹299</button>
-        <span>All figures computed from RBI MPC repo rate records, 2020–2026.</span>
-      </div>
-      <div style="display:flex; gap:20px; flex-wrap:wrap; border-top:1px solid var(--color-divider); padding-top:16px; font-size:12.5px;">
-        <sc-for list="{{ legalTabs }}" as="lf" hint-placeholder-count="6">
-          <button type="button" onClick="{{ lf.go }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-body); font-size:12.5px; color:var(--color-accent-700); text-decoration:underline;">{{ lf.label }}</button>
-        </sc-for>
-        <span style="margin-left:auto; color:var(--color-neutral-700);">© 2026 {{ legalEntity }}</span>
-      </div>
+    <div style="max-width:1120px; margin:0 auto; padding:26px 24px 40px; display:flex; justify-content:space-between; gap:18px; flex-wrap:wrap; font-size:12.5px; color:var(--color-neutral-700);">
+      <span>LoanRepo — real rate history, no lender affiliation.</span>
+      <button type="button" onClick="{{ goBook }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-body); font-size:12.5px; color:var(--color-accent-700); text-decoration:underline;">The Quiet Years — our guide for borrowers, ₹299</button>
+      <span>All figures computed from RBI MPC repo rate records, 2020–2026.</span>
     </div>
   </footer>
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;legalEntity&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;LoanRepo&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;legalAddress&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Address to be confirmed&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;contactEmail&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;hello@loanrepo.in&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;grievanceOfficer&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Ravi, Founder — hello@loanrepo.in&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;jurisdiction&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Bengaluru&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;eblrSpread&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2.65,&quot;min&quot;:1.5,&quot;max&quot;:4,&quot;step&quot;:0.05,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Model assumptions&quot;},&quot;mclrSpread&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:3.75,&quot;min&quot;:2.5,&quot;max&quot;:5,&quot;step&quot;:0.05,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Model assumptions&quot;},&quot;showScenario&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Result screen&quot;},&quot;showChecklist&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Result screen&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;eblrSpread&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2.65,&quot;min&quot;:1.5,&quot;max&quot;:4,&quot;step&quot;:0.05,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Model assumptions&quot;},&quot;mclrSpread&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:3.75,&quot;min&quot;:2.5,&quot;max&quot;:5,&quot;step&quot;:0.05,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Model assumptions&quot;},&quot;showScenario&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Result screen&quot;},&quot;showChecklist&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Result screen&quot;}}">
 class Component extends DCLogic {
   static REPO = [
     { d: "2020-02-06", r: 5.15 }, { d: "2020-03-27", r: 4.40 }, { d: "2020-05-22", r: 4.00 },
@@ -1148,34 +923,6 @@ class Component extends DCLogic {
     { date: "2022-01", city: "Hyderabad", amt: 6500000, ten: 20, note: "Bought just before the hike cycle began" },
     { date: "2023-03", city: "Mumbai", amt: 7500000, ten: 20, note: "Bought right after the peak hike" },
     { date: "2024-06", city: "Chennai", amt: 5500000, ten: 15, note: "Bought during the two-year rate hold" }
-  ];
-  static LEGAL_TABS = [
-    { id: "about", label: "About" },
-    { id: "terms", label: "Terms" },
-    { id: "privacy", label: "Privacy" },
-    { id: "refunds", label: "Refunds" },
-    { id: "contact", label: "Contact" },
-    { id: "copyright", label: "Copyright" }
-  ];
-  static TERMS = [
-    { n: "01", h: "What the service is", b: "A calculator and a set of reference screens. You give it loan particulars; it computes what the published repo rate history implies for a loan with those particulars. It is an information tool and nothing more." },
-    { n: "02", h: "It is not advice", b: "Nothing here is investment, tax, legal or financial advice, and nothing here is a recommendation to buy, sell, borrow, prepay, refinance or switch. We are not a registered investment adviser, broker, lender or distributor. Decisions of consequence deserve a professional who knows your full position." },
-    { n: "03", h: "Accuracy, and its limits", b: "Rate history comes from published RBI Monetary Policy Committee decisions and we take care with it. The model also rests on assumptions — a typical bank spread, a standard reset cycle — which are stated openly on the Method screen. Your actual loan may differ. Always reconcile against your own statement and sanction letter before acting." },
-    { n: "04", h: "What you enter", b: "You are responsible for the particulars you enter. Wrong inputs give wrong outputs, and we cannot detect the difference." },
-    { n: "05", h: "Accounts", b: "An account is optional and exists only to save loans and track them over time. Keep your sign-in email secure; anyone with access to it can reach your saved loans. Tell us if you believe your account has been compromised." },
-    { n: "06", h: "Paid products", b: "The book is a one-time purchase, delivered digitally. Tracking is a monthly subscription that renews until cancelled. Both are covered by the refund terms on the Refunds tab, which form part of these terms." },
-    { n: "07", h: "Availability", b: "We aim to keep the site up and will not always succeed. It is provided as it is, without warranty of uninterrupted or error-free operation, and we may change or withdraw features. Where a change materially affects a paid subscription, we will tell subscribers before it takes effect." },
-    { n: "08", h: "Liability", b: "To the extent the law allows, we are not liable for losses arising from decisions you take using this site. Where liability cannot be excluded, it is limited to what you have paid us in the preceding twelve months. Nothing here excludes liability for fraud or for anything that cannot lawfully be excluded." },
-    { n: "09", h: "Acceptable use", b: "Do not scrape the site at scale, attempt to breach its security, resell its output as your own product, or use it to train a machine-learning model. Personal and journalistic use, with attribution, is welcome." },
-    { n: "10", h: "Changes to these terms", b: "We may update them. The date at the top shows when they last changed, and material changes affecting paid users will be emailed rather than quietly posted." }
-  ];
-  static PRIVACY_ROWS = [
-    { what: "Loan particulars — amount, dates, rate, benchmark", when: "Never, unless you sign in and press Track this loan", why: "So the loan can be followed across resets and check-ins" },
-    { what: "Email address", when: "When you sign in, join the waitlist, or buy the book", why: "Sign-in links, delivery of what you bought, and reset reminders" },
-    { what: "Check-in readings you enter", when: "Only for a loan you chose to track", why: "To reconcile your statement against the model over time" },
-    { what: "Purchase record — amount, payment reference", when: "When you buy something", why: "Proof of purchase, delivery, refunds, and tax records we must keep" },
-    { what: "Your loan figures alongside a purchase", when: "Only if you had run your loan before buying the book", why: "To generate the personalised edition you paid for" },
-    { what: "Anonymous event records — e.g. \"a calculation ran\"", when: "As you use the site", why: "To know which screens are used. No identifier, no IP address, no profile" }
   ];
   static CHAPTERS = [
     { n: "01", t: "The number nobody shows you" },
@@ -1209,7 +956,7 @@ class Component extends DCLogic {
     screen: "loan", date: "2021-06", amount: 5000000, tenure: 20,
     benchmark: "EBLR", prepay: 500000, prepayMode: "tenure", result: null,
     ownSpread: "", useOwnSpread: false, buyAmount: 5000000, buyTenure: 20,
-    ebookEmail: "", ebookMsg: "", ebookBusy: false, legalTab: "about",
+    ebookEmail: "", ebookMsg: "", ebookBusy: false,
     payoffLump: 500000, payoffExtra: 5000,
     user: null, authOpen: false, email: "", authMsg: "", saveMsg: "",
     runs: [], repoHistory: null, cases: null, waitlist: "", waitlistMsg: "",
@@ -1291,16 +1038,7 @@ class Component extends DCLogic {
 
   // Builds the link to a personalised edition from whatever the reader has
   // already computed. No round trip, no stored copy — the book is the document.
-  // The query string alone, for the purchase record — fulfilment builds the
-  // full URL so the domain is never baked into stored data.
-  personalisedLoanQuery() {
-    if (!this.state.result) return null;
-    const href = this.personalisedBookHref(false);
-    const i = href.indexOf("?");
-    return i < 0 ? null : href.slice(i + 1);
-  }
-
-  personalisedBookHref(sample) {
+  personalisedBookHref() {
     const r = this.state.result;
     if (!r) return "Ebook.html";
     const resets = [];
@@ -1322,7 +1060,6 @@ class Component extends DCLogic {
     });
     const name = (this.state.user && this.state.user.email) ? this.state.user.email.split("@")[0] : "";
     if (name) q.set("name", name);
-    if (sample) q.set("sample", "1");
     return "Ebook.html?" + q.toString();
   }
 
@@ -1334,7 +1071,7 @@ class Component extends DCLogic {
     }
     this.setState({ ebookBusy: true, ebookMsg: "" });
     this.loadRazorpay()
-      .then(() => this.db.startEbookOrder(email, this.personalisedLoanQuery()))
+      .then(() => this.db.startEbookOrder(email))
       .then(res => {
         if (!res.ok || !window.Razorpay) {
           this.setState({ ebookBusy: false, ebookMsg: this.friendly(res, "Checkout isn't available right now. Try again shortly.") });
@@ -1586,26 +1323,8 @@ class Component extends DCLogic {
       onBook: s.screen === "book",
       goBook: () => this.go("book"),
       chapters: Component.CHAPTERS,
-      onLegal: s.screen === "legal",
-      legalAbout: s.legalTab === "about", legalTerms: s.legalTab === "terms",
-      legalPrivacy: s.legalTab === "privacy", legalRefunds: s.legalTab === "refunds",
-      legalContact: s.legalTab === "contact", legalCopyright: s.legalTab === "copyright",
-      legalTabs: Component.LEGAL_TABS.map(t => ({
-        label: t.label,
-        bg: s.screen === "legal" && s.legalTab === t.id ? "var(--color-text)" : "transparent",
-        fg: s.screen === "legal" && s.legalTab === t.id ? "var(--color-bg)" : "var(--color-text)",
-        go: () => this.setState({ screen: "legal", legalTab: t.id }, () => window.scrollTo({ top: 0 }))
-      })),
-      terms: Component.TERMS,
-      privacyRows: Component.PRIVACY_ROWS,
-      // The facts only the operator holds. Set these before launch.
-      legalEntity: this.props.legalEntity ?? "LoanRepo",
-      legalAddress: this.props.legalAddress ?? "Address to be confirmed",
-      contactEmail: this.props.contactEmail ?? "hello@loanrepo.in",
-      grievanceOfficer: this.props.grievanceOfficer ?? "Ravi, Founder — hello@loanrepo.in",
-      jurisdiction: this.props.jurisdiction ?? "Bengaluru",
       canPersonalise: !!s.result,
-      personalHref: this.personalisedBookHref(true),
+      personalHref: this.personalisedBookHref(),
       ebookEmail: s.ebookEmail, ebookMsg: s.ebookMsg,
       ebookCta: s.ebookBusy ? "Opening checkout…" : "Buy the book — ₹299",
       setEbookEmail: e => this.setState({ ebookEmail: e.target.value }),
@@ -1909,7 +1628,7 @@ class Component extends DCLogic {
           + "Actual: " + ((r.payoffM || r.n) / 12).toFixed(1) + " years\n"
           + "EMI: unchanged at " + this.inr(r.e0) + " throughout\n\n"
           + "The rate cycle added " + (extraM > 0 ? (extraM / 12).toFixed(1) : "0") + " years to my loan and no statement ever said so.\n\n"
-          + "Check yours: loanrepo.in";
+          + "Check yours: loanrepo.onrender.com";
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(txt).then(
             () => this.setState({ shareMsg: "Copied" }),
