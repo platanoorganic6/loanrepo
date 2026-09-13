@@ -49,12 +49,18 @@
      chrome, keep the evidence, and let the tables break across pages. */
   @media print {
     @page { margin: 14mm; }
-    header, footer, [data-print-hide] { display: none !important; }
+    header, footer, [data-print-hide], button { display: none !important; }
     main { padding: 0 !important; max-width: none !important; }
     body { background: #fff; }
     table, tr, figure, [data-print-keep] { break-inside: avoid; }
     thead { display: table-header-group; }
+    [data-print-only] { display: block !important; }
+    /* A textarea keeps its scroll height on paper and clips its own content,
+       so the draft prints from a plain block instead. */
+    textarea { display: none !important; }
+    [data-print-draft] { white-space: pre-wrap; font: 11pt/1.5 var(--font-body); border: 1px solid #ccc; padding: 10pt 12pt; }
   }
+  [data-print-only] { display: none; }
 </style>
 </helmet>
 
@@ -119,7 +125,7 @@
   <sc-if value="{{ onLoan }}" hint-placeholder-val="{{ true }}">
   <main style="max-width:1120px; margin:0 auto; padding:clamp(28px,5vw,44px) clamp(16px,4vw,24px) 88px;">
 
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:56px; align-items:start;">
+    <div data-print-hide="true" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:56px; align-items:start;">
       <div>
         <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">Loan journey · sourced from RBI MPC records</div>
         <h1 style="font-size:clamp(30px,6vw,46px); line-height:1.04; margin:0 0 18px; max-width:20ch;">Your bank never told you this changed.</h1>
@@ -162,10 +168,19 @@
 
     <sc-if value="{{ hasResult }}" hint-placeholder-val="{{ true }}">
     <div ref="{{ resultRef }}" style="margin-top:64px; border-top:1px solid var(--color-text); padding-top:0; scroll-margin-top:16px;">
+      <!-- The printed PDF opens on the loan, not on the pitch. -->
+      <div data-print-only="true" style="border-bottom:1px solid #1d1f20; padding-bottom:12pt; margin-bottom:18pt;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:20pt; flex-wrap:wrap;">
+          <div style="font-family:var(--font-heading); font-weight:600; font-size:16pt; letter-spacing:0.01em;">LOAN<span style="color:var(--color-accent-700);">REPO</span></div>
+          <div style="font-family:var(--font-heading); font-size:9pt; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-neutral-600);">Loan journey · sourced from RBI MPC records</div>
+        </div>
+        <div style="font-family:var(--font-heading); font-size:20pt; margin-top:10pt; line-height:1.2;">{{ printSummary }}</div>
+        <div style="font-size:10pt; color:var(--color-neutral-700); margin-top:4pt;">{{ printSubhead }}</div>
+      </div>
 
       <!-- verdict -->
       <sc-if value="{{ isLeak }}" hint-placeholder-val="{{ true }}">
-      <div style="background:var(--color-accent-900); color:var(--color-bg); padding:clamp(24px,4vw,40px); display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:44px; align-items:end;">
+      <div data-print-keep="true" style="background:var(--color-accent-900); color:var(--color-bg); padding:clamp(24px,4vw,40px); display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:44px; align-items:end;">
         <div>
           <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.16em; text-transform:uppercase; opacity:0.7; margin-bottom:10px;">Added to your loan, unannounced</div>
           <div style="font-family:var(--font-heading); font-weight:600; font-size:clamp(56px,12vw,86px); line-height:0.9; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;">+{{ leakYears }}</div>
@@ -239,8 +254,8 @@
             <div>
               <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:7px;"><span>Actual, after every rate reset</span><span style="font-variant-numeric:tabular-nums;">{{ totalYearsExact }} years</span></div>
               <div style="height:26px; background:rgba(242,242,243,0.22); position:relative;">
-                <div style="position:absolute; inset:0 auto 0 0; width:{{ barActual }}%; background:var(--color-bg);"></div>
-                <div style="position:absolute; top:0; bottom:0; left:{{ barPromised }}%; width:{{ barGap }}%; background:repeating-linear-gradient(135deg, rgba(242,242,243,0.9) 0 2px, transparent 2px 7px);"></div>
+                <div style="position:absolute; inset:0 auto 0 0; width:{{ barPromised }}%; background:var(--color-bg);"></div>
+                <div style="position:absolute; top:0; bottom:0; left:{{ barPromised }}%; width:{{ barGap }}%; background:repeating-linear-gradient(135deg, rgba(242,242,243,0.9) 0 2px, rgba(242,242,243,0.12) 2px 7px); border-right:1px solid var(--color-bg);"></div>
               </div>
             </div>
           </div>
@@ -392,6 +407,7 @@
           <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:6px;">A message you can send your bank</div>
           <p style="font-size:13px; color:var(--color-neutral-700); margin:0 0 14px;">Your figures, already filled in. Every answer it asks for is something your bank is required to hold.</p>
           <textarea class="input" readOnly="{{ true }}" rows="14" style="font-size:13px; line-height:1.6; resize:vertical;" value="{{ draft }}"></textarea>
+          <div data-print-draft="true" data-print-only="true">{{ draft }}</div>
           <div style="display:flex; gap:12px; align-items:center; margin-top:12px; flex-wrap:wrap;">
             <button type="button" class="btn btn-secondary" onClick="{{ copyDraft }}">Copy the message</button>
             <span style="font-size:12px; color:var(--color-accent-800);">{{ copyMsg }}</span>
@@ -1964,8 +1980,15 @@ class Component extends DCLogic {
       extraCashTxt: extraM !== null && extraM > 0 ? this.short(extraM * r.e0) : "₹0",
       overpayPct: extraM !== null && extraM > 0 ? this.overpayPct(r.principal, r.startRate, r.tenureYears, extraM * r.e0).toFixed(0) : "0",
       totalYearsExact: ((r.payoffM || r.n) / 12).toFixed(1),
+      printSummary: this.short(r.principal) + " over " + r.tenureYears + " years, disbursed " + this.mLabel(r.start),
+      // Prepared = the real clock. TODAY is the model date, which is a
+      // different fact and is stated on the Method screen.
+      printSubhead: r.benchmark + " at " + r.spread.toFixed(2) + "% spread · EMI "
+        + this.inr(r.e0) + " · prepared " + new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
+        + " · rates to " + Component.TODAY.toLocaleDateString("en-IN", { month: "short", year: "numeric" }),
       barPromised: (r.payoffM ? (r.n / Math.max(r.payoffM, r.n)) * 100 : 100).toFixed(1),
-      barActual: "100",
+      // The solid fill is the contracted term only; the hatched band beyond it
+      // is what the rate cycle added. A full-width solid fill hid the band.
       barGap: (r.payoffM ? Math.max((r.payoffM - r.n) / Math.max(r.payoffM, r.n), 0) * 100 : 0).toFixed(1),
       shareCta: s.shareMsg || "Copy as text",
       copyShare: () => {
