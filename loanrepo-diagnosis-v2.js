@@ -61,8 +61,14 @@
     });
 
     if (!signedIn) {
+      /* The diagnosis result already provides the single public conversion CTA
+         "Track this loan". Keep the header quiet: sign-in remains available as
+         a utility action, but it must not create a second tracking CTA. */
       Array.from(root.querySelectorAll('button')).forEach(button => {
-        if (text(button) === 'Sign in') button.textContent = 'Track my loan';
+        if (text(button) === 'Track my loan') button.remove();
+      });
+      Array.from(root.querySelectorAll('button')).forEach(button => {
+        if (text(button) === 'Sign in') button.textContent = 'Sign in';
       });
       const title = Array.from(root.querySelectorAll('.dialog-title')).find(el => text(el) === 'Sign in to save your runs');
       if (title) title.textContent = 'Sign in to track your loan';
@@ -71,10 +77,6 @@
     }
   }
 
-  /* Find the stable result anchor used by the page itself. Do not depend on
-     the verdict wording: a healthy loan says "ahead of your original schedule"
-     while a leakage case says "Added to your loan, unannounced". Both share the
-     same result container with scroll-margin-top. */
   function findResult(root){
     const marked = root.querySelector('[style*="scroll-margin-top"]');
     if (marked) return marked;
