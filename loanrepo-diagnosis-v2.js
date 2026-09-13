@@ -16,21 +16,7 @@
   const STYLE_ID = 'loanrepo-diagnosis-v2-css';
 
   const css = `
-    #${CARD_ID}{
-      display:block !important;
-      width:100% !important;
-      max-width:100% !important;
-      box-sizing:border-box !important;
-      clear:both !important;
-      position:relative !important;
-      z-index:2 !important;
-      margin:24px 0 !important;
-      padding:22px 24px !important;
-      border:1px solid var(--color-divider,#d7d7d7) !important;
-      background:var(--color-bg,#fff) !important;
-      color:var(--color-text,#111) !important;
-      grid-column:1 / -1 !important;
-    }
+    #${CARD_ID}{display:block !important;width:100% !important;max-width:100% !important;box-sizing:border-box !important;clear:both !important;position:relative !important;z-index:2 !important;margin:24px 0 !important;padding:22px 24px !important;border:1px solid var(--color-divider,#d7d7d7) !important;background:var(--color-bg,#fff) !important;color:var(--color-text,#111) !important;grid-column:1 / -1 !important}
     #${CARD_ID} .lr2-grid{display:grid !important;grid-template-columns:minmax(180px,.8fr) 1fr !important;gap:24px !important;align-items:start !important}
     #${CARD_ID} .lr2-kicker{font-family:var(--font-heading,inherit);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent-700,#315b7d);margin-bottom:7px}
     #${CARD_ID} .lr2-title{font-family:var(--font-heading,inherit);font-size:28px;font-weight:600;line-height:1.05;margin:0 0 8px}
@@ -41,40 +27,21 @@
     #${CARD_ID} .lr2-action b{display:block;font-family:var(--font-heading,inherit);font-size:14px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
     #${CARD_ID} .lr2-confidence{display:inline-flex !important;align-items:center;gap:7px;font-size:12px;border:1px solid var(--color-divider,#d7d7d7);padding:6px 9px;margin-top:10px}
     #${CARD_ID} .lr2-dot{width:7px;height:7px;border-radius:50%;background:var(--color-accent-700,#315b7d);display:inline-block}
-    @media(max-width:700px){
-      #${CARD_ID}{padding:18px 16px !important}
-      #${CARD_ID} .lr2-grid{grid-template-columns:1fr !important}
-      #${CARD_ID} .lr2-actions{grid-template-columns:1fr !important}
-    }
+    @media(max-width:700px){#${CARD_ID}{padding:18px 16px !important}#${CARD_ID} .lr2-grid{grid-template-columns:1fr !important}#${CARD_ID} .lr2-actions{grid-template-columns:1fr !important}}
   `;
 
   function ensureStyles(){
     let style = document.getElementById(STYLE_ID);
-    if (!style) {
-      style = document.createElement('style');
-      style.id = STYLE_ID;
-      document.head.appendChild(style);
-    }
+    if (!style) { style = document.createElement('style'); style.id = STYLE_ID; document.head.appendChild(style); }
     if (style.textContent !== css) style.textContent = css;
   }
   ensureStyles();
 
   function text(el){ return (el && el.textContent || '').replace(/\s+/g,' ').trim(); }
-
-  function parseYears(root){
-    const m = text(root).match(/\+(\d+(?:\.\d+)?)\s*years? of tenure/i);
-    return m ? Number(m[1]) : 0;
-  }
-
-  function parseRates(root){
-    const m = text(root).match(/from\s+(\d+(?:\.\d+)?)%.*?to\s+(\d+(?:\.\d+)?)%/i);
-    return m ? {start:Number(m[1]),now:Number(m[2])} : null;
-  }
-
+  function parseYears(root){ const m = text(root).match(/\+(\d+(?:\.\d+)?)\s*years? of tenure/i); return m ? Number(m[1]) : 0; }
+  function parseRates(root){ const m = text(root).match(/from\s+(\d+(?:\.\d+)?)%.*?to\s+(\d+(?:\.\d+)?)%/i); return m ? {start:Number(m[1]),now:Number(m[2])} : null; }
   function score(root){
-    const years = parseYears(root);
-    const rates = parseRates(root);
-    let value = 88;
+    const years = parseYears(root); const rates = parseRates(root); let value = 88;
     value -= Math.min(30, years * 7);
     if (rates && rates.now > rates.start) value -= Math.min(12,(rates.now-rates.start)*6);
     return Math.max(35,Math.min(95,Math.round(value)));
@@ -83,20 +50,25 @@
   /* Public homepage cleanup: keep the front door about diagnosis. The deeper
      loan-management surfaces remain available once the borrower is signed in. */
   function cleanPublicNavigation(root){
-    const signedIn = !!root.querySelector('button[onClick="{{ signOut }}"]');
+    const signedIn = Array.from(root.querySelectorAll('button')).some(button => text(button) === 'Sign out');
     const nav = root.querySelector('header nav');
     if (!nav) return;
-
     const labels = ['Buying soon','Rate cycle','Examples','Saved runs','Method'];
     Array.from(nav.querySelectorAll('button')).forEach(button => {
       const label = text(button);
-      if (labels.includes(label)) {
-        button.style.display = signedIn ? '' : 'none';
-      }
-      if (label === 'Your loan') {
-        button.textContent = signedIn ? 'Your loan' : 'Diagnose';
-      }
+      if (labels.includes(label)) button.style.display = signedIn ? '' : 'none';
+      if (label === 'Your loan') button.textContent = signedIn ? 'Your loan' : 'Diagnose';
     });
+
+    if (!signedIn) {
+      Array.from(root.querySelectorAll('button')).forEach(button => {
+        if (text(button) === 'Sign in') button.textContent = 'Track my loan';
+      });
+      const title = Array.from(root.querySelectorAll('.dialog-title')).find(el => text(el) === 'Sign in to save your runs');
+      if (title) title.textContent = 'Sign in to track your loan';
+      const body = title && title.parentElement ? Array.from(title.parentElement.querySelectorAll('.dialog-body')).find(Boolean) : null;
+      if (body) body.textContent = 'Create your private LoanRepo workspace to keep this diagnosis, follow future resets and act when your loan needs attention.';
+    }
   }
 
   /* Find the stable result anchor used by the page itself. Do not depend on
@@ -106,18 +78,14 @@
   function findResult(root){
     const marked = root.querySelector('[style*="scroll-margin-top"]');
     if (marked) return marked;
-
     const marker = Array.from(root.querySelectorAll('div')).find(el => {
       if (el.closest && el.closest('.lr2-health')) return false;
       const s = text(el);
       return /added to your loan|ahead of your original schedule|ahead of schedule/i.test(s);
     });
     if (!marker) return null;
-
     let parent = marker;
-    for(let i=0;i<8 && parent;i++,parent=parent.parentElement){
-      if (parent.querySelector && parent.querySelector('table')) return parent;
-    }
+    for(let i=0;i<8 && parent;i++,parent=parent.parentElement){ if (parent.querySelector && parent.querySelector('table')) return parent; }
     return marker.parentElement;
   }
 
@@ -131,14 +99,9 @@
   }
 
   function renderCard(card,result){
-    const years = parseYears(result);
-    const rates = parseRates(result);
-    const health = score(result);
+    const years = parseYears(result); const rates = parseRates(result); const health = score(result);
     const estimated = !document.querySelector('#dc-root input[type="checkbox"]:checked + span') || text(document.getElementById('dc-root')).includes('Typical EBLR spreads');
-    const rateLine = rates
-      ? `Rate moved from ${rates.start.toFixed(2)}% to ${rates.now.toFixed(2)}% in the model.`
-      : 'Your rate path is based on the selected benchmark and spread.';
-
+    const rateLine = rates ? `Rate moved from ${rates.start.toFixed(2)}% to ${rates.now.toFixed(2)}% in the model.` : 'Your rate path is based on the selected benchmark and spread.';
     card.className = 'lr2-health';
     card.innerHTML = `
       <div class="lr2-grid">
@@ -168,57 +131,32 @@
     cleanPublicNavigation(root);
 
     const h1 = root.querySelector('h1');
-    if (h1 && (h1.textContent.includes('Your bank never told you this changed.') || h1.textContent.includes('Did your home loan quietly get longer?'))) {
-      h1.textContent = 'Did your home loan quietly get longer?';
-    }
+    if (h1 && (h1.textContent.includes('Your bank never told you this changed.') || h1.textContent.includes('Did your home loan quietly get longer?'))) h1.textContent = 'Did your home loan quietly get longer?';
 
-    const kicker = Array.from(root.querySelectorAll('div')).find(el => text(el) === 'Loan journey · sourced from RBI MPC records');
+    const kicker = Array.from(root.querySelectorAll('div')).find(el => text(el) === 'Loan journey · sourced from RBI MPC records' || text(el) === 'Home loan diagnosis');
     if (kicker) kicker.textContent = 'Home loan diagnosis';
 
     const lead = Array.from(root.querySelectorAll('p')).find(p => text(p).startsWith('Enter the month you took the loan.') || text(p).startsWith('See what the rate cycle did to your loan'));
     if (lead) lead.textContent = 'See what the rate cycle did to your loan — tenure, balance and estimated interest — and understand what to check next.';
 
-    /* Keep the public homepage trust statement concise and diagnostic. */
-    const trust = Array.from(root.querySelectorAll('p')).find(p => text(p).startsWith('The calculation runs in your browser.'));
+    const trust = Array.from(root.querySelectorAll('p')).find(p => text(p).startsWith('The calculation runs in your browser.') || text(p).startsWith('Your loan particulars are saved only'));
     if (trust) trust.textContent = 'The calculation runs in your browser. Your loan particulars are saved only if you sign in and choose to track the loan. LoanRepo is independent of lenders.';
 
-    /* Remove/move our presentation layer first so the result is always located
-       in the app's original DOM position. */
     const existingCard = removeDuplicateCards(root);
     const result = findResult(root);
-
-    if (!result) {
-      if (existingCard) existingCard.remove();
-      return;
-    }
+    if (!result) { if (existingCard) existingCard.remove(); return; }
 
     const card = existingCard || document.createElement('section');
-    card.id = CARD_ID;
-    card.className = 'lr2-health';
-    renderCard(card,result);
-
-    /* IMPORTANT: keep the original loan result completely intact. The health
-       card is a sibling placed immediately before it, never inside its verdict
-       grid or one of its metric rows. */
-    if (card.parentNode !== result.parentNode || card.nextElementSibling !== result) {
-      result.parentNode.insertBefore(card,result);
-    }
+    card.id = CARD_ID; card.className = 'lr2-health'; renderCard(card,result);
+    if (card.parentNode !== result.parentNode || card.nextElementSibling !== result) result.parentNode.insertBefore(card,result);
   }
 
-  let scheduled = false;
-  let appObserver = null;
-
-  function scheduleEnhance(){
-    if (scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(() => { scheduled = false; enhance(); });
-  }
-
+  let scheduled = false; let appObserver = null;
+  function scheduleEnhance(){ if (scheduled) return; scheduled = true; requestAnimationFrame(() => { scheduled = false; enhance(); }); }
   function observeApp(){
     const root = document.getElementById('dc-root');
     if (!root) return false;
     if (appObserver) return true;
-
     appObserver = new MutationObserver((mutations) => {
       const relevant = mutations.some(mutation => {
         if (mutation.type !== 'childList') return false;
@@ -227,17 +165,11 @@
       });
       if (relevant) scheduleEnhance();
     });
-    appObserver.observe(root,{childList:true,subtree:true});
-    scheduleEnhance();
-    return true;
+    appObserver.observe(root,{childList:true,subtree:true}); scheduleEnhance(); return true;
   }
 
-  const bootstrapObserver = new MutationObserver(() => {
-    if (observeApp()) bootstrapObserver.disconnect();
-  });
-
+  const bootstrapObserver = new MutationObserver(() => { if (observeApp()) bootstrapObserver.disconnect(); });
   if (!observeApp()) bootstrapObserver.observe(document.documentElement,{childList:true,subtree:true});
-
   setTimeout(() => { observeApp(); enhance(); },500);
   setTimeout(() => enhance(),1500);
 })();
