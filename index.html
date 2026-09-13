@@ -1232,6 +1232,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
+  static BUILD = "b7";
   static LEGAL_TABS = [
     { id: "about", label: "About" },
     { id: "terms", label: "Terms" },
@@ -2001,7 +2002,8 @@ class Component extends DCLogic {
       // different fact and is stated on the Method screen.
       printSubhead: r.benchmark + " at " + r.spread.toFixed(2) + "% spread · EMI "
         + this.inr(r.e0) + " · prepared " + new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
-        + " · rates to " + Component.TODAY.toLocaleDateString("en-IN", { month: "short", year: "numeric" }),
+        + " · rates to " + Component.TODAY.toLocaleDateString("en-IN", { month: "short", year: "numeric" })
+        + " · " + Component.BUILD,
       barPromised: (r.payoffM ? (r.n / Math.max(r.payoffM, r.n)) * 100 : 100).toFixed(1),
       // The solid fill is the contracted term only; the hatched band beyond it
       // is what the rate cycle added. A full-width solid fill hid the band.
