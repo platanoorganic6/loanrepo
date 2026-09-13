@@ -59,6 +59,8 @@
        so the draft prints from a plain block instead. */
     textarea { display: none !important; }
     [data-print-draft] { white-space: pre-wrap; font: 11pt/1.5 var(--font-body); border: 1px solid #ccc; padding: 10pt 12pt; }
+    /* A heading stranded at the foot of a page reads as a mistake. */
+    [data-print-lede] { break-after: avoid; }
   }
   [data-print-only] { display: none; }
 </style>
@@ -238,7 +240,7 @@
 
       <!-- the one shareable image -->
       <sc-if value="{{ isLeak }}" hint-placeholder-val="{{ true }}">
-      <div style="margin-top:44px;">
+      <div data-print-hide="true" style="margin-top:44px;">
         <div style="display:flex; justify-content:space-between; align-items:baseline; gap:16px; flex-wrap:wrap; margin-bottom:14px;">
           <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase;">The loan you signed, against the loan you have</div>
           <button type="button" class="btn btn-ghost" onClick="{{ copyShare }}" style="font-size:12px;">{{ shareCta }}</button>
@@ -317,7 +319,7 @@
 
       <!-- reset timeline -->
       <div style="margin-top:52px;">
-        <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:4px;">Every reset that moved your rate</div>
+        <div data-print-lede="true" style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:4px;">Every reset that moved your rate</div>
         <p style="font-size:14px; color:var(--color-neutral-700); max-width:64ch; margin:0 0 18px;">Each row is a real RBI decision reaching your loan at its next reset date. Your EMI is the same on every line.</p>
         <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;"><table class="table" style="min-width:520px;">
           <thead>
@@ -341,7 +343,7 @@
       <!-- scenarios -->
       <sc-if value="{{ showScenario }}" hint-placeholder-val="{{ true }}">
       <div style="margin-top:56px;">
-        <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:6px;">Routes to closing this loan</div>
+        <div data-print-lede="true" style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:6px;">Routes to closing this loan</div>
         <p style="font-size:14px; color:var(--color-neutral-700); max-width:70ch; margin:0 0 20px;">Five ways the same loan can end, and the arithmetic for each. Deliberately unranked: which of these is right depends on what else your money could do, your tax position and your job security — none of which we know, and none of which we'll guess at.</p>
         <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin-bottom:24px;">
           <div class="field"><label for="lr-lump">One-off lump sum today (₹)</label><input class="input" id="lr-lump" type="number" min="0" step="50000" value="{{ fLump }}" onChange="{{ setLump }}"></div>
@@ -368,7 +370,7 @@
 
         <sc-if value="{{ showChecklist }}" hint-placeholder-val="{{ true }}">
         <div>
-          <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:6px;">Ask your bank these five things</div>
+          <div data-print-lede="true" style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:6px;">Ask your bank these five things</div>
           <p style="font-size:13px; color:var(--color-neutral-700); margin:0 0 4px;">Written to be read out on a call. Every answer is something they are required to have.</p>
           <ol style="margin:0; padding:0; list-style:none; counter-reset:q;">
             <sc-for list="{{ questions }}" as="q" hint-placeholder-count="5">
