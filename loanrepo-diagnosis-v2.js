@@ -2,11 +2,17 @@
  * Presentation-layer enhancement. Keeps the existing amortisation engine intact.
  * Adds clearer positioning, a diagnostic health card, confidence language and
  * next-action guidance after a loan run.
+ *
+ * Duplicate-render fix: the diagnosis card is now a document-level singleton,
+ * duplicate legacy cards are cleaned up, and DOM observation is scoped to the
+ * LoanRepo app root once it exists.
  */
 (() => {
   'use strict';
   if (window.__LOANREPO_DIAGNOSIS_V2__) return;
   window.__LOANREPO_DIAGNOSIS_V2__ = true;
+
+  const CARD_ID = 'loanrepo-diagnosis-v2-card';
 
   const css = `
     .lr2-health{margin:24px 0 0;padding:22px 24px;border:1px solid var(--color-divider);background:var(--color-bg);}
@@ -24,24 +30,22 @@
   `;
   const style = document.createElement('style');
   style.id = 'loanrepo-diagnosis-v2-css';
-  style.textContent = css;
-  document.head.appendChild(style);
+  if (!document.getElementById(style.id)) document.head.appendChild(style);
 
   function text(el){ return (el && el.textContent || '').replace(/\s+/g,' ').trim(); }
-  function money(n){
-    if (!Number.isFinite(n)) return '—';
-    return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
-  }
+
   function parseYears(root){
     const s = text(root);
     const m = s.match(/\+(\d+(?:\.\d+)?)\s*years? of tenure/i);
     return m ? Number(m[1]) : 0;
   }
+
   function parseRates(root){
     const s = text(root);
     const m = s.match(/from\s+(\d+(?:\.\d+)?)%.*?to\s+(\d+(?:\.\d+)?)%/i);
     return m ? {start:Number(m[1]),now:Number(m[2])} : null;
   }
+
   function score(root){
     const years = parseYears(root);
     const rates = parseRates(root);
@@ -50,20 +54,34 @@
     if (rates && rates.now > rates.start) value -= Math.min(12,(rates.now-rates.start)*6);
     return Math.max(35,Math.min(95,Math.round(value)));
   }
-  function findResult(){
-    const root = document.getElementById('dc-root');
-    if (!root) return null;
+
+  function findResult(root){
     const marker = Array.from(root.querySelectorAll('div')).find(el => {
+      if (el.closest && el.closest('.lr2-health')) return false;
       const s = text(el);
       return s.includes('Added to your loan, unannounced') || s.includes('ahead of schedule');
     });
     if (!marker) return null;
+
     let parent = marker;
     for(let i=0;i<4 && parent;i++,parent=parent.parentElement){
       if (parent.querySelector && parent.querySelector('table')) return parent;
     }
     return marker.parentElement;
   }
+
+  function removeDuplicateCards(root){
+    const cards = Array.from(root.querySelectorAll('.lr2-health'));
+    if (!cards.length) return null;
+
+    const keeper = cards.find(card => card.id === CARD_ID) || cards[0];
+    cards.forEach(card => {
+      if (card !== keeper) card.remove();
+    });
+    if (keeper.id !== CARD_ID) keeper.id = CARD_ID;
+    return keeper;
+  }
+
   function enhance(){
     const root = document.getElementById('dc-root');
     if (!root) return;
@@ -76,9 +94,11 @@
     const lead = Array.from(root.querySelectorAll('p')).find(p => text(p).startsWith('Enter the month you took the loan.'));
     if (lead) lead.textContent = 'See what the rate cycle did to your loan — tenure, balance and estimated interest — and understand what to check next.';
 
-    const result = findResult();
+    const existingCard = removeDuplicateCards(root);
+    if (existingCard) return;
+
+    const result = findResult(root);
     if (!result) return;
-    if (result.querySelector('.lr2-health')) return;
 
     const years = parseYears(result);
     const rates = parseRates(result);
@@ -87,6 +107,7 @@
     const rateLine = rates ? `Rate moved from ${rates.start.toFixed(2)}% to ${rates.now.toFixed(2)}% in the model.` : 'Your rate path is based on the selected benchmark and spread.';
 
     const card = document.createElement('section');
+    card.id = CARD_ID;
     card.className = 'lr2-health';
     card.innerHTML = `
       <div class="lr2-grid">
@@ -112,12 +133,47 @@
   }
 
   let scheduled = false;
-  const observer = new MutationObserver(() => {
+  let appObserver = null;
+
+  function scheduleEnhance(){
     if (scheduled) return;
     scheduled = true;
-    requestAnimationFrame(() => { scheduled = false; enhance(); });
+    requestAnimationFrame(() => {
+      scheduled = false;
+      enhance();
+    });
+  }
+
+  function observeApp(){
+    const root = document.getElementById('dc-root');
+    if (!root) return false;
+    if (appObserver) return true;
+
+    appObserver = new MutationObserver((mutations) => {
+      const relevant = mutations.some(mutation => {
+        if (mutation.type !== 'childList') return false;
+        if (mutation.addedNodes.length === 0 && mutation.removedNodes.length === 0) return false;
+        return !Array.from(mutation.addedNodes).every(node => node.nodeType === 1 && (node.matches?.('.lr2-health') || node.closest?.('.lr2-health')));
+      });
+      if (relevant) scheduleEnhance();
+    });
+
+    appObserver.observe(root,{childList:true,subtree:true});
+    scheduleEnhance();
+    return true;
+  }
+
+  const bootstrapObserver = new MutationObserver(() => {
+    if (observeApp()) bootstrapObserver.disconnect();
   });
-  observer.observe(document.documentElement,{childList:true,subtree:true});
-  setTimeout(enhance,500);
-  setTimeout(enhance,1500);
+
+  if (!observeApp()) {
+    bootstrapObserver.observe(document.documentElement,{childList:true,subtree:true});
+  }
+
+  setTimeout(() => {
+    observeApp();
+    enhance();
+  },500);
+  setTimeout(() => enhance(),1500);
 })();
