@@ -24,7 +24,7 @@
       clear:both !important;
       position:relative !important;
       z-index:2 !important;
-      margin:24px 0 0 !important;
+      margin:24px 0 !important;
       padding:22px 24px !important;
       border:1px solid var(--color-divider,#d7d7d7) !important;
       background:var(--color-bg,#fff) !important;
@@ -49,11 +49,13 @@
   `;
 
   function ensureStyles(){
-    if (document.getElementById(STYLE_ID)) return;
-    const style = document.createElement('style');
-    style.id = STYLE_ID;
-    style.textContent = css;
-    document.head.appendChild(style);
+    let style = document.getElementById(STYLE_ID);
+    if (!style) {
+      style = document.createElement('style');
+      style.id = STYLE_ID;
+      document.head.appendChild(style);
+    }
+    if (style.textContent !== css) style.textContent = css;
   }
   ensureStyles();
 
@@ -78,15 +80,27 @@
     return Math.max(35,Math.min(95,Math.round(value)));
   }
 
+  /* Find the existing app result container, not a child of the verdict.
+     The DC page gives the result anchor scroll-margin-top; using that stable
+     structural marker prevents the diagnosis card from becoming a child/grid
+     item of the dark verdict panel. */
   function findResult(root){
+    const marked = Array.from(root.querySelectorAll('[style*="scroll-margin-top"]'))
+      .find(el => {
+        const s = text(el);
+        return s.includes('Added to your loan, unannounced') || s.includes('ahead of schedule');
+      });
+    if (marked) return marked;
+
     const marker = Array.from(root.querySelectorAll('div')).find(el => {
       if (el.closest && el.closest('.lr2-health')) return false;
       const s = text(el);
       return s.includes('Added to your loan, unannounced') || s.includes('ahead of schedule');
     });
     if (!marker) return null;
+
     let parent = marker;
-    for(let i=0;i<4 && parent;i++,parent=parent.parentElement){
+    for(let i=0;i<8 && parent;i++,parent=parent.parentElement){
       if (parent.querySelector && parent.querySelector('table')) return parent;
     }
     return marker.parentElement;
@@ -145,8 +159,10 @@
     const lead = Array.from(root.querySelectorAll('p')).find(p => text(p).startsWith('Enter the month you took the loan.'));
     if (lead) lead.textContent = 'See what the rate cycle did to your loan — tenure, balance and estimated interest — and understand what to check next.';
 
-    const result = findResult(root);
+    /* Remove/move our presentation layer first so the result is always located
+       in the app's original DOM position. */
     const existingCard = removeDuplicateCards(root);
+    const result = findResult(root);
 
     if (!result) {
       if (existingCard) existingCard.remove();
@@ -158,8 +174,11 @@
     card.className = 'lr2-health';
     renderCard(card,result);
 
-    if (card.parentNode !== result.parentNode || card.previousElementSibling !== result) {
-      result.parentNode.insertBefore(card,result.nextSibling);
+    /* IMPORTANT: keep the original loan result completely intact. The health
+       card is a sibling placed immediately before it, never inside its verdict
+       grid or one of its metric rows. */
+    if (card.parentNode !== result.parentNode || card.nextElementSibling !== result) {
+      result.parentNode.insertBefore(card,result);
     }
   }
 
