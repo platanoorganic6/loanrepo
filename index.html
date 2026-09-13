@@ -273,9 +273,8 @@
       <!-- The one place the book is offered inside the result: directly under
            the evidence, while the number above is still doing the arguing. -->
       <sc-if value="{{ isLeak }}" hint-placeholder-val="{{ true }}">
-      <div style="display:flex; gap:20px; align-items:baseline; flex-wrap:wrap; justify-content:space-between; padding:18px 20px; border-bottom:1px solid var(--color-divider); background:var(--color-accent-100);">
-        <div style="font-size:14.5px; line-height:1.5; max-width:60ch; color:var(--color-neutral-800);">Everything below is what happened, and it stays free. <b style="color:var(--color-text);">The Quiet Years</b> is the eight chapters this site doesn't touch — including when <i>not</i> to prepay, and what to do if you cannot pay.</div>
-        <button data-print-hide="true" type="button" onClick="{{ goBook }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-heading); font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-accent-800); border-bottom:1px solid var(--color-accent-800); white-space:nowrap;">The book — ₹299</button>
+      <div data-print-hide="true" style="padding:18px 20px; border-bottom:1px solid var(--color-divider); background:var(--color-accent-100);">
+        <div style="font-size:14.5px; line-height:1.5; max-width:74ch; color:var(--color-neutral-800);">Everything below is what happened, and it stays free. <b style="color:var(--color-text);">The Quiet Years</b> is the eight chapters this site doesn't touch — including when <i>not</i> to prepay, and what to do if you cannot pay. <button data-print-hide="true" type="button" onClick="{{ goBook }}" style="background:none; border:none; padding:0; margin-left:4px; cursor:pointer; font-family:var(--font-heading); font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-accent-800); border-bottom:1px solid var(--color-accent-800); white-space:nowrap; vertical-align:baseline;">The book — ₹299</button></div>
       </div>
       </sc-if>
 
@@ -427,7 +426,15 @@
 
       <!-- The free PDF is the diagnosis; the book is the treatment. Naming the
            line plainly is what makes the paid edition coherent. -->
-      <div style="margin-top:22px; display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:0; border:1px solid var(--color-divider);">
+      <!-- The document closes on its own method, so it stands up on its own
+           if it is handed to a bank. -->
+      <div data-print-only="true" style="margin-top:24pt; border-top:1px solid #1d1f20; padding-top:14pt;">
+        <div style="font-family:var(--font-heading); font-size:10pt; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:8pt;">How these figures were produced</div>
+        <p style="font-size:10pt; line-height:1.55; margin:0 0 8pt; color:var(--color-neutral-800); max-width:78ch;">The loan above was advanced one month at a time from its disbursal month. At each reset date the rate was set to the Reserve Bank of India repo rate in force on that date plus the spread shown, with the EMI held constant — which is the default treatment on a floating-rate loan. Beyond the current month the repo rate is held at {{ nowRepo }}% rather than forecast. Rate history is drawn from published RBI Monetary Policy Committee decisions.</p>
+        <p style="font-size:10pt; line-height:1.55; margin:0; color:var(--color-neutral-700); max-width:78ch;">{{ confidence }} This document is descriptive and is not investment, tax or legal advice. Figures should be reconciled against your own statement and sanction letter. Prepared by LoanRepo · loanrepo.in · no lender affiliation.</p>
+      </div>
+
+      <div data-print-hide="true" style="margin-top:22px; display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:0; border:1px solid var(--color-divider);">
         <div style="padding:20px 22px; border-right:1px solid var(--color-divider);">
           <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:8px;">The PDF above — free, always</div>
           <div style="font-size:14px; line-height:1.55; color:var(--color-neutral-800);">Your verdict, the spec sheet, the chart, and every reset that moved your rate. The full diagnosis, and yours without paying for it.</div>
@@ -901,7 +908,7 @@
 
         <div style="border-top:1px solid var(--color-text); padding-top:20px; margin-bottom:36px;">
           <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:6px;">What's already free, and what isn't</div>
-          <p style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin:0 0 18px; max-width:56ch;">Every chapter, and whether this site already gives you the same thing. Four do overlap. We would rather you found that here than after paying.</p>
+          <p style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin:0 0 18px; max-width:56ch;">All seventeen chapters and the reference section, against whether this site already gives you the same thing. Four do overlap. We would rather you found that here than after paying.</p>
           <table class="table">
             <thead><tr><th style="width:44px;">Ch</th><th>Subject</th><th style="width:104px;">On the site</th><th>In the book</th></tr></thead>
             <tbody>
@@ -915,15 +922,16 @@
               </sc-for>
             </tbody>
           </table>
-          <div style="font-size:13px; line-height:1.55; color:var(--color-neutral-700); margin-top:12px; max-width:60ch;">Put plainly: four chapters repeat what the site does, five go deeper on ground it touches, and <b style="color:var(--color-text);">eight are not on the site at all</b> — the decisions around the loan, which is where most of the money is won or lost.</div>
+          <div style="font-size:13px; line-height:1.55; color:var(--color-neutral-700); margin-top:12px; max-width:60ch;">Put plainly, of the seventeen chapters: four repeat what the site does, five go deeper on ground it touches, and <b style="color:var(--color-text);">eight are not on the site at all</b> — the decisions around the loan, which is where most of the money is won or lost. The reference section extends the site's one email template to three.</div>
         </div>
 
         <div style="border-top:1px solid var(--color-text); padding-top:20px;">
-          <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:14px;">Contents</div>
+          <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:4px;">Contents</div>
+          <div style="font-size:13px; color:var(--color-neutral-700); margin-bottom:14px;">Seventeen chapters in four parts, then the reference section.</div>
           <ol style="margin:0; padding:0; list-style:none;">
             <sc-for list="{{ chapters }}" as="ch" hint-placeholder-count="10">
-              <li style="display:grid; grid-template-columns:34px 1fr; gap:12px; padding:10px 0; border-bottom:1px solid var(--color-divider); font-size:14.5px;">
-                <span style="font-family:var(--font-heading); color:var(--color-accent-700); font-variant-numeric:tabular-nums;">{{ ch.n }}</span>
+              <li style="display:grid; grid-template-columns:34px 1fr; gap:12px; padding:10px 0; border-bottom:1px solid var(--color-divider); font-size:14.5px; border-top:{{ ch.rule }};">
+                <span style="font-family:var(--font-heading); color:{{ ch.fg }}; font-variant-numeric:tabular-nums;">{{ ch.n }}</span>
                 <span>{{ ch.t }}</span>
               </li>
             </sc-for>
@@ -957,9 +965,9 @@
         <div class="blueprint" style="margin-top:26px; padding:24px; background:var(--color-accent-100);">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:8px;">Your copy is written against your loan</div>
-          <p style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin:0 0 14px;">Because you've already run your loan, we don't send you the generic book. Chapter one opens on your own tenure drift, chapter eight works the prepayment arithmetic on your actual balance, and chapter fifteen lists your four reset dates instead of leaving blanks. No other book can do that, because no other book knows your loan.</p>
+          <p style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin:0 0 14px;">Because you've already run your loan, we don't send you the generic book. Chapter one opens on your own tenure drift, chapter eight works the prepayment arithmetic on your actual balance, and chapter sixteen lists your four reset dates instead of leaving blanks. No other book can do that, because no other book knows your loan.</p>
           <a href="{{ personalHref }}" target="_blank" class="btn btn-secondary" style="text-decoration:none;">Read the first two chapters free</a>
-          <div style="font-size:12px; color:var(--color-neutral-700); margin-top:10px;">Opens in a new tab, with your figures already in it. The remaining fourteen chapters come with the purchase.</div>
+          <div style="font-size:12px; color:var(--color-neutral-700); margin-top:10px;">Opens in a new tab, with your figures already in it. The remaining fifteen chapters come with the purchase.</div>
         </div>
         </sc-if>
 
@@ -1658,7 +1666,13 @@ class Component extends DCLogic {
       onBuying: s.screen === "buying", navBuying: nav("buying"),
       onBook: s.screen === "book",
       goBook: () => this.go("book"),
-      chapters: Component.CHAPTERS,
+      // The reference section is not chapter eighteen; set it apart so nobody
+      // counts it as one.
+      chapters: Component.CHAPTERS.map(c => ({
+        n: c.n, t: c.t,
+        fg: c.n === "—" ? "var(--color-neutral-600)" : "var(--color-accent-700)",
+        rule: c.n === "—" ? "1px solid var(--color-text)" : "none"
+      })),
       overlap: Component.OVERLAP.map(o => ({
         ch: o.ch,
         t: o.t,
