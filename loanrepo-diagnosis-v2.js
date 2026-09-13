@@ -3,9 +3,9 @@
  * Adds clearer positioning, a diagnostic health card, confidence language and
  * next-action guidance after a loan run.
  *
- * Duplicate-render fix: the diagnosis card is now a document-level singleton,
- * duplicate legacy cards are cleaned up, and DOM observation is scoped to the
- * LoanRepo app root once it exists.
+ * Robust rendering: the diagnosis card is a singleton, refreshes with the
+ * current result DOM, and carries critical layout styles inline so app-level
+ * CSS/layout changes cannot collapse it into unstyled text.
  */
 (() => {
   'use strict';
@@ -13,36 +13,59 @@
   window.__LOANREPO_DIAGNOSIS_V2__ = true;
 
   const CARD_ID = 'loanrepo-diagnosis-v2-card';
+  const STYLE_ID = 'loanrepo-diagnosis-v2-css';
 
   const css = `
-    .lr2-health{margin:24px 0 0;padding:22px 24px;border:1px solid var(--color-divider);background:var(--color-bg);}
-    .lr2-grid{display:grid;grid-template-columns:minmax(180px,.8fr) 1fr;gap:24px;align-items:start}
-    .lr2-kicker{font-family:var(--font-heading);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:7px}
-    .lr2-title{font-family:var(--font-heading);font-size:28px;font-weight:600;line-height:1.05;margin:0 0 8px}
-    .lr2-score{font-family:var(--font-heading);font-size:58px;font-weight:600;line-height:.9;font-variant-numeric:tabular-nums}
-    .lr2-muted{font-size:12px;line-height:1.5;color:var(--color-neutral-700)}
-    .lr2-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
-    .lr2-action{border-top:2px solid var(--color-text);padding-top:9px;font-size:13px;line-height:1.45}
-    .lr2-action b{display:block;font-family:var(--font-heading);font-size:14px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
-    .lr2-confidence{display:inline-flex;align-items:center;gap:7px;font-size:12px;border:1px solid var(--color-divider);padding:6px 9px;margin-top:10px}
-    .lr2-dot{width:7px;height:7px;border-radius:50%;background:var(--color-accent-700);display:inline-block}
-    @media(max-width:700px){.lr2-grid{grid-template-columns:1fr}.lr2-actions{grid-template-columns:1fr}}
+    #${CARD_ID}{
+      display:block !important;
+      width:100% !important;
+      max-width:100% !important;
+      box-sizing:border-box !important;
+      clear:both !important;
+      position:relative !important;
+      z-index:2 !important;
+      margin:24px 0 0 !important;
+      padding:22px 24px !important;
+      border:1px solid var(--color-divider,#d7d7d7) !important;
+      background:var(--color-bg,#fff) !important;
+      color:var(--color-text,#111) !important;
+      grid-column:1 / -1 !important;
+    }
+    #${CARD_ID} .lr2-grid{display:grid !important;grid-template-columns:minmax(180px,.8fr) 1fr !important;gap:24px !important;align-items:start !important}
+    #${CARD_ID} .lr2-kicker{font-family:var(--font-heading,inherit);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent-700,#315b7d);margin-bottom:7px}
+    #${CARD_ID} .lr2-title{font-family:var(--font-heading,inherit);font-size:28px;font-weight:600;line-height:1.05;margin:0 0 8px}
+    #${CARD_ID} .lr2-score{font-family:var(--font-heading,inherit);font-size:58px;font-weight:600;line-height:.9;font-variant-numeric:tabular-nums}
+    #${CARD_ID} .lr2-muted{font-size:12px;line-height:1.5;color:var(--color-neutral-700,#555)}
+    #${CARD_ID} .lr2-actions{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:10px !important;margin-top:14px !important}
+    #${CARD_ID} .lr2-action{border-top:2px solid var(--color-text,#111);padding-top:9px;font-size:13px;line-height:1.45}
+    #${CARD_ID} .lr2-action b{display:block;font-family:var(--font-heading,inherit);font-size:14px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+    #${CARD_ID} .lr2-confidence{display:inline-flex !important;align-items:center;gap:7px;font-size:12px;border:1px solid var(--color-divider,#d7d7d7);padding:6px 9px;margin-top:10px}
+    #${CARD_ID} .lr2-dot{width:7px;height:7px;border-radius:50%;background:var(--color-accent-700,#315b7d);display:inline-block}
+    @media(max-width:700px){
+      #${CARD_ID}{padding:18px 16px !important}
+      #${CARD_ID} .lr2-grid{grid-template-columns:1fr !important}
+      #${CARD_ID} .lr2-actions{grid-template-columns:1fr !important}
+    }
   `;
-  const style = document.createElement('style');
-  style.id = 'loanrepo-diagnosis-v2-css';
-  if (!document.getElementById(style.id)) document.head.appendChild(style);
+
+  function ensureStyles(){
+    if (document.getElementById(STYLE_ID)) return;
+    const style = document.createElement('style');
+    style.id = STYLE_ID;
+    style.textContent = css;
+    document.head.appendChild(style);
+  }
+  ensureStyles();
 
   function text(el){ return (el && el.textContent || '').replace(/\s+/g,' ').trim(); }
 
   function parseYears(root){
-    const s = text(root);
-    const m = s.match(/\+(\d+(?:\.\d+)?)\s*years? of tenure/i);
+    const m = text(root).match(/\+(\d+(?:\.\d+)?)\s*years? of tenure/i);
     return m ? Number(m[1]) : 0;
   }
 
   function parseRates(root){
-    const s = text(root);
-    const m = s.match(/from\s+(\d+(?:\.\d+)?)%.*?to\s+(\d+(?:\.\d+)?)%/i);
+    const m = text(root).match(/from\s+(\d+(?:\.\d+)?)%.*?to\s+(\d+(?:\.\d+)?)%/i);
     return m ? {start:Number(m[1]),now:Number(m[2])} : null;
   }
 
@@ -62,7 +85,6 @@
       return s.includes('Added to your loan, unannounced') || s.includes('ahead of schedule');
     });
     if (!marker) return null;
-
     let parent = marker;
     for(let i=0;i<4 && parent;i++,parent=parent.parentElement){
       if (parent.querySelector && parent.querySelector('table')) return parent;
@@ -73,41 +95,21 @@
   function removeDuplicateCards(root){
     const cards = Array.from(root.querySelectorAll('.lr2-health'));
     if (!cards.length) return null;
-
     const keeper = cards.find(card => card.id === CARD_ID) || cards[0];
-    cards.forEach(card => {
-      if (card !== keeper) card.remove();
-    });
-    if (keeper.id !== CARD_ID) keeper.id = CARD_ID;
+    cards.forEach(card => { if (card !== keeper) card.remove(); });
+    keeper.id = CARD_ID;
     return keeper;
   }
 
-  function enhance(){
-    const root = document.getElementById('dc-root');
-    if (!root) return;
-
-    const h1 = root.querySelector('h1');
-    if (h1 && h1.textContent.includes('Your bank never told you this changed.')) {
-      h1.textContent = 'Did your home loan quietly get longer?';
-    }
-
-    const lead = Array.from(root.querySelectorAll('p')).find(p => text(p).startsWith('Enter the month you took the loan.'));
-    if (lead) lead.textContent = 'See what the rate cycle did to your loan — tenure, balance and estimated interest — and understand what to check next.';
-
-    const existingCard = removeDuplicateCards(root);
-    if (existingCard) return;
-
-    const result = findResult(root);
-    if (!result) return;
-
+  function renderCard(card,result){
     const years = parseYears(result);
     const rates = parseRates(result);
     const health = score(result);
-    const estimated = !root.querySelector('input[type="checkbox"]:checked + span') || text(root).includes('Typical EBLR spreads');
-    const rateLine = rates ? `Rate moved from ${rates.start.toFixed(2)}% to ${rates.now.toFixed(2)}% in the model.` : 'Your rate path is based on the selected benchmark and spread.';
+    const estimated = !document.querySelector('#dc-root input[type="checkbox"]:checked + span') || text(document.getElementById('dc-root')).includes('Typical EBLR spreads');
+    const rateLine = rates
+      ? `Rate moved from ${rates.start.toFixed(2)}% to ${rates.now.toFixed(2)}% in the model.`
+      : 'Your rate path is based on the selected benchmark and spread.';
 
-    const card = document.createElement('section');
-    card.id = CARD_ID;
     card.className = 'lr2-health';
     card.innerHTML = `
       <div class="lr2-grid">
@@ -128,8 +130,37 @@
           <div class="lr2-muted" style="margin-top:15px">${rateLine}</div>
         </div>
       </div>`;
+  }
 
-    result.parentNode.insertBefore(card,result.nextSibling);
+  function enhance(){
+    const root = document.getElementById('dc-root');
+    if (!root) return;
+    ensureStyles();
+
+    const h1 = root.querySelector('h1');
+    if (h1 && h1.textContent.includes('Your bank never told you this changed.')) {
+      h1.textContent = 'Did your home loan quietly get longer?';
+    }
+
+    const lead = Array.from(root.querySelectorAll('p')).find(p => text(p).startsWith('Enter the month you took the loan.'));
+    if (lead) lead.textContent = 'See what the rate cycle did to your loan — tenure, balance and estimated interest — and understand what to check next.';
+
+    const result = findResult(root);
+    const existingCard = removeDuplicateCards(root);
+
+    if (!result) {
+      if (existingCard) existingCard.remove();
+      return;
+    }
+
+    const card = existingCard || document.createElement('section');
+    card.id = CARD_ID;
+    card.className = 'lr2-health';
+    renderCard(card,result);
+
+    if (card.parentNode !== result.parentNode || card.previousElementSibling !== result) {
+      result.parentNode.insertBefore(card,result.nextSibling);
+    }
   }
 
   let scheduled = false;
@@ -138,10 +169,7 @@
   function scheduleEnhance(){
     if (scheduled) return;
     scheduled = true;
-    requestAnimationFrame(() => {
-      scheduled = false;
-      enhance();
-    });
+    requestAnimationFrame(() => { scheduled = false; enhance(); });
   }
 
   function observeApp(){
@@ -152,12 +180,11 @@
     appObserver = new MutationObserver((mutations) => {
       const relevant = mutations.some(mutation => {
         if (mutation.type !== 'childList') return false;
-        if (mutation.addedNodes.length === 0 && mutation.removedNodes.length === 0) return false;
-        return !Array.from(mutation.addedNodes).every(node => node.nodeType === 1 && (node.matches?.('.lr2-health') || node.closest?.('.lr2-health')));
+        if (!mutation.addedNodes.length && !mutation.removedNodes.length) return false;
+        return !Array.from(mutation.addedNodes).every(node => node.nodeType === 1 && (node.matches?.('#'+CARD_ID) || node.closest?.('#'+CARD_ID)));
       });
       if (relevant) scheduleEnhance();
     });
-
     appObserver.observe(root,{childList:true,subtree:true});
     scheduleEnhance();
     return true;
@@ -167,13 +194,8 @@
     if (observeApp()) bootstrapObserver.disconnect();
   });
 
-  if (!observeApp()) {
-    bootstrapObserver.observe(document.documentElement,{childList:true,subtree:true});
-  }
+  if (!observeApp()) bootstrapObserver.observe(document.documentElement,{childList:true,subtree:true});
 
-  setTimeout(() => {
-    observeApp();
-    enhance();
-  },500);
+  setTimeout(() => { observeApp(); enhance(); },500);
   setTimeout(() => enhance(),1500);
 })();
