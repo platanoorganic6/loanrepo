@@ -47,8 +47,6 @@
     return Math.max(35,Math.min(95,Math.round(value)));
   }
 
-  /* Public homepage cleanup: keep the front door about diagnosis. The deeper
-     loan-management surfaces remain available once the borrower is signed in. */
   function cleanPublicNavigation(root){
     const signedIn = Array.from(root.querySelectorAll('button')).some(button => text(button) === 'Sign out');
     const nav = root.querySelector('header nav');
@@ -61,9 +59,6 @@
     });
 
     if (!signedIn) {
-      /* The diagnosis result already provides the single public conversion CTA
-         "Track this loan". Keep the header quiet: sign-in remains available as
-         a utility action, but it must not create a second tracking CTA. */
       Array.from(root.querySelectorAll('button')).forEach(button => {
         if (text(button) === 'Track my loan') button.remove();
       });
@@ -75,6 +70,21 @@
       const body = title && title.parentElement ? Array.from(title.parentElement.querySelectorAll('.dialog-body')).find(Boolean) : null;
       if (body) body.textContent = 'Create your private LoanRepo workspace to keep this diagnosis, follow future resets and act when your loan needs attention.';
     }
+  }
+
+  /* After Track this loan succeeds, take the borrower into the authenticated
+     workspace instead of leaving them stranded on the diagnosis. The existing
+     save handler remains the source of truth; we only follow its success state. */
+  function openTrackedWorkspace(root){
+    if (root.dataset.lr2WorkspaceOpened === '1') return;
+    const signedIn = Array.from(root.querySelectorAll('button')).some(button => text(button) === 'Sign out');
+    if (!signedIn) return;
+    const tracked = Array.from(root.querySelectorAll('*')).some(el => text(el) === 'Tracked. Find it under Saved runs.');
+    if (!tracked) return;
+    const saved = Array.from(root.querySelectorAll('header nav button')).find(button => text(button) === 'Saved runs');
+    if (!saved) return;
+    root.dataset.lr2WorkspaceOpened = '1';
+    saved.click();
   }
 
   function findResult(root){
@@ -131,6 +141,7 @@
     if (!root) return;
     ensureStyles();
     cleanPublicNavigation(root);
+    openTrackedWorkspace(root);
 
     const h1 = root.querySelector('h1');
     if (h1 && (h1.textContent.includes('Your bank never told you this changed.') || h1.textContent.includes('Did your home loan quietly get longer?'))) h1.textContent = 'Did your home loan quietly get longer?';
