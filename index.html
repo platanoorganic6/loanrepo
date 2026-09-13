@@ -44,6 +44,17 @@
   body { margin: 0; }
   a { color: var(--color-accent-700); text-decoration: none; }
   a:hover { color: var(--color-accent-900); text-decoration: underline; }
+
+  /* The result PDF is a deliverable, not a screenshot of the app: drop the
+     chrome, keep the evidence, and let the tables break across pages. */
+  @media print {
+    @page { margin: 14mm; }
+    header, footer, [data-print-hide] { display: none !important; }
+    main { padding: 0 !important; max-width: none !important; }
+    body { background: #fff; }
+    table, tr, figure, [data-print-keep] { break-inside: avoid; }
+    thead { display: table-header-group; }
+  }
 </style>
 </helmet>
 
@@ -142,7 +153,7 @@
             <div style="font-size:12px; color:var(--color-neutral-700); margin-top:7px;">{{ spreadHint }}</div>
           </sc-if>
         </div>
-        <button type="button" class="btn btn-primary blueprint" onClick="{{ run }}" style="width:100%; margin-top:24px; padding:13px; font-size:15px; letter-spacing:0.06em; text-transform:uppercase;">
+        <button data-print-hide="true" type="button" class="btn btn-primary blueprint" onClick="{{ run }}" style="width:100%; margin-top:24px; padding:13px; font-size:15px; letter-spacing:0.06em; text-transform:uppercase;">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           Run your loan journey
         </button>
@@ -248,8 +259,8 @@
            the evidence, while the number above is still doing the arguing. -->
       <sc-if value="{{ isLeak }}" hint-placeholder-val="{{ true }}">
       <div style="display:flex; gap:20px; align-items:baseline; flex-wrap:wrap; justify-content:space-between; padding:18px 20px; border-bottom:1px solid var(--color-divider); background:var(--color-accent-100);">
-        <div style="font-size:14.5px; line-height:1.5; max-width:60ch; color:var(--color-neutral-800);">Everything below is what happened. <b style="color:var(--color-text);">The Quiet Years</b> is what to do about it — the seventeen chapters, the bank emails, the reset worksheet.</div>
-        <button type="button" onClick="{{ goBook }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-heading); font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-accent-800); border-bottom:1px solid var(--color-accent-800); white-space:nowrap;">The book — ₹299</button>
+        <div style="font-size:14.5px; line-height:1.5; max-width:60ch; color:var(--color-neutral-800);">Everything below is what happened, and it stays free. <b style="color:var(--color-text);">The Quiet Years</b> is the eight chapters this site doesn't touch — including when <i>not</i> to prepay, and what to do if you cannot pay.</div>
+        <button data-print-hide="true" type="button" onClick="{{ goBook }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-heading); font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-accent-800); border-bottom:1px solid var(--color-accent-800); white-space:nowrap;">The book — ₹299</button>
       </div>
       </sc-if>
 
@@ -388,7 +399,7 @@
         </div>
       </div>
 
-      <div style="margin-top:48px; display:flex; gap:14px; flex-wrap:wrap; align-items:center; border-top:1px solid var(--color-divider); padding-top:26px;">
+      <div data-print-hide="true" style="margin-top:48px; display:flex; gap:14px; flex-wrap:wrap; align-items:center; border-top:1px solid var(--color-divider); padding-top:26px;">
         <sc-if value="{{ dbEnabled }}" hint-placeholder-val="{{ false }}">
           <button type="button" class="btn btn-primary" onClick="{{ saveRun }}">Track this loan</button>
           <span style="font-size:12px; color:var(--color-accent-800);">{{ saveMsg }}</span>
@@ -407,8 +418,8 @@
         </div>
         <div style="padding:20px 22px; background:var(--color-accent-100);">
           <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-accent-800); margin-bottom:8px;">The book — ₹299, written on these numbers</div>
-          <div style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin-bottom:12px;">Sixteen chapters on what to do next, with your {{ balTxt }} balance and {{ nowRate }}% rate carried into every worked example, and your four reset dates filled in.</div>
-          <button type="button" onClick="{{ goBook }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-heading); font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-accent-800); border-bottom:1px solid var(--color-accent-800);">Read two chapters free</button>
+          <div style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin-bottom:12px;">The eight chapters this site doesn't touch — when <i>not</i> to prepay, reading your sanction letter and statement, balance transfers, what gets bundled at signing, what to do if you cannot pay. Worked on your {{ balTxt }} balance at {{ nowRate }}%.</div>
+          <button data-print-hide="true" type="button" onClick="{{ goBook }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-heading); font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-accent-800); border-bottom:1px solid var(--color-accent-800);">Read two chapters free</button>
         </div>
       </div>
 
@@ -870,7 +881,26 @@
         <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">The book · ₹299</div>
         <h1 style="font-size:clamp(30px,6vw,48px); line-height:1.02; margin:0 0 18px; max-width:14ch;">The Quiet Years</h1>
         <p style="font-size:17px; line-height:1.55; max-width:46ch; color:var(--color-neutral-800); margin:0 0 16px;">What to watch for on a floating-rate home loan, and how to close it sooner without losing money doing it.</p>
-        <p style="font-size:15px; line-height:1.6; max-width:46ch; color:var(--color-neutral-800); margin:0 0 26px;">The site shows you what happened to your loan. The book is the part that comes next: which four numbers to write down each year, how to read the sanction letter you filed away, what to send your bank, and when paying early is the wrong move. Seventeen short chapters in four parts, plus ready-to-send email templates and a worksheet to fill in before you call.</p>
+        <p style="font-size:15px; line-height:1.6; max-width:46ch; color:var(--color-neutral-800); margin:0 0 26px;">The site shows you what happened to your loan. The book is the part that comes next: how to read the sanction letter you filed away, what your statement is really telling you, when paying early is the wrong move, and what to do if you cannot pay at all. Seventeen short chapters in four parts, plus ready-to-send email templates and a worksheet to fill in before you call.</p>
+
+        <div style="border-top:1px solid var(--color-text); padding-top:20px; margin-bottom:36px;">
+          <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:6px;">What's already free, and what isn't</div>
+          <p style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin:0 0 18px; max-width:56ch;">Every chapter, and whether this site already gives you the same thing. Four do overlap. We would rather you found that here than after paying.</p>
+          <table class="table">
+            <thead><tr><th style="width:44px;">Ch</th><th>Subject</th><th style="width:104px;">On the site</th><th>In the book</th></tr></thead>
+            <tbody>
+              <sc-for list="{{ overlap }}" as="ov" hint-placeholder-count="18">
+                <tr>
+                  <td style="font-family:var(--font-heading); font-size:13px; color:var(--color-accent-700); font-variant-numeric:tabular-nums;">{{ ov.ch }}</td>
+                  <td style="font-size:14px;">{{ ov.t }}</td>
+                  <td><span style="display:inline-block; padding:3px 9px; background:{{ ov.markBg }}; color:{{ ov.markFg }}; font-family:var(--font-heading); font-size:12px; letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap;">{{ ov.mark }}</span></td>
+                  <td style="font-size:13.5px; color:var(--color-neutral-700);">{{ ov.book }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+          <div style="font-size:13px; line-height:1.55; color:var(--color-neutral-700); margin-top:12px; max-width:60ch;">Put plainly: four chapters repeat what the site does, five go deeper on ground it touches, and <b style="color:var(--color-text);">eight are not on the site at all</b> — the decisions around the loan, which is where most of the money is won or lost.</div>
+        </div>
 
         <div style="border-top:1px solid var(--color-text); padding-top:20px;">
           <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:14px;">Contents</div>
@@ -1148,6 +1178,33 @@ class Component extends DCLogic {
     { date: "2022-01", city: "Hyderabad", amt: 6500000, ten: 20, note: "Bought just before the hike cycle began" },
     { date: "2023-03", city: "Mumbai", amt: 7500000, ten: 20, note: "Bought right after the peak hike" },
     { date: "2024-06", city: "Chennai", amt: 5500000, ten: 15, note: "Bought during the two-year rate hold" }
+  ];
+  // The honest boundary between the free site and the paid book. Written to be
+  // read by a sceptic: what you already have, what the book repeats in more
+  // depth, and what only exists in the book.
+  // The honest boundary between the free site and the paid book, enumerated
+  // chapter by chapter against the current 17-chapter numbering. Keep the
+  // numbers in step with Component.CHAPTERS — a reader can check them on the
+  // same screen, and a wrong one destroys the table's whole purpose.
+  static OVERLAP = [
+    { ch: "01", t: "The number nobody shows you", site: "full", book: "Your tenure drift, with the arithmetic behind it" },
+    { ch: "02", t: "How your rate actually moves", site: "part", book: "Benchmark, spread and reset explained from first principles" },
+    { ch: "03", t: "Your sanction letter: four lines that matter", site: "none", book: "The four terms that govern everything, and how to read them" },
+    { ch: "04", t: "EBLR or MCLR, and why it isn't a detail", site: "part", book: "The 2025 pass-through charted — what each benchmark actually cost" },
+    { ch: "05", t: "What happens at a reset", site: "part", book: "What to check on the statement, and what to do when it's wrong" },
+    { ch: "06", t: "Nine loans, five years, two very different stories", site: "full", book: "The same cases as the Examples screen, read for what they show" },
+    { ch: "07", t: "Talking to your bank", site: "full", book: "The five questions, plus what each answer means and how to press when deflected" },
+    { ch: "08", t: "The arithmetic of paying early", site: "full", book: "Same arithmetic, plus the front-loading that makes early payment worth more" },
+    { ch: "09", t: "When paying early is the wrong move", site: "none", book: "Emergency fund, costlier debt, tax position, late-loan" },
+    { ch: "10", t: "Reading your statement, line by line", site: "none", book: "Every line that matters, and the check that catches bank errors" },
+    { ch: "11", t: "Why the first five years decide everything", site: "none", book: "Amortisation, charted — and what it means for timing" },
+    { ch: "12", t: "The balance transfer question", site: "none", book: "Every cost counted, and the cheaper thing to try first" },
+    { ch: "13", t: "Fixed, floating, and the hybrid pitch", site: "none", book: "What each really costs, and what \"fixed\" usually means here" },
+    { ch: "14", t: "What they sell you alongside the loan", site: "none", book: "Insurance, fees, and what is actually optional" },
+    { ch: "15", t: "If you cannot pay", site: "none", book: "The options, your rights, and how fast both narrow" },
+    { ch: "16", t: "A ten-minute routine, four times a year", site: "part", book: "All four of your reset dates, and the habit that uses them" },
+    { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
+    { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
   static LEGAL_TABS = [
     { id: "about", label: "About" },
@@ -1586,6 +1643,14 @@ class Component extends DCLogic {
       onBook: s.screen === "book",
       goBook: () => this.go("book"),
       chapters: Component.CHAPTERS,
+      overlap: Component.OVERLAP.map(o => ({
+        ch: o.ch,
+        t: o.t,
+        book: o.book,
+        mark: o.site === "full" ? "Free" : o.site === "part" ? "In part" : "Not on site",
+        markBg: o.site === "full" ? "var(--color-accent-200)" : "transparent",
+        markFg: o.site === "full" ? "var(--color-accent-900)" : "var(--color-neutral-600)"
+      })),
       onLegal: s.screen === "legal",
       legalAbout: s.legalTab === "about", legalTerms: s.legalTab === "terms",
       legalPrivacy: s.legalTab === "privacy", legalRefunds: s.legalTab === "refunds",
