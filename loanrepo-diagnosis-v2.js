@@ -80,6 +80,25 @@
     return Math.max(35,Math.min(95,Math.round(value)));
   }
 
+  /* Public homepage cleanup: keep the front door about diagnosis. The deeper
+     loan-management surfaces remain available once the borrower is signed in. */
+  function cleanPublicNavigation(root){
+    const signedIn = !!root.querySelector('button[onClick="{{ signOut }}"]');
+    const nav = root.querySelector('header nav');
+    if (!nav) return;
+
+    const labels = ['Buying soon','Rate cycle','Examples','Saved runs','Method'];
+    Array.from(nav.querySelectorAll('button')).forEach(button => {
+      const label = text(button);
+      if (labels.includes(label)) {
+        button.style.display = signedIn ? '' : 'none';
+      }
+      if (label === 'Your loan') {
+        button.textContent = signedIn ? 'Your loan' : 'Diagnose';
+      }
+    });
+  }
+
   /* Find the stable result anchor used by the page itself. Do not depend on
      the verdict wording: a healthy loan says "ahead of your original schedule"
      while a leakage case says "Added to your loan, unannounced". Both share the
@@ -146,14 +165,22 @@
     const root = document.getElementById('dc-root');
     if (!root) return;
     ensureStyles();
+    cleanPublicNavigation(root);
 
     const h1 = root.querySelector('h1');
-    if (h1 && h1.textContent.includes('Your bank never told you this changed.')) {
+    if (h1 && (h1.textContent.includes('Your bank never told you this changed.') || h1.textContent.includes('Did your home loan quietly get longer?'))) {
       h1.textContent = 'Did your home loan quietly get longer?';
     }
 
-    const lead = Array.from(root.querySelectorAll('p')).find(p => text(p).startsWith('Enter the month you took the loan.'));
+    const kicker = Array.from(root.querySelectorAll('div')).find(el => text(el) === 'Loan journey · sourced from RBI MPC records');
+    if (kicker) kicker.textContent = 'Home loan diagnosis';
+
+    const lead = Array.from(root.querySelectorAll('p')).find(p => text(p).startsWith('Enter the month you took the loan.') || text(p).startsWith('See what the rate cycle did to your loan'));
     if (lead) lead.textContent = 'See what the rate cycle did to your loan — tenure, balance and estimated interest — and understand what to check next.';
+
+    /* Keep the public homepage trust statement concise and diagnostic. */
+    const trust = Array.from(root.querySelectorAll('p')).find(p => text(p).startsWith('The calculation runs in your browser.'));
+    if (trust) trust.textContent = 'The calculation runs in your browser. Your loan particulars are saved only if you sign in and choose to track the loan. LoanRepo is independent of lenders.';
 
     /* Remove/move our presentation layer first so the result is always located
        in the app's original DOM position. */
