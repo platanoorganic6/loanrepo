@@ -15,6 +15,50 @@
   const CARD_ID = 'loanrepo-diagnosis-v2-card';
   const STYLE_ID = 'loanrepo-diagnosis-v2-css';
 
+  /* The DC page can mount before scripts nested inside <helmet> have actually
+     executed. That leaves LoanRepoDB undefined and makes the tracking controls
+     disappear even though the Supabase configuration is present. Bootstrap
+     the three dependencies from here, where we know this script is executing,
+     and let the existing Component.initDb() retry until the data layer exists. */
+  function loadScript(src, id) {
+    return new Promise((resolve, reject) => {
+      if (id && document.getElementById(id)) {
+        const existing = document.getElementById(id);
+        if (existing.dataset.loaded === '1') { resolve(); return; }
+        existing.addEventListener('load', () => resolve(), { once:true });
+        existing.addEventListener('error', () => reject(new Error('load failed: ' + src)), { once:true });
+        return;
+      }
+      const s = document.createElement('script');
+      if (id) s.id = id;
+      s.src = src;
+      s.async = false;
+      s.onload = () => { s.dataset.loaded = '1'; resolve(); };
+      s.onerror = () => reject(new Error('load failed: ' + src));
+      document.head.appendChild(s);
+    });
+  }
+
+  async function ensureSupabaseRuntime() {
+    if (window.LoanRepoDB && window.LoanRepoDB.enabled) return true;
+    try {
+      if (!window.LOANREPO_SUPABASE || !window.LOANREPO_SUPABASE.url) {
+        await loadScript('./supabase-config.js', 'loanrepo-supabase-config');
+      }
+      if (!window.supabase || !window.supabase.createClient) {
+        await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js', 'loanrepo-supabase-lib');
+      }
+      if (!window.LoanRepoDB || !window.LoanRepoDB.enabled) {
+        await loadScript('./supabase-client.js', 'loanrepo-supabase-client');
+      }
+      return !!(window.LoanRepoDB && window.LoanRepoDB.enabled);
+    } catch (e) {
+      console.warn('[LoanRepo] Supabase bootstrap failed', e);
+      return false;
+    }
+  }
+  ensureSupabaseRuntime();
+
   const css = `
     #${CARD_ID}{display:block !important;width:100% !important;max-width:100% !important;box-sizing:border-box !important;clear:both !important;position:relative !important;z-index:2 !important;margin:24px 0 !important;padding:22px 24px !important;border:1px solid var(--color-divider,#d7d7d7) !important;background:var(--color-bg,#fff) !important;color:var(--color-text,#111) !important;grid-column:1 / -1 !important}
     #${CARD_ID} .lr2-grid{display:grid !important;grid-template-columns:minmax(180px,.8fr) 1fr !important;gap:24px !important;align-items:start !important}
