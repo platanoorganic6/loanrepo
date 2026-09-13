@@ -80,22 +80,18 @@
     return Math.max(35,Math.min(95,Math.round(value)));
   }
 
-  /* Find the existing app result container, not a child of the verdict.
-     The DC page gives the result anchor scroll-margin-top; using that stable
-     structural marker prevents the diagnosis card from becoming a child/grid
-     item of the dark verdict panel. */
+  /* Find the stable result anchor used by the page itself. Do not depend on
+     the verdict wording: a healthy loan says "ahead of your original schedule"
+     while a leakage case says "Added to your loan, unannounced". Both share the
+     same result container with scroll-margin-top. */
   function findResult(root){
-    const marked = Array.from(root.querySelectorAll('[style*="scroll-margin-top"]'))
-      .find(el => {
-        const s = text(el);
-        return s.includes('Added to your loan, unannounced') || s.includes('ahead of schedule');
-      });
+    const marked = root.querySelector('[style*="scroll-margin-top"]');
     if (marked) return marked;
 
     const marker = Array.from(root.querySelectorAll('div')).find(el => {
       if (el.closest && el.closest('.lr2-health')) return false;
       const s = text(el);
-      return s.includes('Added to your loan, unannounced') || s.includes('ahead of schedule');
+      return /added to your loan|ahead of your original schedule|ahead of schedule/i.test(s);
     });
     if (!marker) return null;
 
