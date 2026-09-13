@@ -240,12 +240,12 @@
 
       <!-- the one shareable image -->
       <sc-if value="{{ isLeak }}" hint-placeholder-val="{{ true }}">
-      <div data-print-hide="true" style="margin-top:44px;">
-        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:16px; flex-wrap:wrap; margin-bottom:14px;">
+      <div data-print-keep="true" style="margin-top:44px;">
+        <div data-print-lede="true" style="display:flex; justify-content:space-between; align-items:baseline; gap:16px; flex-wrap:wrap; margin-bottom:14px;">
           <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase;">The loan you signed, against the loan you have</div>
           <button type="button" class="btn btn-ghost" onClick="{{ copyShare }}" style="font-size:12px;">{{ shareCta }}</button>
         </div>
-        <div id="lr-share" style="background:var(--color-accent-900); color:var(--color-bg); padding:30px 34px;">
+        <div id="lr-share" data-print-keep="true" style="background:var(--color-accent-900); color:var(--color-bg); padding:30px 34px; print-color-adjust:exact; -webkit-print-color-adjust:exact;">
           <div style="display:grid; gap:20px;">
             <div>
               <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:7px; opacity:0.8;"><span>Contracted</span><span style="font-variant-numeric:tabular-nums;">{{ fTenure }} years</span></div>
@@ -265,7 +265,7 @@
             <div style="font-size:14px; line-height:1.5; max-width:42ch;">Same EMI throughout. The hatched band is what the rate cycle added without a conversation.</div>
             <div style="text-align:right;">
               <div style="font-family:var(--font-heading); font-size:42px; line-height:1; font-variant-numeric:tabular-nums;">+{{ leakYears }} yrs</div>
-              <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.12em; text-transform:uppercase; opacity:0.7; margin-top:6px;">loanrepo · rbi mpc records</div>
+              <div data-print-hide="true" style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.12em; text-transform:uppercase; opacity:0.7; margin-top:6px;">loanrepo · rbi mpc records</div>
             </div>
           </div>
         </div>
