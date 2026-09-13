@@ -54,7 +54,6 @@
     },
 
     /* ── reference data ───────────────────────────────────────────────── */
-    // → [{d:"2020-02-06", r:5.15}, …] in the engine's own shape, or null.
     fetchRepoHistory: function () {
       if (!enabled) return Promise.resolve(null);
       return client
@@ -67,7 +66,6 @@
         })
         .catch(function () { return null; });
     },
-    // → [{date:"2021-06", city, amt, ten, note}, …] or null.
     fetchExamples: function () {
       if (!enabled) return Promise.resolve(null);
       return client
@@ -103,7 +101,6 @@
           result: run.result || {}
         }).then(function (r) {
           var msg = r.error && r.error.message;
-          // The free-tier gate lives in a DB trigger, so it arrives as an error.
           if (msg && msg.indexOf("free_tier_loan_limit") > -1) return { ok: false, reason: "loan-limit" };
           return { ok: !r.error, error: msg };
         });
@@ -168,8 +165,6 @@
         .then(function (r) { return r.error ? null : r.data; })
         .catch(function () { return null; });
     },
-    // Asks the razorpay-order Edge Function for a subscription to open in
-    // Checkout. The Razorpay key secret never reaches the browser.
     startCheckout: function () {
       if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
       return client.functions.invoke("razorpay-order", { body: {} })
@@ -181,8 +176,6 @@
     },
 
     /* ── ebook: one-time purchase, no account needed ──────────────────── */
-    // Returns an order for Razorpay Checkout. The download link is sent by the
-    // webhook after payment clears — never by the browser.
     startEbookOrder: function (email, loanQuery) {
       if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
       return client.functions.invoke("ebook-order", { body: { email: email, loanQuery: loanQuery || null } })
@@ -215,4 +208,15 @@
   };
 
   window.LoanRepoDB = DB;
+})();
+
+/* LoanRepo Diagnosis v2 loader. Loaded here because this client file is already
+   present before the DC runtime mounts the application. */
+(function () {
+  try {
+    var s = document.createElement('script');
+    s.src = './loanrepo-diagnosis-v2.js';
+    s.async = true;
+    document.head.appendChild(s);
+  } catch (e) {}
 })();
