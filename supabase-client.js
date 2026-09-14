@@ -122,17 +122,6 @@
   window.LoanRepoDB = DB;
 })();
 
-/* LoanRepo Diagnosis v2 loader. Loaded here because this client file is already
-   present before the DC runtime mounts the application. */
-(function () {
-  try {
-    var s = document.createElement('script');
-    s.src = './loanrepo-diagnosis-v2.js';
-    s.async = true;
-    document.head.appendChild(s);
-    var r = document.createElement('script');
-    r.src = './loanrepo-health-refinement.js';
-    r.async = true;
-    document.head.appendChild(r);
-  } catch (e) {}
-})();
+/* The diagnosis card, the health score and the copy rewrites that used to be
+   injected from here now live in the page itself (build c3). Re-adding a
+   loader would render the card twice. */
