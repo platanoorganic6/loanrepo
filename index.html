@@ -85,10 +85,12 @@
     <div style="max-width:1120px; margin:0 auto; padding:10px 18px; display:flex; align-items:center; gap:16px 24px; flex-wrap:wrap; min-height:62px;">
       <div style="font-family:var(--font-heading); font-weight:600; font-size:21px; letter-spacing:0.01em; margin-right:auto;">LOAN<span style="color:var(--color-accent-700);">REPO</span></div>
       <nav style="display:flex; gap:14px 20px; flex-wrap:wrap;">
-        <button type="button" onClick="{{ goLoan }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navLoan }};">Your loan</button>
+        <button type="button" onClick="{{ goLoan }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navLoan }};">{{ navLoanLabel }}</button>
+        <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
         <button type="button" onClick="{{ goBuying }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navBuying }};">Buying soon</button>
         <button type="button" onClick="{{ goCycle }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navCycle }};">Rate cycle</button>
         <button type="button" onClick="{{ goExamples }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navExamples }};">Examples</button>
+        </sc-if>
         <sc-if value="{{ dbEnabled }}" hint-placeholder-val="{{ false }}">
           <button type="button" onClick="{{ goSaved }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navSaved }};">Saved runs</button>
         </sc-if>
@@ -112,8 +114,8 @@
   <div class="dialog-backdrop" style="z-index:50;">
     <div class="dialog blueprint" style="background:var(--color-bg);">
       <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-      <div class="dialog-title">Sign in to save your runs</div>
-      <div class="dialog-body">An account only stores the loan particulars you choose to save. It is not required to use the calculator.</div>
+      <div class="dialog-title">Sign in to track your loan</div>
+      <div class="dialog-body">Create your private LoanRepo workspace to keep this diagnosis, follow future resets and act when your loan needs attention.</div>
       <button type="button" class="btn btn-secondary btn-block" onClick="{{ signInGoogle }}">Continue with Google</button>
       <div style="display:flex; align-items:center; gap:12px; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-neutral-600); margin:2px 0;">
         <span style="flex:1; height:1px; background:var(--color-divider);"></span>or<span style="flex:1; height:1px; background:var(--color-divider);"></span>
@@ -134,10 +136,10 @@
 
     <div data-print-hide="true" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:56px; align-items:start;">
       <div>
-        <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">Loan journey · sourced from RBI MPC records</div>
-        <h1 style="font-size:clamp(30px,6vw,46px); line-height:1.04; margin:0 0 18px; max-width:20ch;">Your bank never told you this changed.</h1>
-        <p style="font-size:16px; line-height:1.6; max-width:52ch; color:var(--color-neutral-800); margin:0 0 12px;">Enter the month you took the loan. We walk it through every actual repo rate change since — reset by reset, month by month — and show where your tenure and balance really landed.</p>
-        <p style="font-size:14px; line-height:1.6; max-width:52ch; color:var(--color-neutral-700); margin:0;">The calculation runs in your browser. Your particulars are saved only if you sign in and choose to save a run — and only you can read them back. No lender affiliation, no commission on what you decide.</p>
+        <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">Home loan diagnosis</div>
+        <h1 style="font-size:clamp(30px,6vw,46px); line-height:1.04; margin:0 0 18px; max-width:20ch;">Did your home loan quietly get longer?</h1>
+        <p style="font-size:16px; line-height:1.6; max-width:52ch; color:var(--color-neutral-800); margin:0 0 12px;">See what the rate cycle did to your loan — tenure, balance and estimated interest — and understand what to check next.</p>
+        <p style="font-size:14px; line-height:1.6; max-width:52ch; color:var(--color-neutral-700); margin:0;">The calculation runs in your browser. Your loan particulars are saved only if you sign in and choose to track the loan. LoanRepo is independent of lenders.</p>
       </div>
 
       <div class="blueprint" style="padding:22px 24px 24px;">
@@ -179,10 +181,38 @@
       <div data-print-only="true" style="border-bottom:1px solid #1d1f20; padding-bottom:12pt; margin-bottom:18pt;">
         <div style="display:flex; justify-content:space-between; align-items:baseline; gap:20pt; flex-wrap:wrap;">
           <div style="font-family:var(--font-heading); font-weight:600; font-size:16pt; letter-spacing:0.01em;">LOAN<span style="color:var(--color-accent-700);">REPO</span></div>
-          <div style="font-family:var(--font-heading); font-size:9pt; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-neutral-600);">Loan journey · sourced from RBI MPC records</div>
+          <div style="font-family:var(--font-heading); font-size:9pt; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-neutral-600);">Home loan diagnosis</div>
         </div>
         <div style="font-family:var(--font-heading); font-size:20pt; margin-top:10pt; line-height:1.2;">{{ printSummary }}</div>
         <div style="font-size:10pt; color:var(--color-neutral-700); margin-top:4pt;">{{ printSubhead }}</div>
+      </div>
+
+      <!-- Diagnosis card. Folded in from the independent pass, but computed
+           from the engine's own numbers rather than scraped from the DOM. -->
+      <div class="blueprint" style="padding:22px 24px; margin-bottom:24px;">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:24px; align-items:start;">
+          <div>
+            <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:7px;">Loan diagnosis</div>
+            <div style="font-family:var(--font-heading); font-size:58px; font-weight:600; line-height:0.9; font-variant-numeric:tabular-nums;">{{ health }}</div>
+            <div style="font-family:var(--font-heading); font-size:28px; font-weight:600; line-height:1.05; margin:0 0 8px;">Loan Health</div>
+            <div style="font-size:12px; line-height:1.5; color:var(--color-neutral-700);">A diagnostic score for the modelled impact of the rate cycle. It is not a credit score or lender rating.</div>
+            <div style="display:inline-flex; align-items:center; gap:7px; font-size:12px; border:1px solid var(--color-divider); padding:6px 9px; margin-top:10px;">
+              <span style="width:7px; height:7px; border-radius:50%; background:var(--color-accent-700); display:inline-block;"></span>{{ healthBasis }}
+            </div>
+          </div>
+          <div style="grid-column:span 2; min-width:0;">
+            <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:7px;">What matters now</div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px;">
+              <sc-for list="{{ actions }}" as="act" hint-placeholder-count="3">
+                <div style="border-top:2px solid var(--color-text); padding-top:9px; font-size:13px; line-height:1.45;">
+                  <b style="display:block; font-family:var(--font-heading); font-size:14px; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:3px;">{{ act.head }}</b>{{ act.body }}
+                </div>
+              </sc-for>
+            </div>
+            <div style="font-size:12px; line-height:1.5; color:var(--color-neutral-700); margin-top:15px;">{{ healthRateLine }}</div>
+          </div>
+        </div>
       </div>
 
       <!-- verdict -->
@@ -1327,7 +1357,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "c2";
+  static BUILD = "c3";
   static LEGAL_TABS = [
     { id: "about", label: "About" },
     { id: "terms", label: "Terms" },
@@ -1942,7 +1972,13 @@ class Component extends DCLogic {
           result: { verdict: v.isLeak ? "+" + v.leakYears + " yrs" : "−" + v.aheadYears + " yrs", startRate: v.startRate, nowRate: v.nowRate, balance: Math.round(r.nowBal), emi: Math.round(r.e0) }
         }).then(res => {
           this.setState({ saveMsg: res.ok ? "Tracked. Find it under Saved runs." : this.friendly(res, "Couldn't save that run. Try again.") });
-          if (res.ok) { this.loadRuns(); this.db.track("run_saved", { benchmark: s.benchmark }); }
+          if (res.ok) {
+            this.loadRuns();
+            this.db.track("run_saved", { benchmark: s.benchmark });
+            // Take them into the workspace rather than leaving them on the
+            // diagnosis wondering whether anything happened.
+            setTimeout(() => this.go("saved"), 400);
+          }
           if (!res.ok && (res.reason === "loan-limit" || /subscription-required/.test(String(res.error || "")))) this.go("upgrade");
         });
       },
@@ -1958,6 +1994,7 @@ class Component extends DCLogic {
       ...this.errand(),
       ...this.cohort(),
       trackCta: this.isPro ? "Track this loan" : "Track this loan — ₹149/mo",
+      navLoanLabel: s.user ? "Your loan" : "Diagnose",
       hookKicker: "What to do about it",
       hookTitle: "The site tells you what happened. The book tells you what to do.",
       hookLine: "Eight chapters this site doesn't touch — when not to prepay, what your statement hides, balance transfers, what gets bundled at signing, and what to do if you cannot pay.",
@@ -2192,6 +2229,23 @@ class Component extends DCLogic {
       hookLine: leak
         ? "Eight chapters this site doesn't touch — when not to prepay, what your statement hides, balance transfers, what gets bundled at signing, and what to do if you cannot pay."
         : "Rates fell in your favour, which is luck rather than protection. The same mechanism that spared you adds years to a loan when it runs the other way — and it does so without a letter. The book is the part that prepares you for that, plus the eight chapters this site doesn't touch.",
+      health: (() => {
+        // Same shape as the independent pass, but from real values: start at 88,
+        // dock 7 per drifted year to a floor, plus a penalty for a rate that
+        // ended above where it started.
+        let val = 88 - Math.min(30, Math.max(extraM || 0, 0) / 12 * 7);
+        if (r.nowRate > r.startRate) val -= Math.min(12, (r.nowRate - r.startRate) * 6);
+        return Math.max(35, Math.min(95, Math.round(val)));
+      })(),
+      healthBasis: s.useOwnSpread && s.ownSpread ? "Modelled on your own spread" : "Estimated model",
+      healthRateLine: "Rate moved from " + r.startRate.toFixed(2) + "% to " + r.nowRate.toFixed(2) + "% in the model.",
+      actions: [
+        leak
+          ? { head: "+" + (extraM / 12).toFixed(1) + " years", body: "Estimated additional tenure in this model." }
+          : { head: "No tenure leakage", body: "The current model does not show tenure leakage." },
+        { head: "Verify the spread", body: "Check the sanction letter and latest statement. Your actual spread is more reliable than a default assumption." },
+        { head: "Log the next reset", body: "Record the actual rate, EMI, outstanding and remaining months so LoanRepo can reconcile the model with your statement." }
+      ],
       isLeak: leak,
       isAhead: extraM !== null && extraM <= 1,
       leakYears: leak ? (extraM / 12).toFixed(1) : "0",
