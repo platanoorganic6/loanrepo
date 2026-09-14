@@ -5,10 +5,41 @@
    writes resolve to {ok:false, reason:'not-configured'} so the app keeps
    working entirely client-side. */
 (function () {
+  var CDN = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js";
   var cfg = window.LOANREPO_SUPABASE || {};
   var lib = window.supabase;
   var enabled = !!(cfg.url && cfg.anonKey && lib && lib.createClient);
   var client = enabled ? lib.createClient(cfg.url, cfg.anonKey) : null;
+
+  // This file can execute before the Supabase UMD bundle has run — script order
+  // in the page is not guaranteed. Without a retry every method would report
+  // not-configured for the rest of the session, silently disabling accounts.
+  function connectLater() {
+    if (enabled) return;
+    var tries = 0;
+    var attach = function () {
+      cfg = window.LOANREPO_SUPABASE || cfg;
+      lib = window.supabase;
+      if (cfg.url && cfg.anonKey && lib && lib.createClient) {
+        client = lib.createClient(cfg.url, cfg.anonKey);
+        enabled = true;
+        if (window.LoanRepoDB) { window.LoanRepoDB.enabled = true; window.LoanRepoDB.client = client; }
+        return true;
+      }
+      return false;
+    };
+    var tick = function () {
+      if (attach() || tries++ > 60) return;
+      setTimeout(tick, 100);
+    };
+    if (!window.supabase && !document.getElementById("loanrepo-supabase-lib")) {
+      var s = document.createElement("script");
+      s.id = "loanrepo-supabase-lib";
+      s.src = CDN;
+      document.head.appendChild(s);
+    }
+    tick();
+  }
 
   function sessionId() {
     try {
@@ -120,6 +151,7 @@
     }
   };
   window.LoanRepoDB = DB;
+  connectLater();
 })();
 
 /* The diagnosis card, the health score and the copy rewrites that used to be
