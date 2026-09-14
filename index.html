@@ -45,6 +45,11 @@
   a { color: var(--color-accent-700); text-decoration: none; }
   a:hover { color: var(--color-accent-900); text-decoration: underline; }
 
+  /* Industry declares --color-divider as color-mix(); this engine drops
+     color-mix() inside the border shorthand, so every hairline in the
+     wireframe vanishes. Same colour, literal form, parses everywhere. */
+  :root { --color-divider: rgba(29, 31, 32, 0.16); }
+
   /* The result PDF is a deliverable, not a screenshot of the app: drop the
      chrome, keep the evidence, and let the tables break across pages. */
   @media print {
@@ -238,6 +243,26 @@
         </div>
       </div>
 
+      <sc-if value="{{ hasCohort }}" hint-placeholder-val="{{ false }}">
+      <div data-print-keep="true" style="margin-top:44px; border-top:1px solid var(--color-divider); padding-top:22px;">
+        <div data-print-lede="true" style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:12px;">Against everyone who borrowed the same quarter</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0; border:1px solid var(--color-divider);">
+          <div style="padding:16px 18px; border-right:1px solid var(--color-divider);">
+            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:6px;">Your loan</div>
+            <div style="font-family:var(--font-heading); font-size:26px; font-variant-numeric:tabular-nums;">{{ cohortMine }}</div>
+          </div>
+          <div style="padding:16px 18px; border-right:1px solid var(--color-divider);">
+            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:6px;">Typical, {{ cohortQuarter }}</div>
+            <div style="font-family:var(--font-heading); font-size:26px; font-variant-numeric:tabular-nums; color:var(--color-neutral-700);">{{ cohortMedian }}</div>
+          </div>
+          <div style="padding:16px 18px; grid-column:span 2; min-width:0;">
+            <div style="font-size:14px; line-height:1.5; color:var(--color-neutral-800);">{{ cohortLine }}</div>
+          </div>
+        </div>
+        <div style="font-size:12.5px; line-height:1.5; color:var(--color-neutral-700); margin-top:10px; max-width:80ch;">{{ cohortNote }}</div>
+      </div>
+      </sc-if>
+
       <!-- the one shareable image -->
       <sc-if value="{{ isLeak }}" hint-placeholder-val="{{ true }}">
       <div data-print-keep="true" style="margin-top:44px;">
@@ -274,11 +299,24 @@
 
       <!-- The one place the book is offered inside the result: directly under
            the evidence, while the number above is still doing the arguing. -->
-      <sc-if value="{{ isLeak }}" hint-placeholder-val="{{ true }}">
-      <div data-print-hide="true" style="padding:18px 20px; border-bottom:1px solid var(--color-divider); background:var(--color-accent-100);">
-        <div style="font-size:14.5px; line-height:1.5; max-width:74ch; color:var(--color-neutral-800);">Everything below is what happened, and it stays free. <b style="color:var(--color-text);">The Quiet Years</b> is the eight chapters this site doesn't touch — including when <i>not</i> to prepay, and what to do if you cannot pay. <button data-print-hide="true" type="button" onClick="{{ goBook }}" style="background:none; border:none; padding:0; margin-left:4px; cursor:pointer; font-family:var(--font-heading); font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-accent-800); border-bottom:1px solid var(--color-accent-800); white-space:nowrap; vertical-align:baseline;">The book — ₹299</button></div>
+      <!-- Shown to everyone, not only to loans that leaked: a borrower whose
+           cycle went the right way is the one most likely to be caught out by
+           the next one. -->
+      <div data-print-hide="true" class="blueprint" style="padding:26px 28px; background:var(--color-accent-100); display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:28px; align-items:center;">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div>
+          <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:10px;">{{ hookKicker }}</div>
+          <div style="font-family:var(--font-heading); font-size:26px; line-height:1.1; margin-bottom:10px; max-width:24ch;">{{ hookTitle }}</div>
+          <div style="font-size:15px; line-height:1.55; color:var(--color-neutral-800); max-width:52ch;">{{ hookLine }}</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px; align-items:flex-start;">
+          <button type="button" class="btn btn-primary blueprint" onClick="{{ goBook }}" style="padding:13px 24px; letter-spacing:0.06em; text-transform:uppercase; font-size:15px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            The book — ₹299
+          </button>
+          <div style="font-size:13px; line-height:1.5; color:var(--color-neutral-700); max-width:34ch;">Written on these numbers. Two chapters free, with your own figures in them.</div>
+        </div>
       </div>
-      </sc-if>
 
       <!-- chart -->
       <figure class="blueprint" style="margin-top:44px; padding:26px 26px 18px;">
@@ -418,7 +456,7 @@
 
       <div data-print-hide="true" style="margin-top:48px; display:flex; gap:14px; flex-wrap:wrap; align-items:center; border-top:1px solid var(--color-divider); padding-top:26px;">
         <sc-if value="{{ dbEnabled }}" hint-placeholder-val="{{ false }}">
-          <button type="button" class="btn btn-primary" onClick="{{ saveRun }}">Track this loan</button>
+          <button type="button" class="btn btn-primary" onClick="{{ saveRun }}">{{ trackCta }}</button>
           <span style="font-size:12px; color:var(--color-accent-800);">{{ saveMsg }}</span>
         </sc-if>
         <button type="button" class="btn btn-secondary" onClick="{{ print }}">Save this result as PDF</button>
@@ -705,9 +743,13 @@
     <sc-if value="{{ signedOut }}" hint-placeholder-val="{{ true }}">
       <div class="blueprint" style="padding:34px; max-width:520px;">
         <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-        <div style="font-family:var(--font-heading); font-size:19px; margin-bottom:8px;">Sign in to see your saved runs</div>
+        <div style="font-family:var(--font-heading); font-size:19px; margin-bottom:8px;">Tracking is the subscription — ₹149 a month</div>
+        <p style="font-size:14px; line-height:1.6; color:var(--color-neutral-700); margin:0 0 8px;">The calculator, the PDF and the bank message are free and need no account. Tracking is the part that keeps running after you close the tab: your loan re-run against every RBI decision, and an email the week one reaches it.</p>
         <p style="font-size:14px; color:var(--color-neutral-700); margin:0 0 18px;">{{ savedEmptyNote }}</p>
-        <button type="button" class="btn btn-primary" onClick="{{ openAuth }}">Sign in</button>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-primary" onClick="{{ goUpgrade }}">See what tracking does</button>
+          <button type="button" class="btn btn-secondary" onClick="{{ openAuth }}">Sign in</button>
+        </div>
       </div>
     </sc-if>
 
@@ -718,9 +760,29 @@
           <span style="font-size:15px; margin-left:14px;">{{ planLabel }}</span>
         </div>
         <sc-if value="{{ isFree }}" hint-placeholder-val="{{ true }}">
-          <button type="button" class="btn btn-secondary" onClick="{{ goUpgrade }}">Track more than one loan — ₹149/mo</button>
+          <button type="button" class="btn btn-secondary" onClick="{{ goUpgrade }}">Start tracking — ₹149/mo</button>
         </sc-if>
       </div>
+
+      <!-- The quarterly errand: one question, one action, above everything
+           else. A subscriber who visits four times a year should not have to
+           hunt for the reason they came. -->
+      <sc-if value="{{ hasErrand }}" hint-placeholder-val="{{ false }}">
+      <div class="blueprint" style="padding:28px 30px; margin-bottom:36px;">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:30px; align-items:center;">
+          <div>
+            <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:10px;">{{ errandKicker }}</div>
+            <div style="font-family:var(--font-heading); font-weight:600; font-size:44px; line-height:0.95; font-variant-numeric:tabular-nums;">{{ errandFigure }}</div>
+            <div style="font-size:14.5px; line-height:1.5; color:var(--color-neutral-800); margin-top:10px; max-width:40ch;">{{ errandLine }}</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:12px; align-items:flex-start;">
+            <button type="button" class="btn btn-primary" onClick="{{ errandAction }}">{{ errandCta }}</button>
+            <div style="font-size:12.5px; line-height:1.5; color:var(--color-neutral-700); max-width:38ch;">{{ errandNote }}</div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
 
       <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;"><table class="table" style="min-width:520px;">
         <thead><tr><th>Loan</th><th>Disbursed</th><th>Benchmark</th><th style="text-align:right;">Verdict when saved</th><th style="text-align:right;"></th></tr></thead>
@@ -854,46 +916,79 @@
   <!-- ══ SCREEN: UPGRADE ══ -->
   <sc-if value="{{ onUpgrade }}" hint-placeholder-val="{{ false }}">
   <main style="max-width:1120px; margin:0 auto; padding:clamp(28px,5vw,44px) clamp(16px,4vw,24px) 88px;">
-    <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">Plans</div>
-    <h1 style="font-size:clamp(28px,5.5vw,42px); line-height:1.06; margin:0 0 16px; max-width:26ch;">One loan is free, and stays free.</h1>
-    <p style="font-size:16px; line-height:1.6; max-width:68ch; color:var(--color-neutral-800); margin:0 0 40px;">The calculator, the rate history, the examples and the bank message are free for everyone, with no account. Paying gets you more than one tracked loan — which in practice means a parent's, a spouse's, or a second property's — and nothing is held back from the free tier to make the paid one look better.</p>
+    <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">Tracking</div>
+    <h1 style="font-size:clamp(28px,5.5vw,42px); line-height:1.06; margin:0 0 16px; max-width:26ch;">The calculator is free. Watching it for twenty years is the subscription.</h1>
+    <p style="font-size:16px; line-height:1.6; max-width:70ch; color:var(--color-neutral-800); margin:0 0 40px;">Everything you have used so far — the engine, the rate history, the examples, the bank message, the PDF — is free and stays free, with no account. What ₹149 a month buys is the part that happens while you are not looking: your loan re-run against every rate decision, and an email the week anything reaches it.</p>
 
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:32px; align-items:stretch;">
-      <div class="blueprint" style="padding:30px; display:flex; flex-direction:column;">
-        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-        <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:14px;">Free</div>
-        <div style="font-family:var(--font-heading); font-size:52px; line-height:0.9; font-variant-numeric:tabular-nums;">₹0</div>
-        <div style="font-size:13px; color:var(--color-neutral-700); margin-top:8px;">forever, no card</div>
-        <ul style="margin:24px 0 0; padding:0; list-style:none; font-size:14px; line-height:1.6;">
-          <li style="padding:9px 0; border-top:1px solid var(--color-divider);">The full engine, every calculation on this site</li>
-          <li style="padding:9px 0; border-top:1px solid var(--color-divider);">Rate history, examples library, method</li>
-          <li style="padding:9px 0; border-top:1px solid var(--color-divider);">The bank message, with your figures</li>
-          <li style="padding:9px 0; border-top:1px solid var(--color-divider);">One tracked loan, with unlimited check-ins</li>
-          <li style="padding:9px 0; border-top:1px solid var(--color-divider);">Year in review on that loan</li>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:32px; align-items:start;">
+      <div style="background:var(--color-accent-900); color:var(--color-bg); padding:32px;">
+        <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;">
+          <span style="font-family:var(--font-heading); font-size:52px; line-height:0.9; font-variant-numeric:tabular-nums;">₹149</span>
+          <span style="font-size:13px; opacity:0.75;">per month · cancel any time</span>
+        </div>
+        <ul style="margin:26px 0 0; padding:0; list-style:none; font-size:14.5px; line-height:1.6;">
+          <li style="display:grid; grid-template-columns:20px minmax(0,1fr); gap:14px; padding:14px 0; border-top:1px solid rgba(242,242,243,0.25);">
+            <span style="font-family:var(--font-heading); opacity:0.6;">—</span>
+            <span><b style="font-weight:600;">Your loan, followed across every reset</b><span style="display:block; opacity:0.8; font-size:13.5px; line-height:1.5; margin-top:4px;">The engine re-runs against each new RBI decision, so the answer is current rather than the one you got the day you signed up.</span></span>
+          </li>
+          <li style="display:grid; grid-template-columns:20px minmax(0,1fr); gap:14px; padding:14px 0; border-top:1px solid rgba(242,242,243,0.25);">
+            <span style="font-family:var(--font-heading); opacity:0.6;">—</span>
+            <span><b style="font-weight:600;">An email the day the RBI moves</b><span style="display:block; opacity:0.8; font-size:13.5px; line-height:1.5; margin-top:4px;">Within 24 hours of each MPC decision: what moved, the date it reaches your loan, and what it does to your tenure. Six times a year.</span></span>
+          </li>
+          <li style="display:grid; grid-template-columns:20px minmax(0,1fr); gap:14px; padding:14px 0; border-top:1px solid rgba(242,242,243,0.25);">
+            <span style="font-family:var(--font-heading); opacity:0.6;">—</span>
+            <span><b style="font-weight:600;">An email the week your own reset lands</b><span style="display:block; opacity:0.8; font-size:13.5px; line-height:1.5; margin-top:4px;">Your reset date is yours alone — it follows your disbursal month, not the news. We tell you the week it arrives, and again ten days later when the statement is with you.</span></span>
+          </li>
+          <li style="display:grid; grid-template-columns:20px minmax(0,1fr); gap:14px; padding:14px 0; border-top:1px solid rgba(242,242,243,0.25);">
+            <span style="font-family:var(--font-heading); opacity:0.6;">—</span>
+            <span><b style="font-weight:600;">A check-in record that outlives our assumptions</b><span style="display:block; opacity:0.8; font-size:13.5px; line-height:1.5; margin-top:4px;">Log what your statement actually said. Three years of dated readings is a document your bank has never produced for you, and it is yours to export.</span></span>
+          </li>
+          <li style="display:grid; grid-template-columns:20px minmax(0,1fr); gap:14px; padding:14px 0; border-top:1px solid rgba(242,242,243,0.25);">
+            <span style="font-family:var(--font-heading); opacity:0.6;">—</span>
+            <span><b style="font-weight:600;">A monthly note when nothing moved</b><span style="display:block; opacity:0.8; font-size:13.5px; line-height:1.5; margin-top:4px;">Short, and always with your next reset date on it. You should never have to wonder whether the loan is being watched.</span></span>
+          </li>
+          <li style="display:grid; grid-template-columns:20px minmax(0,1fr); gap:14px; padding:14px 0; border-top:1px solid rgba(242,242,243,0.25);">
+            <span style="font-family:var(--font-heading); opacity:0.6;">—</span>
+            <span><b style="font-weight:600;">Your year in review</b><span style="display:block; opacity:0.8; font-size:13.5px; line-height:1.5; margin-top:4px;">Twelve months on: what the cycle did, what you logged, and where you stand against the schedule you originally signed.</span></span>
+          </li>
+          <li style="display:grid; grid-template-columns:20px minmax(0,1fr); gap:14px; padding:14px 0; border-top:1px solid rgba(242,242,243,0.25);">
+            <span style="font-family:var(--font-heading); opacity:0.6;">—</span>
+            <span><b style="font-weight:600;">As many loans as you have</b><span style="display:block; opacity:0.8; font-size:13.5px; line-height:1.5; margin-top:4px;">A parent’s, a spouse’s, a second property’s. Each tracked and emailed separately.</span></span>
+          </li>
         </ul>
-      </div>
-
-      <div style="background:var(--color-accent-900); color:var(--color-bg); padding:30px; display:flex; flex-direction:column;">
-        <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:14px; opacity:0.75;">Unlimited</div>
-        <div style="font-family:var(--font-heading); font-size:52px; line-height:0.9; font-variant-numeric:tabular-nums;">₹149</div>
-        <div style="font-size:13px; opacity:0.75; margin-top:8px;">per month, cancel any time</div>
-        <ul style="margin:24px 0 0; padding:0; list-style:none; font-size:14px; line-height:1.6;">
-          <li style="padding:9px 0; border-top:1px solid rgba(242,242,243,0.25);">Everything in free</li>
-          <li style="padding:9px 0; border-top:1px solid rgba(242,242,243,0.25);">As many tracked loans as you have</li>
-          <li style="padding:9px 0; border-top:1px solid rgba(242,242,243,0.25);">A reset-date email per loan, when it lands</li>
-          <li style="padding:9px 0; border-top:1px solid rgba(242,242,243,0.25);">Post-decision digest after each MPC meeting</li>
-        </ul>
-        <div style="margin-top:auto; padding-top:26px;">
+        <div style="padding-top:28px;">
           <button type="button" class="btn" onClick="{{ upgrade }}" style="background:var(--color-bg); color:var(--color-accent-900); border-color:var(--color-bg); letter-spacing:0.06em; text-transform:uppercase; padding:13px 22px;">{{ upgradeCta }}</button>
           <div style="font-size:12.5px; margin-top:12px; min-height:18px; opacity:0.85;">{{ upgradeMsg }}</div>
         </div>
       </div>
+
+      <div>
+        <div class="blueprint" style="padding:26px;">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:14px;">Free, with no account, forever</div>
+          <ul style="margin:0; padding:0; list-style:none; font-size:14px; line-height:1.6;">
+            <li style="padding:9px 0; border-top:1px solid var(--color-divider);">The full engine — every calculation on this site</li>
+            <li style="padding:9px 0; border-top:1px solid var(--color-divider);">Rate history, the examples library, the method</li>
+            <li style="padding:9px 0; border-top:1px solid var(--color-divider);">The bank message, with your figures in it</li>
+            <li style="padding:9px 0; border-top:1px solid var(--color-divider);">The result as a PDF, unwatermarked</li>
+            <li style="padding:9px 0; border-top:1px solid var(--color-divider);">Two chapters of the book, on your own numbers</li>
+          </ul>
+          <div style="font-size:12.5px; line-height:1.55; color:var(--color-neutral-700); margin-top:14px; border-top:1px dashed var(--color-divider); padding-top:12px;">Nothing is held back from the free side to make the paid one look better. If you never subscribe, you still get the answer.</div>
+        </div>
+
+        <div style="margin-top:26px; border-left:2px solid var(--color-accent-700); padding-left:20px;">
+          <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:10px;">What you are actually paying for</div>
+          <p style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-800); margin:0 0 12px;">Not a dashboard. A loan changes four times a year at most, and you should not have to remember when. You are paying for someone to be watching on the days that matter and to write to you when one arrives.</p>
+          <p style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-800); margin:0;">Expect to hear from us six to ten times a year. If we ever write more than that, something has gone wrong.</p>
+        </div>
+      </div>
     </div>
 
-    <div style="margin-top:40px; display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:28px; border-top:1px solid var(--color-divider); padding-top:26px; font-size:13px; line-height:1.6; color:var(--color-neutral-700);">
-      <div><b style="color:var(--color-text);">Why a subscription and not a fee.</b> A one-time fee would reward us for the first calculation. The whole point is the ones you do years later, after a reset you'd otherwise have missed.</div>
-      <div><b style="color:var(--color-text);">What we still don't do.</b> We don't sell loans, refer lenders, or take a commission. Paying us does not change a single number the engine produces.</div>
-      <div><b style="color:var(--color-text);">Cancelling.</b> Cancel and you drop to free with your first loan intact. Nothing is deleted, and your check-in history stays readable.</div>
+    <div style="margin-top:40px; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:28px; border-top:1px solid var(--color-divider); padding-top:26px; font-size:13px; line-height:1.6; color:var(--color-neutral-700);">
+      <div><b style="color:var(--color-text);">Why monthly and not one-off.</b> A one-time fee would pay us for the first calculation. The value is in the ones years later, after a reset you would otherwise have missed.</div>
+      <div><b style="color:var(--color-text);">What we still do not do.</b> We do not sell loans, refer lenders, or take a commission. Paying us changes no number the engine produces.</div>
+      <div><b style="color:var(--color-text);">Cancelling.</b> One click, and no email exchange. Your tracked loans and check-in history stay readable, and you can export them.</div>
+      <div><b style="color:var(--color-text);">The book is separate.</b> ₹299 once, and not a subscription. Subscribers get no discount and non-subscribers lose nothing.</div>
     </div>
   </main>
   </sc-if>
@@ -1232,7 +1327,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "b7";
+  static BUILD = "c2";
   static LEGAL_TABS = [
     { id: "about", label: "About" },
     { id: "terms", label: "Terms" },
@@ -1254,8 +1349,8 @@ class Component extends DCLogic {
     { n: "10", h: "Changes to these terms", b: "We may update them. The date at the top shows when they last changed, and material changes affecting paid users will be emailed rather than quietly posted." }
   ];
   static PRIVACY_ROWS = [
-    { what: "Loan particulars — amount, dates, rate, benchmark", when: "Never, unless you sign in and press Track this loan", why: "So the loan can be followed across resets and check-ins" },
-    { what: "Email address", when: "When you sign in, join the waitlist, or buy the book", why: "Sign-in links, delivery of what you bought, and reset reminders" },
+    { what: "Loan particulars — amount, dates, rate, benchmark", when: "Never, unless you subscribe and press Track this loan", why: "So the loan can be followed across resets and check-ins" },
+    { what: "Email address", when: "When you sign in, join the waitlist, or buy the book", why: "Sign-in links, delivery of what you bought, and — for subscribers — rate and reset emails" },
     { what: "Check-in readings you enter", when: "Only for a loan you chose to track", why: "To reconcile your statement against the model over time" },
     { what: "Purchase record — amount, payment reference", when: "When you buy something", why: "Proof of purchase, delivery, refunds, and tax records we must keep" },
     { what: "Your loan figures alongside a purchase", when: "Only if you had run your loan before buying the book", why: "To generate the personalised edition you paid for" },
@@ -1446,6 +1541,105 @@ class Component extends DCLogic {
       });
   }
 
+  // The single thing a returning subscriber came to find out. Priority order:
+  // a reset that has already landed and needs logging, then a reset coming up,
+  // then the plain "nothing is due" state.
+  errand() {
+    const runs = this.state.runs || [];
+    if (!runs.length || !this.isPro) return { hasErrand: false };
+    const row = runs[0];
+    const sim = this.simulate(row.start_month, Number(row.amount), Number(row.tenure_years), row.benchmark);
+    const resetN = sim.resetN;
+    const k = Math.ceil((sim.todayM + 0.001) / resetN);
+    const next = this.addMonths(sim.start, k * resetN);
+    const last = this.addMonths(sim.start, (k - 1) * resetN);
+    const days = Math.round((next - Component.TODAY) / 86400000);
+    const sinceLast = Math.round((Component.TODAY - last) / 86400000);
+    const savedVerdict = (row.result && row.result.verdict) || null;
+    const nowVerdict = sim.payoffM === null ? "—"
+      : ((sim.payoffM - sim.n) > 1 ? "+" : "−") + Math.abs((sim.payoffM - sim.n) / 12).toFixed(1) + " yrs";
+    const moved = savedVerdict && savedVerdict !== nowVerdict;
+    const open = () => this.setState({ selectedLoanId: row.id, ciMsg: "" }, () => this.loadCheckIns());
+
+    // A reset landed in the last six weeks and has not been logged.
+    if (sinceLast <= 45) {
+      return {
+        hasErrand: true,
+        errandKicker: "A reset has just landed",
+        errandFigure: nowVerdict,
+        errandLine: moved
+          ? "Your tenure moved since you last checked — it was " + savedVerdict + ". Your statement for " + this.mLabel(last) + " will say what your bank actually did."
+          : "Your reset fell on " + this.mLabel(last) + ". The statement covering it is the one to check.",
+        errandCta: "Log what the statement said",
+        errandAction: open,
+        errandNote: "Two numbers: the effective rate, and the months remaining. Everything else is optional."
+      };
+    }
+    if (days <= 21) {
+      return {
+        hasErrand: true,
+        errandKicker: "Your next reset",
+        errandFigure: days <= 0 ? "today" : days + (days === 1 ? " day" : " days"),
+        errandLine: "Falls on or about " + this.mLabel(next) + ". Nothing to do until the statement covering it arrives.",
+        errandCta: "Recalculate now",
+        errandAction: () => this.setState({ date: row.start_month, amount: Number(row.amount), tenure: row.tenure_years, benchmark: row.benchmark, screen: "loan" }, () => this.compute()),
+        errandNote: "We will email you the week it lands."
+      };
+    }
+    return {
+      hasErrand: true,
+      errandKicker: moved ? "Changed since you last looked" : "Nothing due",
+      errandFigure: nowVerdict,
+      errandLine: moved
+        ? "Your tenure position was " + savedVerdict + " when you saved this loan. Recalculating brings it up to today."
+        : "No reset is due for " + Math.round(days / 30) + " months. Your next one falls on or about " + this.mLabel(next) + ".",
+      errandCta: moved ? "Recalculate" : "Recalculate anyway",
+      errandAction: () => this.setState({ date: row.start_month, amount: Number(row.amount), tenure: row.tenure_years, benchmark: row.benchmark, screen: "loan" }, () => this.compute()),
+      errandNote: "We email you when the RBI moves and again the week your reset lands, so this page is never the thing you have to remember."
+    };
+  }
+
+  // Where this loan sits against everyone who borrowed the same quarter.
+  // Computed from the engine, not from other users' data — nothing about one
+  // borrower is ever exposed to another.
+  cohort() {
+    const r = this.state.result;
+    if (!r) return { hasCohort: false };
+    const [y, m] = (this.state.date || "").split("-").map(Number);
+    if (!y) return { hasCohort: false };
+    const qStart = new Date(y, Math.floor((m - 1) / 3) * 3, 1);
+    const peers = [];
+    for (let i = 0; i < 3; i++) {
+      const d = new Date(qStart.getFullYear(), qStart.getMonth() + i, 1);
+      if (d > Component.TODAY) break;
+      const ds = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+      for (const ten of [15, 20, 25]) {
+        const sim = this.simulate(ds, r.principal, ten, r.benchmark);
+        if (sim.payoffM !== null) peers.push((sim.payoffM - sim.n) / 12);
+      }
+    }
+    if (peers.length < 3) return { hasCohort: false };
+    const mine = r.payoffM === null ? null : (r.payoffM - r.n) / 12;
+    if (mine === null) return { hasCohort: false };
+    peers.sort((a, b) => a - b);
+    const median = peers[Math.floor(peers.length / 2)];
+    const worse = peers.filter(p => p > mine).length;
+    const qLabel = ["Jan–Mar", "Apr–Jun", "Jul–Sep", "Oct–Dec"][Math.floor((m - 1) / 3)] + " " + y;
+    const gap = mine - median;
+    return {
+      hasCohort: true,
+      cohortQuarter: qLabel,
+      cohortMine: (mine > 0 ? "+" : "−") + Math.abs(mine).toFixed(1) + " yrs",
+      cohortMedian: (median > 0 ? "+" : "−") + Math.abs(median).toFixed(1) + " yrs",
+      cohortLine: Math.abs(gap) < 0.3
+        ? "Your loan tracks the typical outcome for that quarter almost exactly. What happened to you was the cycle, not your bank."
+        : gap > 0
+          ? "Your loan has drifted about " + gap.toFixed(1) + " years further than the typical loan disbursed that quarter — usually a longer original tenure, which leaves more term for the rate to act on."
+          : "Your loan has drifted about " + Math.abs(gap).toFixed(1) + " years less than the typical loan disbursed that quarter, usually because a shorter original tenure gave the rate less to work with.",
+      cohortNote: worse + " of the " + peers.length + " comparable loans from " + qLabel + " ended up worse off than yours. These are modelled from the same rate history, not from other people's data — nothing you enter is ever shown to anyone else."
+    };
+  }
+
   startUpgrade() {
     if (!this.state.user) { this.setState({ authOpen: true }); return; }
     if (this.isPro) return;
@@ -1496,7 +1690,7 @@ class Component extends DCLogic {
   friendly(res, fallback) {
     const raw = (res && (res.error || res.reason)) || "";
     if (raw) console.warn("[LoanRepo] " + raw);
-    if (res && res.reason === "loan-limit") return "The free tier tracks one loan. Upgrade to add another.";
+    if (res && res.reason === "loan-limit" || /subscription-required/.test(raw)) return "Tracking is the subscription. ₹149/mo, cancel whenever.";
     if (res && res.reason === "signed-out") return "Sign in first, then save.";
     if (res && res.reason === "not-configured") return "This isn't switched on yet — sorry.";
     if (/schema cache|does not exist|relation/i.test(raw)) return "This isn't switched on yet — sorry. Nothing you entered was lost.";
@@ -1749,7 +1943,7 @@ class Component extends DCLogic {
         }).then(res => {
           this.setState({ saveMsg: res.ok ? "Tracked. Find it under Saved runs." : this.friendly(res, "Couldn't save that run. Try again.") });
           if (res.ok) { this.loadRuns(); this.db.track("run_saved", { benchmark: s.benchmark }); }
-          if (!res.ok && res.reason === "loan-limit") this.go("upgrade");
+          if (!res.ok && (res.reason === "loan-limit" || /subscription-required/.test(String(res.error || "")))) this.go("upgrade");
         });
       },
       runs: (s.runs || []).map(row => ({
@@ -1761,14 +1955,21 @@ class Component extends DCLogic {
         load: () => this.setState({ date: row.start_month, amount: Number(row.amount), tenure: row.tenure_years, benchmark: row.benchmark, screen: "loan" }, () => this.compute()),
         remove: () => this.db.deleteRun(row.id).then(() => this.setState({ selectedLoanId: null, checkIns: [] }, () => this.loadRuns()))
       })),
+      ...this.errand(),
+      ...this.cohort(),
+      trackCta: this.isPro ? "Track this loan" : "Track this loan — ₹149/mo",
+      hookKicker: "What to do about it",
+      hookTitle: "The site tells you what happened. The book tells you what to do.",
+      hookLine: "Eight chapters this site doesn't touch — when not to prepay, what your statement hides, balance transfers, what gets bundled at signing, and what to do if you cannot pay.",
       runsNote: (s.runs || []).length
-        ? "Pick a loan to log a check-in against it. Recalculate re-runs it against today's rate history."
+        ? "Pick a loan to log a check-in against it. Recalculate re-runs it against every rate decision since you last looked."
         : "No tracked loans yet. Run a loan, then use “Track this loan”.",
       savedEmptyNote: "Magic link or Google, whichever you prefer. We store the loan particulars and what you log against them — nothing about the property, nothing about your identity beyond the email.",
-      planLabel: this.isPro ? "Unlimited — ₹149/mo" : "Free — one tracked loan",
+      planLabel: this.isPro ? "Tracking — ₹149/mo, active" : "No tracking subscription",
       isFree: !this.isPro,
+      isPro: this.isPro,
       upgradeMsg: s.upgradeMsg,
-      upgradeCta: this.isPro ? "You're on Unlimited" : "Upgrade — ₹149/mo",
+      upgradeCta: this.isPro ? "Your tracking is active" : "Start tracking — ₹149/mo",
       upgrade: () => this.startUpgrade(),
       fWaitlist: s.waitlist, waitlistMsg: s.waitlistMsg,
       setWaitlist: e => this.setState({ waitlist: e.target.value }),
@@ -1981,7 +2182,16 @@ class Component extends DCLogic {
     const promisedEnd = this.addMonths(r.start, r.n);
     const bal = r.nowBal;
 
+    // Everyone gets the hook; only its framing changes. A loan that is ahead
+    // today is one rate cycle from not being.
     Object.assign(v, {
+      hookKicker: leak ? "What to do about it" : "Before the cycle turns",
+      hookTitle: leak
+        ? "The site tells you what happened. The book tells you what to do."
+        : "Your loan is ahead today. The next cycle decides whether it stays there.",
+      hookLine: leak
+        ? "Eight chapters this site doesn't touch — when not to prepay, what your statement hides, balance transfers, what gets bundled at signing, and what to do if you cannot pay."
+        : "Rates fell in your favour, which is luck rather than protection. The same mechanism that spared you adds years to a loan when it runs the other way — and it does so without a letter. The book is the part that prepares you for that, plus the eight chapters this site doesn't touch.",
       isLeak: leak,
       isAhead: extraM !== null && extraM <= 1,
       leakYears: leak ? (extraM / 12).toFixed(1) : "0",
