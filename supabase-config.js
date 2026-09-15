@@ -22,3 +22,21 @@ window.LOANREPO_SUPABASE = {
     document.head.appendChild(link);
   }
 })();
+
+/* Load the Stage-2 tracking bridge after supabase-client.js has created
+   window.LoanRepoDB. This keeps index.html generated/static and app.html
+   untouched while making Track this loan deterministic. */
+(function () {
+  function loadBridge() {
+    if (document.querySelector('script[data-loanrepo-track-bridge]')) return;
+    var s = document.createElement("script");
+    s.src = "./loanrepo-track-bridge.js?v=20260916";
+    s.setAttribute("data-loanrepo-track-bridge", "true");
+    document.head.appendChild(s);
+  }
+  if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", loadBridge, { once: true });
+  } else {
+    loadBridge();
+  }
+})();
