@@ -52,6 +52,20 @@
     } catch (e) { return null; }
   }
 
+  // Anonymous product analytics must never become a shadow loan database.
+  // Only low-risk aggregate dimensions are allowed here. Loan particulars
+  // such as amount, start date, tenure, EMI, rate, outstanding balance,
+  // lender, spread and reset dates are deliberately excluded.
+  function safeAnalyticsProps(props) {
+    props = props || {};
+    var allowed = ["source", "stage", "variant", "benchmark", "diagnosis_type", "outcome", "entry_point"];
+    var out = {};
+    allowed.forEach(function (k) {
+      if (props[k] !== undefined && props[k] !== null) out[k] = String(props[k]).slice(0, 80);
+    });
+    return out;
+  }
+
   var DB = {
     enabled: enabled,
     client: client,
@@ -145,9 +159,24 @@
       if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
       return client.from("waitlist").insert({ email: email, source: source || "app" }).then(function (r) { if (r.error && r.error.code === "23505") return { ok: true, duplicate: true }; return { ok: !r.error, error: r.error && r.error.message }; });
     },
+    // General analytics entry point. Loan particulars are filtered out before
+    // anything reaches Supabase so analytics cannot silently become storage.
     track: function (event, props) {
       if (!enabled) return;
-      client.from("usage_events").insert({ event: event, props: props || {}, session_id: sessionId() }).then(function () {}, function () {});
+      client.from("usage_events").insert({ event: event, props: safeAnalyticsProps(props), session_id: sessionId() }).then(function () {}, function () {});
+    },
+    // Purpose-built metric for the 10,000-borrower mission. This records only
+    // that a diagnosis was completed, plus non-identifying aggregate dimensions.
+    // It deliberately does NOT accept or transmit the diagnosis inputs/results.
+    logAnonymousDiagnosis: function (props) {
+      if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
+      return client.from("usage_events").insert({
+        event: "diagnosis_completed",
+        props: safeAnalyticsProps(props),
+        session_id: sessionId()
+      }).then(function (r) {
+        return { ok: !r.error, error: r.error && r.error.message };
+      }).catch(function (e) { return { ok: false, error: String(e) }; });
     }
   };
   window.LoanRepoDB = DB;
