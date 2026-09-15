@@ -9,3 +9,16 @@ window.LOANREPO_SUPABASE = {
   url: "https://ipshimfcquhjkbbypghj.supabase.co",
   anonKey: "sb_publishable_Ytd_Lbk5_5PZ6IjWZxZOBg_qdhBtUJG"
 };
+
+/* Load the readability layer without touching the generated app bundle.
+   It is scoped to the calculator page by its #lr-date marker, so app.html is unaffected. */
+(function () {
+  var href = "./loanrepo-readable.css?v=20260916";
+  if (!document.querySelector('link[data-loanrepo-readable]')) {
+    var link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    link.setAttribute("data-loanrepo-readable", "true");
+    document.head.appendChild(link);
+  }
+})();
