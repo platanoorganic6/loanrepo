@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LoanRepo — My Loan Control Centre</title>
+  <link rel="stylesheet" href="_ds/industry-0aee6b66-0396-4d31-a389-4f4990a07af6/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-client.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&text=%E2%82%B9&display=swap');
+    :root{--font-heading:"Barlow Condensed","Noto Sans",system-ui,sans-serif;--font-body:"Barlow","Noto Sans",system-ui,sans-serif;--color-divider:rgba(29,31,32,.16)}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)}
+    button,a{font:inherit}
+    button{cursor:pointer}
+    .app{min-height:100vh;display:grid;grid-template-columns:230px minmax(0,1fr);grid-template-rows:64px 1fr}
+    .topbar{grid-column:1/-1;border-bottom:1px solid var(--color-divider);display:flex;align-items:center;padding:0 22px;gap:20px;background:var(--color-bg);position:sticky;top:0;z-index:20}
+    .brand{font-family:var(--font-heading);font-weight:600;font-size:22px;letter-spacing:.01em;margin-right:auto}
+    .brand span{color:var(--color-accent-700)}
+    .top-title{font-family:var(--font-heading);font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700)}
+    .user{display:flex;align-items:center;gap:10px;border-left:1px solid var(--color-divider);padding-left:16px;font-size:12.5px;color:var(--color-neutral-700)}
+    .sidebar{grid-row:2;border-right:1px solid var(--color-divider);padding:22px 14px;position:sticky;top:64px;height:calc(100vh - 64px);overflow:auto;background:var(--color-bg)}
+    .side-label{font-family:var(--font-heading);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600);padding:0 12px 8px;margin-top:10px}
+    .nav{display:grid;gap:3px}
+    .nav button{border:0;background:transparent;text-align:left;padding:11px 12px;border-radius:2px;color:var(--color-neutral-800);font-size:13.5px}
+    .nav button:hover{background:var(--color-accent-100)}
+    .nav button.active{background:var(--color-accent-900);color:var(--color-bg)}
+    .nav button.locked{opacity:.55}
+    .main{min-width:0;padding:34px clamp(18px,4vw,42px) 70px;max-width:1320px;width:100%}
+    .eyebrow{font-family:var(--font-heading);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:8px}
+    h1{font-family:var(--font-heading);font-weight:600;font-size:clamp(30px,4vw,44px);line-height:1;margin:0 0 9px}
+    .lede{font-size:15px;line-height:1.55;color:var(--color-neutral-700);margin:0;max-width:68ch}
+    .grid{display:grid;gap:18px}
+    .stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:26px}
+    .card{border:1px solid var(--color-divider);background:var(--color-bg);padding:20px;min-width:0}
+    .card.dark{background:var(--color-accent-900);color:var(--color-bg);border-color:var(--color-accent-900)}
+    .card.tint{background:var(--color-accent-100)}
+    .label{font-family:var(--font-heading);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:8px}
+    .dark .label{color:rgba(242,242,243,.7)}
+    .value{font-family:var(--font-heading);font-size:28px;line-height:1;font-variant-numeric:tabular-nums}
+    .subvalue{font-size:12px;color:var(--color-neutral-700);margin-top:7px;line-height:1.4}
+    .dark .subvalue{color:rgba(242,242,243,.72)}
+    .section{margin-top:30px}
+    .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:14px;margin-bottom:12px}
+    .section-title{font-family:var(--font-heading);font-size:14px;letter-spacing:.12em;text-transform:uppercase}
+    .action-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .action{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+    .action h3{font-family:var(--font-heading);font-size:20px;margin:0 0 6px}
+    .action p{font-size:13.5px;line-height:1.5;color:var(--color-neutral-700);margin:0}
+    .pill{display:inline-flex;align-items:center;border:1px solid var(--color-divider);padding:5px 8px;font-family:var(--font-heading);font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+    .pill.alert{border-color:var(--color-accent-700);color:var(--color-accent-800)}
+    .btn{border:1px solid var(--color-text);background:var(--color-bg);padding:9px 13px;font-family:var(--font-heading);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+    .btn.primary{background:var(--color-accent-900);color:var(--color-bg);border-color:var(--color-accent-900)}
+    .btn.ghost{border-color:var(--color-divider)}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .loan-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+    .loan-name{font-family:var(--font-heading);font-size:24px;margin:0 0 4px}
+    .loan-meta{font-size:12.5px;color:var(--color-neutral-700)}
+    .loan-health{display:flex;align-items:center;gap:8px;font-family:var(--font-heading);font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+    .dot{width:9px;height:9px;border-radius:50%;display:inline-block;background:currentColor}
+    .loan-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:22px;border-top:1px solid var(--color-divider)}
+    .fact{padding:15px 14px 4px 0;border-right:1px solid var(--color-divider);margin-right:14px}
+    .fact:last-child{border-right:0;margin-right:0}
+    .fact .value{font-size:22px}
+    .timeline{display:grid;gap:0}
+    .event{display:grid;grid-template-columns:100px 10px minmax(0,1fr);gap:12px;padding:13px 0;border-top:1px solid var(--color-divider);align-items:start}
+    .event-date{font-size:12px;color:var(--color-neutral-600)}
+    .event-mark{width:8px;height:8px;border:1px solid var(--color-text);margin-top:5px}
+    .event-text{font-size:13.5px;line-height:1.45}
+    .gate{max-width:760px;margin:38px auto}
+    .gate h2{font-family:var(--font-heading);font-size:30px;margin:0 0 10px}
+    .gate p{font-size:15px;line-height:1.6;color:var(--color-neutral-800)}
+    .feature-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 28px;margin:22px 0 28px;padding:0;list-style:none}
+    .feature-list li{border-top:1px solid rgba(242,242,243,.2);padding:9px 0;font-size:13px}
+    .empty{padding:34px 24px;text-align:center}
+    .empty h2{font-family:var(--font-heading);font-size:27px;margin:0 0 8px}
+    .empty p{font-size:14px;line-height:1.55;color:var(--color-neutral-700);max-width:55ch;margin:0 auto 18px}
+    .toast{position:fixed;right:20px;bottom:20px;max-width:360px;padding:12px 15px;background:var(--color-accent-900);color:var(--color-bg);font-size:13px;z-index:50}
+    .mobile-nav{display:none}
+    @media(max-width:900px){.app{grid-template-columns:1fr;grid-template-rows:58px auto 1fr}.topbar{grid-column:1;position:sticky;top:0}.sidebar{display:none}.mobile-nav{display:flex;overflow:auto;border-bottom:1px solid var(--color-divider);padding:7px 10px;gap:5px;position:sticky;top:58px;z-index:19;background:var(--color-bg)}.mobile-nav button{white-space:nowrap;border:0;background:transparent;padding:8px 10px;font-family:var(--font-heading);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.mobile-nav button.active{background:var(--color-accent-900);color:var(--color-bg)}.stats,.loan-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.action-grid,.feature-list{grid-template-columns:1fr}.user .email{display:none}.top-title{display:none}}
+    @media(max-width:520px){.stats{grid-template-columns:1fr 1fr}.main{padding:26px 15px 55px}.event{grid-template-columns:72px 8px minmax(0,1fr)}.loan-facts{grid-template-columns:1fr 1fr}.fact{border-right:0}.brand{font-size:20px}}
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+  var root=document.getElementById('app');
+  var db=window.LoanRepoDB||{};
+  var state={user:null,sub:null,runs:[],screen:'overview',loading:true,msg:'',razorpayPromise:null};
+
+  function esc(v){return String(v==null?'':v).replace(/[&<>\"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]});}
+  function money(n){var v=Math.round(Number(n)||0);return '₹'+v.toLocaleString('en-IN');}
+  function short(n){var x=Number(n)||0,a=Math.abs(x);if(a>=1e7)return '₹'+(x/1e7).toFixed(2)+' Cr';if(a>=1e5)return '₹'+(x/1e5).toFixed(1)+'L';return money(x)}
+  function active(){return !!(state.sub&&state.sub.plan==='pro'&&state.sub.status==='active')}
+  function current(){return state.runs[0]||null}
+  function toast(m){state.msg=m;render();setTimeout(function(){if(state.msg===m){state.msg='';render()}},3500)}
+  function load(){
+    if(!db.enabled){state.loading=false;state.msg='Account service is not configured.';render();return}
+    db.onAuth(function(user){
+      state.user=user;
+      if(user){Promise.all([db.listRuns(),db.fetchSubscription()]).then(function(x){state.runs=x[0]||[];state.sub=x[1]||null;state.loading=false;render()})}
+      else{state.runs=[];state.sub=null;state.loading=false;render()}
+    });
+  }
+  function loadRazorpay(){
+    if(window.Razorpay)return Promise.resolve(true);
+    if(state.razorpayPromise)return state.razorpayPromise;
+    state.razorpayPromise=new Promise(function(resolve){var s=document.createElement('script');s.src='https://checkout.razorpay.com/v1/checkout.js';s.async=true;s.onload=function(){resolve(!!window.Razorpay)};s.onerror=function(){resolve(false)};document.head.appendChild(s)});
+    return state.razorpayPromise;
+  }
+  function upgrade(){
+    if(!state.user){window.location.href='index.html';return}
+    if(active())return;
+    state.msg='Opening checkout…';render();
+    loadRazorpay().then(function(){return db.startCheckout()}).then(function(res){
+      if(!res.ok||!res.subscriptionId||!window.Razorpay){toast('Checkout is not available right now. Try again shortly.');return}
+      var rz=new window.Razorpay({key:res.keyId,subscription_id:res.subscriptionId,name:'LoanRepo',description:'Loan Watch — ₹149/month',prefill:{email:state.user.email},theme:{color:'#5980a6'},handler:function(){
+        state.msg='Payment received. Activating…';render();var tries=0;
+        (function poll(){db.fetchSubscription().then(function(sub){state.sub=sub;render();if(active())toast('Loan Watch is active. Welcome to your Control Centre.');else if(tries++<10)setTimeout(poll,2000);else toast('Payment received. Activation is taking a little longer; refresh shortly.')})})();
+      },modal:{ondismiss:function(){toast('Checkout closed. Nothing was charged.')}}});
+      state.msg='';render();rz.open();
+    });
+  }
+  function signout(){db.signOut().then(function(){window.location.href='index.html'})}
+  function nav(s){state.screen=s;state.msg='';render()}
+  function appNav(){return '<aside class="sidebar"><div class="side-label">Control centre</div><div class="nav">'+navButton('overview','Overview')+navButton('loans','My Loans')+navButton('actions','Action Centre')+navButton('bank','Bank Desk')+navButton('docs','Evidence Vault')+navButton('watch','Loan Watch')+navButton('history','History')+'</div><div class="side-label" style="margin-top:28px">Account</div><div class="nav">'+navButton('settings','Settings')+'</div></aside>'}
+  function navButton(id,label){var locked=!active()&&id!=='overview'&&id!=='loans'&&id!=='watch';return '<button class="'+(state.screen===id?'active ':'')+(locked?'locked':'')+'" data-nav="'+id+'">'+label+(locked?' · Paid':'')+'</button>'}
+  function top(){return '<header class="topbar"><div class="brand">LOAN<span>REPO</span></div><div class="top-title">My Loan Control Centre</div><div class="user"><span class="email">'+esc(state.user&&state.user.email||'')+'</span><button class="btn ghost" data-action="signout">Sign out</button></div></header>'}
+  function mobile(){return '<div class="mobile-nav">'+['overview','loans','actions','bank','docs','watch','history'].map(function(id){var labels={overview:'Overview',loans:'My Loans',actions:'Actions',bank:'Bank Desk',docs:'Documents',watch:'Loan Watch',history:'History'};return '<button class="'+(state.screen===id?'active':'')+'" data-nav="'+id+'">'+labels[id]+'</button>'}).join('')+'</div>'}
+  function gate(){return '<div class="gate"><div class="card dark"><div class="eyebrow" style="color:rgba(242,242,243,.7)">Loan Watch · ₹149/month</div><h2>Keep watching your loan.</h2><p style="color:rgba(242,242,243,.82)">The Control Centre is where LoanRepo becomes a continuing borrower service: rate resets, loan health, actions, bank follow-ups and your evidence history stay together.</p><ul class="feature-list"><li>Continuous rate/reset watch</li><li>Loan Health status</li><li>Action Centre</li><li>Bank Desk & follow-ups</li><li>Evidence Vault</li><li>Loan history</li></ul><button class="btn" data-action="upgrade" style="background:var(--color-bg);color:var(--color-accent-900);border-color:var(--color-bg)">Activate Loan Watch — ₹149/mo</button><div style="font-size:12px;margin-top:12px;opacity:.75">Cancel any time. Your first tracked loan remains readable.</div></div></div>'}
+  function noLoan(){return '<div class="section"><div class="card empty"><h2>Your Control Centre is ready.</h2><p>Track a loan from the free diagnosis first. Once it is saved to your account, it will appear here.</p><a class="btn primary" href="index.html">Run a loan diagnosis</a></div></div>'}
+  function loanCard(r){
+    var res=r&&r.result||{};var verdict=res.verdict||'—';var health=String(verdict).indexOf('+')===0?'Attention':'Good';
+    return '<div class="section"><div class="section-head"><div class="section-title">My loan</div><button class="btn ghost" data-nav="loans">View loan</button></div><div class="card"><div class="loan-head"><div><div class="loan-name">'+esc(r.name||r.label||'My loan')+'</div><div class="loan-meta">'+esc(r.benchmark||'')+' · Started '+esc(r.start_month||'')+'</div></div><div class="loan-health" style="color:'+(health==='Attention'?'var(--color-accent-800)':'var(--color-accent-700)')+'"><span class="dot"></span>'+health+'</div></div><div class="loan-facts"><div class="fact"><div class="label">Loan amount</div><div class="value">'+short(r.amount)+'</div></div><div class="fact"><div class="label">Tenure</div><div class="value">'+esc(r.tenure_years)+' yr</div></div><div class="fact"><div class="label">Saved verdict</div><div class="value">'+esc(verdict)+'</div></div><div class="fact"><div class="label">Current plan</div><div class="value">'+(active()?'₹149':'Free')+'</div></div></div></div></div>';
+  }
+  function actions(){return '<div class="section"><div class="section-head"><div class="section-title">Things that need attention</div><button class="btn ghost" data-nav="actions">Open Action Centre</button></div><div class="grid action-grid"><div class="card tint action"><div><span class="pill alert">Next phase</span><h3>Rate reset watch</h3><p>LoanRepo will surface a reset when the monitored loan reaches its next relevant reset point.</p></div><button class="btn primary" data-nav="watch">Review</button></div><div class="card action"><div><span class="pill">Build the record</span><h3>Evidence Vault</h3><p>Keep the statement, sanction letter and bank communications alongside the loan history.</p></div><button class="btn ghost" data-nav="docs">Open</button></div></div></div>'}
+  function activity(){return '<div class="section"><div class="section-head"><div class="section-title">Recent activity</div><button class="btn ghost" data-nav="history">View history</button></div><div class="card"><div class="timeline"><div class="event"><div class="event-date">Today</div><div class="event-mark"></div><div class="event-text"><b>Control Centre opened.</b><br><span style="color:var(--color-neutral-700)">LoanRepo is ready to keep the borrower record in one place.</span></div></div><div class="event"><div class="event-date">At diagnosis</div><div class="event-mark"></div><div class="event-text"><b>Loan snapshot saved.</b><br><span style="color:var(--color-neutral-700)">The saved snapshot is the starting point for future check-ins.</span></div></div></div></div></div>'}
+  function overview(){var r=current();return '<div class="eyebrow">Borrower workspace</div><h1>My Loan Control Centre</h1><p class="lede">Your loan, its changes, and the actions that follow — in one place.</p>'+(!active()?gate():'')+(r?loanCard(r):noLoan())+(r&&active()?actions():'')+(r&&active()?activity():'')}
+  function page(title,copy,body){return '<div class="eyebrow">Borrower workspace</div><h1>'+title+'</h1><p class="lede">'+copy+'</p><div class="section">'+body+'</div>'}
+  function content(){
+    if(state.loading)return '<div class="eyebrow">LoanRepo</div><h1>Loading your workspace…</h1>';
+    if(!state.user)return '<div class="gate"><div class="card"><h2>Sign in to your LoanRepo workspace.</h2><p>Your tracked loans are private to your account.</p><a class="btn primary" href="index.html">Sign in</a></div></div>';
+    if(state.screen==='overview')return overview();
+    if(state.screen==='loans')return page('My Loans','Every loan you deliberately saved to LoanRepo.',state.runs.length?state.runs.map(function(r){return '<div class="card" style="margin-bottom:10px"><div class="loan-head"><div><div class="loan-name">'+esc(r.name||r.label||'Untitled loan')+'</div><div class="loan-meta">'+short(r.amount)+' · '+esc(r.tenure_years)+' years · '+esc(r.benchmark)+' · '+esc(r.start_month)+'</div></div><span class="pill">'+esc(r.result&&r.result.verdict||'—')+'</span></div></div>'}).join(''):'<div class="card empty"><h2>No tracked loans yet.</h2><p>Run a diagnosis and choose Track this loan.</p><a class="btn primary" href="index.html">Run diagnosis</a></div>');
+    if(!active()&&state.screen!=='watch')return gate();
+    if(state.screen==='watch')return active()?page('Loan Watch','The monitoring layer behind your ₹149/month subscription.','<div class="grid stats"><div class="card"><div class="label">Status</div><div class="value">Active</div><div class="subvalue">Monitoring is enabled.</div></div><div class="card"><div class="label">Tracked loans</div><div class="value">'+state.runs.length+'</div><div class="subvalue">Persistent borrower records.</div></div><div class="card"><div class="label">Plan</div><div class="value">₹149</div><div class="subvalue">Per month.</div></div><div class="card"><div class="label">Renewal</div><div class="value">'+esc(state.sub.current_period_end?new Date(state.sub.current_period_end).toLocaleDateString('en-IN',{day:'2-digit',month:'short'}):'—')+'</div><div class="subvalue">Current billing period.</div></div></div>') : gate();
+    if(state.screen==='actions')return page('Action Centre','Every material loan event should end with a clear borrower action.','<div class="grid action-grid"><div class="card tint"><span class="pill alert">Monitoring</span><h3>Rate / reset event</h3><p style="font-size:14px;line-height:1.55;color:var(--color-neutral-700)">When a relevant rate or reset event lands, this is where LoanRepo will explain what changed, why it matters and what you can do.</p></div><div class="card"><span class="pill">Follow-up</span><h3>Bank response</h3><p style="font-size:14px;line-height:1.55;color:var(--color-neutral-700)">Track the communication, response and next follow-up so the action does not disappear into email.</p></div></div>');
+    if(state.screen==='bank')return page('Bank Desk','A borrower-side record of what you asked the lender, what they replied, and what remains open.','<div class="card empty"><h2>Bank Desk is next.</h2><p>The shell is in place. The next implementation adds lender-ready messages, communication history, response status and follow-up dates.</p></div>');
+    if(state.screen==='docs')return page('Evidence Vault','Keep the documents that prove what your loan actually says.','<div class="card empty"><h2>Evidence Vault is next.</h2><p>The next implementation adds secure document records and links them to loan events and bank communications.</p></div>');
+    if(state.screen==='history')return page('Loan History','A chronological record of changes, check-ins and actions.','<div class="card empty"><h2>History is next.</h2><p>Existing check-ins will become the first event stream; future resets and borrower actions will be appended here.</p></div>');
+    return page('Settings','Account and subscription controls.','<div class="card"><div class="label">Account</div><div style="font-size:15px">'+esc(state.user.email||'')+'</div><div style="margin-top:16px"><button class="btn ghost" data-action="signout">Sign out</button></div></div>');
+  }
+  function render(){root.innerHTML='<div class="app">'+top()+appNav()+mobile()+'<main class="main">'+content()+'</main></div>'+(state.msg?'<div class="toast">'+esc(state.msg)+'</div>':'');
+    root.querySelectorAll('[data-nav]').forEach(function(b){b.addEventListener('click',function(){var id=b.getAttribute('data-nav');if(!active()&&['actions','bank','docs','history'].indexOf(id)>-1){toast('Activate Loan Watch to use the paid Control Centre.');return}nav(id)})});
+    root.querySelectorAll('[data-action="upgrade"]').forEach(function(b){b.addEventListener('click',upgrade)});
+    root.querySelectorAll('[data-action="signout"]').forEach(function(b){b.addEventListener('click',signout)});
+  }
+  load();
+})();
+</script>
+</body>
+</html>
