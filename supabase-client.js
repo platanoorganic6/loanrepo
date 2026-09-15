@@ -186,3 +186,21 @@
 /* The diagnosis card, the health score and the copy rewrites that used to be
    injected from here now live in the page itself (build c3). Re-adding a
    loader would render the card twice. */
+
+/* Stage-1 diagnosis result actions: PDF first, then methodology, then paid tracking. */
+(function () {
+  function reorder() {
+    var buttons = Array.prototype.slice.call(document.querySelectorAll('button'));
+    var pdf = buttons.find(function (b) { return (b.textContent || '').trim() === 'Save this result as PDF'; });
+    var method = buttons.find(function (b) { return (b.textContent || '').trim() === 'Read the method and assumptions'; });
+    var track = buttons.find(function (b) { return /^Track this loan/.test((b.textContent || '').trim()); });
+    if (!pdf || !method || !track) return;
+    var parent = track.parentElement;
+    if (!parent || pdf.parentElement !== parent || method.parentElement !== parent) return;
+    parent.appendChild(pdf);
+    parent.appendChild(method);
+    parent.appendChild(track);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', reorder); else reorder();
+  if (window.MutationObserver) new MutationObserver(reorder).observe(document.documentElement, { childList: true, subtree: true });
+})();
