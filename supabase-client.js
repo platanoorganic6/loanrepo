@@ -184,3 +184,235 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
 })();
+
+/* Stage-2 bridge: top sign-in + Track this loan -> auth -> save -> ₹149 checkout ->
+   webhook-confirmed Control Centre. Diagnosis remains browser-only until Track is chosen. */
+(function () {
+  var PENDING = "loanrepo.pending_track";
+  var DIAG = "loanrepo.pending_diagnosis";
+  var CHECKOUT = "loanrepo.pending_checkout";
+  var db = window.LoanRepoDB;
+  if (!db) return;
+
+  function isDiagnosisPage() {
+    var p = (window.location.pathname || "").toLowerCase();
+    return p === "/" || /\/index\.html$/.test(p) || /loanrepo/.test(p) && !/\/app\.html$/.test(p);
+  }
+  if (!isDiagnosisPage()) return;
+
+  function storageSet(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
+  function storageGet(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+  function storageDel(k) { try { sessionStorage.removeItem(k); } catch (e) {} }
+
+  function trackButton() {
+    return Array.prototype.slice.call(document.querySelectorAll("button")).find(function (b) {
+      return /^Track this loan/.test((b.textContent || "").trim());
+    });
+  }
+
+  function snapshotDiagnosis() {
+    var date = document.getElementById("lr-date");
+    var ten = document.getElementById("lr-ten");
+    var amt = document.getElementById("lr-amt");
+    if (!date || !ten || !amt) return;
+    var bm = document.querySelector('input[name="bm"]:checked');
+    var spreadToggle = document.querySelector('input[type="checkbox"]');
+    var spread = document.getElementById("lr-spread");
+    storageSet(DIAG, JSON.stringify({
+      date: date.value,
+      tenure: ten.value,
+      amount: amt.value,
+      benchmark: bm ? bm.value : "EBLR",
+      useOwnSpread: !!(spreadToggle && spreadToggle.checked),
+      spread: spread ? spread.value : ""
+    }));
+  }
+
+  function patchAuthCopy() {
+    var title = document.querySelector(".dialog-title");
+    var body = document.querySelector(".dialog-body");
+    if (title) title.textContent = "Sign in to track this loan";
+    if (body) body.textContent = "Your diagnosis stays free. Sign in to save this loan and continue to Loan Watch — ₹149/month.";
+  }
+
+  function patchTrackLabel() {
+    var b = trackButton();
+    if (b && (b.textContent || "").trim() === "Track this loan") b.textContent = "Track this loan — ₹149/month";
+  }
+
+  function savePendingFlag() {
+    snapshotDiagnosis();
+    storageSet(PENDING, "1");
+    patchTrackLabel();
+  }
+
+  document.addEventListener("click", function (e) {
+    var b = e.target && e.target.closest ? e.target.closest("button") : null;
+    if (!b) return;
+    if (/^Track this loan/.test((b.textContent || "").trim())) savePendingFlag();
+  }, true);
+
+  function restoreDiagnosisThenTrack() {
+    var raw = storageGet(DIAG);
+    if (!raw) return;
+    var d;
+    try { d = JSON.parse(raw); } catch (e) { return; }
+    var tries = 0;
+    function apply() {
+      var date = document.getElementById("lr-date");
+      var ten = document.getElementById("lr-ten");
+      var amt = document.getElementById("lr-amt");
+      if (!date || !ten || !amt) {
+        if (tries++ < 80) setTimeout(apply, 100);
+        return;
+      }
+      function setValue(el, value) {
+        if (value == null || value === "") return;
+        el.value = value;
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      setValue(date, d.date);
+      setValue(ten, d.tenure);
+      setValue(amt, d.amount);
+      var radios = Array.prototype.slice.call(document.querySelectorAll('input[name="bm"]'));
+      radios.forEach(function (r) {
+        r.checked = r.value === d.benchmark;
+        if (r.checked) r.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      var toggle = document.querySelector('input[type="checkbox"]');
+      if (toggle && typeof d.useOwnSpread === "boolean") {
+        toggle.checked = d.useOwnSpread;
+        toggle.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      if (d.useOwnSpread && d.spread) {
+        var spread = document.getElementById("lr-spread");
+        if (spread) setValue(spread, d.spread);
+      }
+      setTimeout(function () {
+        var run = Array.prototype.slice.call(document.querySelectorAll("button")).find(function (x) { return (x.textContent || "").trim() === "Run your loan journey"; });
+        if (run) run.click();
+        waitForResultAndTrack();
+      }, 250);
+    }
+    apply();
+  }
+
+  function waitForResultAndTrack() {
+    var tries = 0;
+    function check() {
+      var b = trackButton();
+      if (b) {
+        patchTrackLabel();
+        setTimeout(function () { var t = trackButton(); if (t) t.click(); }, 350);
+        return;
+      }
+      if (tries++ < 100) setTimeout(check, 100);
+    }
+    check();
+  }
+
+  function loadRazorpay() {
+    if (window.Razorpay) return Promise.resolve(true);
+    return new Promise(function (resolve) {
+      var s = document.createElement("script");
+      s.src = "https://checkout.razorpay.com/v1/checkout.js";
+      s.async = true;
+      s.onload = function () { resolve(!!window.Razorpay); };
+      s.onerror = function () { resolve(false); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function activeSubscription(sub) {
+    return !!(sub && sub.plan === "pro" && sub.status === "active");
+  }
+
+  function beginLoanWatchCheckout() {
+    if (storageGet(CHECKOUT) === "opening") return;
+    storageSet(CHECKOUT, "opening");
+    db.fetchSubscription().then(function (sub) {
+      if (activeSubscription(sub)) {
+        storageDel(PENDING); storageDel(DIAG); storageDel(CHECKOUT);
+        window.location.href = "app.html";
+        return null;
+      }
+      return loadRazorpay().then(function (ready) {
+        if (!ready) throw new Error("checkout-unavailable");
+        return db.startCheckout();
+      });
+    }).then(function (res) {
+      if (!res) return;
+      if (!res.ok || !res.subscriptionId || !window.Razorpay) throw new Error("checkout-unavailable");
+      var rz = new window.Razorpay({
+        key: res.keyId,
+        subscription_id: res.subscriptionId,
+        name: "LoanRepo",
+        description: "Loan Watch — ₹149/month",
+        theme: { color: "#5980a6" },
+        handler: function () {
+          var tries = 0;
+          (function poll() {
+            db.fetchSubscription().then(function (sub) {
+              if (activeSubscription(sub)) {
+                storageDel(PENDING); storageDel(DIAG); storageDel(CHECKOUT);
+                window.location.href = "app.html";
+              } else if (tries++ < 20) {
+                setTimeout(poll, 2000);
+              } else {
+                storageDel(CHECKOUT);
+              }
+            });
+          })();
+        },
+        modal: { ondismiss: function () { storageDel(CHECKOUT); } }
+      });
+      rz.open();
+    }).catch(function () {
+      storageDel(CHECKOUT);
+      var msg = document.querySelector(".dialog-body") || document.body;
+      if (msg && /checkout/i.test(msg.textContent || "")) msg.textContent = "Your loan was saved. Loan Watch checkout is temporarily unavailable — please try Track this loan again.";
+    });
+  }
+
+  var originalSaveRun = db.saveRun;
+  if (typeof originalSaveRun === "function") {
+    db.saveRun = function (run) {
+      return originalSaveRun.call(db, run).then(function (res) {
+        if (res && res.ok) {
+          storageDel(PENDING);
+          db.track("loan_tracked", { stage: "post_diagnosis", benchmark: run && run.benchmark });
+          setTimeout(beginLoanWatchCheckout, 250);
+        }
+        return res;
+      });
+    };
+  }
+
+  function onAuth(user) {
+    if (!user || storageGet(PENDING) !== "1") return;
+    patchAuthCopy();
+    setTimeout(function () {
+      var cancel = Array.prototype.slice.call(document.querySelectorAll("button")).find(function (b) { return (b.textContent || "").trim() === "Cancel"; });
+      if (cancel) cancel.click();
+      var raw = storageGet(DIAG);
+      if (raw) restoreDiagnosisThenTrack();
+      else waitForResultAndTrack();
+    }, 300);
+  }
+
+  db.onAuth(onAuth);
+
+  var mo = new MutationObserver(function () {
+    patchTrackLabel();
+    patchAuthCopy();
+  });
+  mo.observe(document.documentElement, { childList: true, subtree: true });
+  setTimeout(function () { mo.disconnect(); }, 30000);
+
+  if (storageGet(PENDING) === "1") {
+    setTimeout(function () {
+      db.onAuth(function (user) { if (user) onAuth(user); });
+    }, 500);
+  }
+})();
