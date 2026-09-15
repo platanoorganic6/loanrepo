@@ -11,9 +11,6 @@
   var enabled = !!(cfg.url && cfg.anonKey && lib && lib.createClient);
   var client = enabled ? lib.createClient(cfg.url, cfg.anonKey) : null;
 
-  // This file can execute before the Supabase UMD bundle has run — script order
-  // in the page is not guaranteed. Without a retry every method would report
-  // not-configured for the rest of the session, silently disabling accounts.
   function connectLater() {
     if (enabled) return;
     var tries = 0;
@@ -52,10 +49,6 @@
     } catch (e) { return null; }
   }
 
-  // Anonymous product analytics must never become a shadow loan database.
-  // Only low-risk aggregate dimensions are allowed here. Loan particulars
-  // such as amount, start date, tenure, EMI, rate, outstanding balance,
-  // lender, spread and reset dates are deliberately excluded.
   function safeAnalyticsProps(props) {
     props = props || {};
     var allowed = ["source", "stage", "variant", "benchmark", "diagnosis_type", "outcome", "entry_point"];
@@ -71,12 +64,8 @@
     client: client,
     onAuth: function (cb) {
       if (!enabled) { cb(null); return function () {}; }
-      client.auth.getSession().then(function (r) {
-        cb((r.data && r.data.session && r.data.session.user) || null);
-      });
-      var sub = client.auth.onAuthStateChange(function (_e, session) {
-        cb((session && session.user) || null);
-      });
+      client.auth.getSession().then(function (r) { cb((r.data && r.data.session && r.data.session.user) || null); });
+      var sub = client.auth.onAuthStateChange(function (_e, session) { cb((session && session.user) || null); });
       return function () { sub.data.subscription.unsubscribe(); };
     },
     signInEmail: function (email) {
@@ -89,41 +78,36 @@
       return client.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.href } })
         .then(function (r) { return { ok: !r.error, error: r.error && r.error.message }; });
     },
-    signOut: function () {
-      if (!enabled) return Promise.resolve({ ok: false });
-      return client.auth.signOut().then(function () { return { ok: true }; });
-    },
+    signOut: function () { if (!enabled) return Promise.resolve({ ok: false }); return client.auth.signOut().then(function () { return { ok: true }; }); },
     fetchRepoHistory: function () {
       if (!enabled) return Promise.resolve(null);
-      return client.from("repo_rates").select("effective_date, rate").order("effective_date")
-        .then(function (r) {
-          if (r.error || !r.data || !r.data.length) return null;
-          return r.data.map(function (row) { return { d: row.effective_date, r: Number(row.rate) }; });
-        }).catch(function () { return null; });
+      return client.from("repo_rates").select("effective_date, rate").order("effective_date").then(function (r) {
+        if (r.error || !r.data || !r.data.length) return null;
+        return r.data.map(function (row) { return { d: row.effective_date, r: Number(row.rate) }; });
+      }).catch(function () { return null; });
     },
     fetchExamples: function () {
       if (!enabled) return Promise.resolve(null);
-      return client.from("examples").select("start_month, city, amount, tenure_years, note")
-        .eq("published", true).order("sort_order")
-        .then(function (r) {
-          if (r.error || !r.data || !r.data.length) return null;
-          return r.data.map(function (row) { return { date: row.start_month, city: row.city, amt: Number(row.amount), ten: row.tenure_years, note: row.note }; });
-        }).catch(function () { return null; });
+      return client.from("examples").select("start_month, city, amount, tenure_years, note").eq("published", true).order("sort_order").then(function (r) {
+        if (r.error || !r.data || !r.data.length) return null;
+        return r.data.map(function (row) { return { date: row.start_month, city: row.city, amt: Number(row.amount), ten: row.tenure_years, note: row.note }; });
+      }).catch(function () { return null; });
     },
     saveRun: function (run) {
       if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
       return client.auth.getUser().then(function (u) {
         var user = u.data && u.data.user;
         if (!user) return { ok: false, reason: "signed-out" };
-        return client.from("tracked_loans").insert({ user_id: user.id, name: run.name || run.label || null, label: run.label || null, start_month: run.start_month, amount: run.amount, tenure_years: run.tenure_years, benchmark: run.benchmark, result: run.result || {} })
-          .then(function (r) { var msg = r.error && r.error.message; if (msg && msg.indexOf("free_tier_loan_limit") > -1) return { ok: false, reason: "loan-limit" }; return { ok: !r.error, error: msg }; });
+        return client.from("tracked_loans").insert({ user_id: user.id, name: run.name || run.label || null, label: run.label || null, start_month: run.start_month, amount: run.amount, tenure_years: run.tenure_years, benchmark: run.benchmark, result: run.result || {} }).then(function (r) {
+          var msg = r.error && r.error.message;
+          if (msg && msg.indexOf("free_tier_loan_limit") > -1) return { ok: false, reason: "loan-limit" };
+          return { ok: !r.error, error: msg };
+        });
       });
     },
     listRuns: function () {
       if (!enabled) return Promise.resolve([]);
-      return client.from("tracked_loans").select("id, name, label, start_month, amount, tenure_years, benchmark, result, created_at")
-        .eq("archived", false).order("created_at", { ascending: false }).limit(50)
-        .then(function (r) { return r.error ? [] : r.data; }).catch(function () { return []; });
+      return client.from("tracked_loans").select("id, name, label, start_month, amount, tenure_years, benchmark, result, created_at").eq("archived", false).order("created_at", { ascending: false }).limit(50).then(function (r) { return r.error ? [] : r.data; }).catch(function () { return []; });
     },
     deleteRun: function (id) { if (!enabled) return Promise.resolve({ ok: false }); return client.from("tracked_loans").delete().eq("id", id).then(function (r) { return { ok: !r.error }; }); },
     renameLoan: function (id, name) { if (!enabled) return Promise.resolve({ ok: false }); return client.from("tracked_loans").update({ name: name }).eq("id", id).then(function (r) { return { ok: !r.error, error: r.error && r.error.message }; }); },
@@ -132,8 +116,7 @@
       return client.auth.getUser().then(function (u) {
         var user = u.data && u.data.user;
         if (!user) return { ok: false, reason: "signed-out" };
-        return client.from("check_ins").insert({ loan_id: loanId, user_id: user.id, effective_rate: obs.effective_rate || null, emi: obs.emi || null, outstanding: obs.outstanding || null, remaining_months: obs.remaining_months || null, outcome: obs.outcome || "unsure", note: obs.note || null })
-          .then(function (r) { return { ok: !r.error, error: r.error && r.error.message }; });
+        return client.from("check_ins").insert({ loan_id: loanId, user_id: user.id, effective_rate: obs.effective_rate || null, emi: obs.emi || null, outstanding: obs.outstanding || null, remaining_months: obs.remaining_months || null, outcome: obs.outcome || "unsure", note: obs.note || null }).then(function (r) { return { ok: !r.error, error: r.error && r.error.message }; });
       });
     },
     listCheckIns: function (loanId) {
@@ -159,22 +142,13 @@
       if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
       return client.from("waitlist").insert({ email: email, source: source || "app" }).then(function (r) { if (r.error && r.error.code === "23505") return { ok: true, duplicate: true }; return { ok: !r.error, error: r.error && r.error.message }; });
     },
-    // General analytics entry point. Loan particulars are filtered out before
-    // anything reaches Supabase so analytics cannot silently become storage.
     track: function (event, props) {
       if (!enabled) return;
       client.from("usage_events").insert({ event: event, props: safeAnalyticsProps(props), session_id: sessionId() }).then(function () {}, function () {});
     },
-    // Purpose-built metric for the 10,000-borrower mission. This records only
-    // that a diagnosis was completed, plus non-identifying aggregate dimensions.
-    // It deliberately does NOT accept or transmit the diagnosis inputs/results.
     logAnonymousDiagnosis: function (props) {
       if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
-      return client.from("usage_events").insert({
-        event: "diagnosis_completed",
-        props: safeAnalyticsProps(props),
-        session_id: sessionId()
-      }).then(function (r) {
+      return client.from("usage_events").insert({ event: "diagnosis_completed", props: safeAnalyticsProps(props), session_id: sessionId() }).then(function (r) {
         return { ok: !r.error, error: r.error && r.error.message };
       }).catch(function (e) { return { ok: false, error: String(e) }; });
     }
@@ -183,6 +157,30 @@
   connectLater();
 })();
 
-/* The diagnosis card, the health score and the copy rewrites that used to be
-   injected from here now live in the page itself (build c3). Re-adding a
-   loader would render the card twice. */
+/* Stage-1 diagnosis result actions: keep the free diagnosis actions ahead of the paid tracking action.
+   This is deliberately narrow: it touches only the three exact result buttons and disconnects once ordered. */
+(function () {
+  function reorderOnce() {
+    var buttons = Array.prototype.slice.call(document.querySelectorAll("button"));
+    var pdf = buttons.find(function (b) { return (b.textContent || "").trim() === "Save this result as PDF"; });
+    var method = buttons.find(function (b) { return (b.textContent || "").trim() === "Read the method and assumptions"; });
+    var track = buttons.find(function (b) { return /^Track this loan/.test((b.textContent || "").trim()); });
+    if (!pdf || !method || !track) return false;
+    var parent = pdf.parentElement;
+    if (!parent || method.parentElement !== parent || track.parentElement !== parent) return false;
+    parent.appendChild(pdf);
+    parent.appendChild(method);
+    parent.appendChild(track);
+    return true;
+  }
+  function start() {
+    if (reorderOnce()) return;
+    if (!window.MutationObserver) return;
+    var observer = new MutationObserver(function () {
+      if (reorderOnce()) observer.disconnect();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    setTimeout(function () { observer.disconnect(); }, 10000);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
+})();
