@@ -1,6 +1,5 @@
 /* LoanRepo readability layer — scoped to the diagnosis/calculator page. */
 
-/* Stronger body typography without changing the blueprint visual language. */
 body:has(#lr-date) main p,
 body:has(#lr-date) main li,
 body:has(#lr-date) main td,
@@ -33,9 +32,24 @@ body:has(#lr-date) main textarea::placeholder {
   opacity: 1;
 }
 
-/* Preserve light text on the dark result/share panels. */
-body:has(#lr-date) main > div[style*="background:var(--color-accent-900)"] p,
-body:has(#lr-date) main > div[style*="background:var(--color-accent-900)"] div,
+/* The verdict panel is nested inside the result wrapper, so do not use a
+   direct-child selector here. Keep every descendant readable on the dark panel. */
+body:has(#lr-date) main [style*="background:var(--color-accent-900)"],
+body:has(#lr-date) main [style*="background: var(--color-accent-900)"] {
+  color: var(--color-bg) !important;
+}
+
+body:has(#lr-date) main [style*="background:var(--color-accent-900)"] p,
+body:has(#lr-date) main [style*="background:var(--color-accent-900)"] div,
+body:has(#lr-date) main [style*="background:var(--color-accent-900)"] span,
+body:has(#lr-date) main [style*="background:var(--color-accent-900)"] b,
+body:has(#lr-date) main [style*="background: var(--color-accent-900)"] p,
+body:has(#lr-date) main [style*="background: var(--color-accent-900)"] div,
+body:has(#lr-date) main [style*="background: var(--color-accent-900)"] span,
+body:has(#lr-date) main [style*="background: var(--color-accent-900)"] b {
+  color: var(--color-bg) !important;
+}
+
 body:has(#lr-date) #lr-share,
 body:has(#lr-date) #lr-share div,
 body:has(#lr-date) #lr-share span {
@@ -59,13 +73,8 @@ body:has(#lr-date) main > div > div[style*="border-top:1px solid var(--color-div
     line-height: 1.65 !important;
   }
 
-  body:has(#lr-date) main h1 {
-    line-height: 1.06 !important;
-  }
-
-  body:has(#lr-date) main h2 {
-    line-height: 1.12 !important;
-  }
+  body:has(#lr-date) main h1 { line-height: 1.06 !important; }
+  body:has(#lr-date) main h2 { line-height: 1.12 !important; }
 
   body:has(#lr-date) main .field label,
   body:has(#lr-date) main label {
@@ -84,7 +93,6 @@ body:has(#lr-date) main > div > div[style*="border-top:1px solid var(--color-div
     line-height: 1.3 !important;
   }
 
-  /* Make the result action row stack naturally for one-handed use. */
   body:has(#lr-date) main > div > div[style*="border-top:1px solid var(--color-divider)"] {
     display: flex !important;
     flex-direction: column !important;
@@ -101,29 +109,29 @@ body:has(#lr-date) main > div > div[style*="border-top:1px solid var(--color-div
     margin-left: 0 !important;
   }
 
-  /* Two-column calculator inputs become single-column instead of squeezing text. */
   body:has(#lr-date) main .field,
   body:has(#lr-date) main .seg-opt {
     min-width: 0;
   }
 
-  /* Tables remain horizontally scrollable, but their readable cell text is stronger. */
-  body:has(#lr-date) main .table {
-    font-size: 13.5px !important;
-  }
-
+  body:has(#lr-date) main .table { font-size: 13.5px !important; }
   body:has(#lr-date) main .table th {
     font-size: 11.5px !important;
     color: #34495a !important;
   }
 
-  /* Small explanatory notes should still be legible rather than looking disabled. */
   body:has(#lr-date) main [style*="font-size:12px"],
   body:has(#lr-date) main [style*="font-size:12.5px"] {
     color: #526477 !important;
   }
 
-  /* Re-assert dark-panel text after the small-note rule above. */
+  body:has(#lr-date) main [style*="background:var(--color-accent-900)"] [style*="font-size:12px"],
+  body:has(#lr-date) main [style*="background:var(--color-accent-900)"] [style*="font-size:12.5px"],
+  body:has(#lr-date) main [style*="background: var(--color-accent-900)"] [style*="font-size:12px"],
+  body:has(#lr-date) main [style*="background: var(--color-accent-900)"] [style*="font-size:12.5px"] {
+    color: var(--color-bg) !important;
+  }
+
   body:has(#lr-date) #lr-share [style*="font-size:12px"],
   body:has(#lr-date) #lr-share [style*="font-size:12.5px"] {
     color: var(--color-bg) !important;
