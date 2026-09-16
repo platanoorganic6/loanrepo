@@ -2,7 +2,7 @@
 (function(){
   window.__loanRepoAccountFlow=true;
   var PENDING="loanrepo.ebook_account_pending",RETURN_PURCHASE="loanrepo.ebook_return_purchase",db=null,user=null,currentNudge="first";
-  var GUIDE_URL="./quiet-years.html?v=20260916-3";
+  var GUIDE_URL="./quiet-years.html?v=20260916-4";
   var path=(location.pathname||"").toLowerCase();
   if(!(path==="/"||/\/index\.html$/.test(path)))return;
   var COPY={first:"GET YOUR PERSONALISED BORROWER'S GUIDE — ₹299",second:"TURN YOUR DIAGNOSIS INTO A BORROWER'S GUIDE — ₹299"};
