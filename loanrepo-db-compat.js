@@ -1,20 +1,12 @@
 /* LoanRepo Stage 2 database compatibility layer.
    The live project uses loan_runs and the existing subscription schema.
-   Keep the public LoanRepoDB contract stable so the diagnosis and Control Centre
-   do not need to know the underlying migration history. */
+   Keep the public LoanRepoDB contract stable so the UI does not depend on
+   the migration history. */
 (function () {
   function start() {
     var db = window.LoanRepoDB;
     if (!db || !db.enabled || !db.client) return false;
-
     var client = db.client;
-    var original = {
-      saveRun: db.saveRun,
-      listRuns: db.listRuns,
-      deleteRun: db.deleteRun,
-      renameLoan: db.renameLoan,
-      fetchSubscription: db.fetchSubscription
-    };
 
     db.saveRun = function (run) {
       return client.auth.getUser().then(function (u) {
@@ -45,15 +37,10 @@
           if (r.error || !r.data) return [];
           return r.data.map(function (x) {
             return {
-              id: x.id,
-              name: x.label,
-              label: x.label,
-              start_month: x.start_month,
-              amount: Number(x.amount),
-              tenure_years: x.tenure_years,
-              benchmark: x.benchmark,
-              result: x.result || {},
-              created_at: x.created_at
+              id: x.id, name: x.label, label: x.label,
+              start_month: x.start_month, amount: Number(x.amount),
+              tenure_years: x.tenure_years, benchmark: x.benchmark,
+              result: x.result || {}, created_at: x.created_at
             };
           });
         }).catch(function () { return []; });
@@ -72,34 +59,25 @@
     };
 
     db.fetchSubscription = function () {
-      return client.from("subscriptions")
-        .select("plan_code,status,expires_at,amount_inr")
-        .eq("user_id", "00000000-0000-0000-0000-000000000000")
-        .limit(0)
-        .then(function () {
-          return client.auth.getUser();
-        }).then(function (u) {
-          var user = u.data && u.data.user;
-          if (!user) return null;
-          return client.from("subscriptions")
-            .select("plan_code,status,expires_at,amount_inr")
-            .eq("user_id", user.id)
-            .order("expires_at", { ascending: false })
-            .limit(1)
-            .maybeSingle();
-        }).then(function (r) {
-          if (!r || r.error || !r.data) return null;
-          return {
-            plan: r.data.plan_code || (Number(r.data.amount_inr) === 149 ? "pro" : "free"),
-            status: r.data.status,
-            current_period_end: r.data.expires_at || null
-          };
-        }).catch(function () { return null; });
+      return client.auth.getUser().then(function (u) {
+        var user = u.data && u.data.user;
+        if (!user) return null;
+        return client.from("subscriptions")
+          .select("plan_code,status,expires_at,amount_inr")
+          .eq("user_id", user.id)
+          .order("expires_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+      }).then(function (r) {
+        if (!r || r.error || !r.data) return null;
+        return {
+          plan: r.data.plan_code || (Number(r.data.amount_inr) === 149 ? "pro" : "free"),
+          status: r.data.status,
+          current_period_end: r.data.expires_at || null
+        };
+      }).catch(function () { return null; });
     };
 
-    /* The original methods remain available for diagnostics that run without
-       the compatibility layer; Stage 2 explicitly uses the live schema above. */
-    db._stage2Originals = original;
     window.LoanRepoDB = db;
     return true;
   }
