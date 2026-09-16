@@ -40,3 +40,21 @@ window.LOANREPO_SUPABASE = {
     loadBridge();
   }
 })();
+
+/* Load the Stage-1 commercial sequence after the tracking bridge. It hides
+   the original Track action, keeps diagnosis/report free, promotes the
+   personalised ₹299 borrower guide, and exposes Loan Watch only after it. */
+(function () {
+  function loadStage1() {
+    if (document.querySelector('script[data-loanrepo-stage1-flow]')) return;
+    var s = document.createElement("script");
+    s.src = "./loanrepo-stage1-flow.js?v=20260916";
+    s.setAttribute("data-loanrepo-stage1-flow", "true");
+    document.head.appendChild(s);
+  }
+  if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", loadStage1, { once: true });
+  } else {
+    loadStage1();
+  }
+})();
