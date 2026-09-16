@@ -36,28 +36,44 @@
     if (body && /account only stores/i.test(body.textContent || "")) body.textContent = "Your diagnosis stays free. Sign in to save this loan and continue to Loan Watch — ₹149/month.";
   }
 
-  /* Put the three result actions in a deterministic order even when the DC
-     runtime wraps individual controls in different elements. */
+  /* Put the three result actions in a deterministic order. Avoid touching the
+     DOM when the order is already correct; otherwise MutationObserver can
+     observe its own appendChild calls and spin continuously. */
   function orderActions() {
     var pdf = pdfButton(), method = methodButton(), track = trackButton();
     if (!pdf || !method || !track) return false;
+
+    var wrap = document.getElementById("lr-stage1-actions");
+    if (wrap) {
+      var children = Array.prototype.slice.call(wrap.children);
+      if (children.length === 3 && children[0] === pdf && children[1] === method && children[2] === track) return true;
+      wrap.appendChild(pdf);
+      wrap.appendChild(method);
+      wrap.appendChild(track);
+      return true;
+    }
+
     var parent = pdf.parentElement;
     var okSame = parent && method.parentElement === parent && track.parentElement === parent;
     if (okSame) {
-      parent.appendChild(pdf); parent.appendChild(method); parent.appendChild(track);
+      var siblings = Array.prototype.slice.call(parent.children);
+      if (siblings.indexOf(pdf) < siblings.indexOf(method) && siblings.indexOf(method) < siblings.indexOf(track)) return true;
+      parent.appendChild(pdf);
+      parent.appendChild(method);
+      parent.appendChild(track);
       return true;
     }
-    var wrap = document.getElementById("lr-stage1-actions");
-    if (!wrap) {
-      wrap = document.createElement("div");
-      wrap.id = "lr-stage1-actions";
-      wrap.style.cssText = "display:flex;flex-wrap:wrap;gap:12px;align-items:center;width:100%;margin-top:0;";
-      var first = [pdf, method, track].sort(function (a, b) {
-        return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
-      })[0];
-      first.parentNode.insertBefore(wrap, first);
-    }
-    wrap.appendChild(pdf); wrap.appendChild(method); wrap.appendChild(track);
+
+    wrap = document.createElement("div");
+    wrap.id = "lr-stage1-actions";
+    wrap.style.cssText = "display:flex;flex-wrap:wrap;gap:12px;align-items:center;width:100%;margin-top:0;";
+    var first = [pdf, method, track].sort(function (a, b) {
+      return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
+    })[0];
+    first.parentNode.insertBefore(wrap, first);
+    wrap.appendChild(pdf);
+    wrap.appendChild(method);
+    wrap.appendChild(track);
     return true;
   }
 
@@ -69,9 +85,7 @@
     var bm = document.querySelector('input[name="bm"]:checked');
     var toggle = document.querySelector('input[type="checkbox"]');
     var spread = document.getElementById("lr-spread");
-    var text = document.body ? document.body.innerText : "";
     var verdict = "";
-    var verdictNode = buttons().map(function () { return null; });
     var dark = Array.prototype.slice.call(document.querySelectorAll("div")).find(function (el) {
       return /Added to your loan, unannounced/.test(el.textContent || "");
     });
