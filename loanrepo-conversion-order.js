@@ -62,8 +62,17 @@
       }
     });
   }
+  function removeOldChapterFreeLink(){
+    buttons().forEach(function(el){
+      var t=clean(el.textContent||"");
+      if(/^(?:READ TWO CHAPTERS FREE|READ THE FIRST TWO CHAPTERS FREE)$/i.test(t)){
+        el.remove();
+      }
+    });
+  }
   function apply(){
     removeFooterBookNudge();
+    removeOldChapterFreeLink();
     if(applied)return;
     var pdf=findButton(/^save this result as pdf$/i);
     var track=findButton(/^track this loan(?:\s*[—-].*)?$/i);
