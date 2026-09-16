@@ -58,6 +58,42 @@
       });
     };
 
+    db.logCheckIn = function (loanId, obs) {
+      return client.auth.getUser().then(function (u) {
+        var user = u.data && u.data.user;
+        if (!user) return { ok: false, reason: "signed-out" };
+        return client.from("check_ins").insert({
+          loan_id: loanId,
+          user_id: user.id,
+          observed_on: obs.observed_on || new Date().toISOString().slice(0, 10),
+          effective_rate: obs.effective_rate == null ? null : obs.effective_rate,
+          emi: obs.emi == null ? null : obs.emi,
+          outstanding: obs.outstanding == null ? null : obs.outstanding,
+          remaining_months: obs.remaining_months == null ? null : obs.remaining_months,
+          outcome: obs.outcome || "unsure",
+          note: obs.note || null
+        }).then(function (r) {
+          return { ok: !r.error, error: r.error && r.error.message };
+        });
+      });
+    };
+
+    db.listCheckIns = function (loanId) {
+      var q = client.from("check_ins")
+        .select("id,loan_id,observed_on,effective_rate,emi,outstanding,remaining_months,outcome,note,created_at")
+        .order("observed_on", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (loanId) q = q.eq("loan_id", loanId);
+      return q.then(function (r) { return r.error ? [] : (r.data || []); }).catch(function () { return []; });
+    };
+
+    db.deleteCheckIn = function (id) {
+      return client.from("check_ins").delete().eq("id", id).then(function (r) {
+        return { ok: !r.error, error: r.error && r.error.message };
+      });
+    };
+
     db.fetchSubscription = function () {
       return client.auth.getUser().then(function (u) {
         var user = u.data && u.data.user;
