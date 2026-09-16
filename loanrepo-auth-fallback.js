@@ -47,11 +47,13 @@
     setTimeout(function () { if (input) input.focus(); }, 30);
   }
 
-  /* Capture phase is important: the site's native action can stop propagation
-     before a bubble-phase fallback listener ever sees the click. */
+  /* Own the click in capture phase. The native templating action is currently
+     capable of blocking the page before a bubble-phase fallback can run. */
   document.addEventListener("click", function (e) {
     var b = e.target && e.target.closest ? e.target.closest("header button") : null;
     if (!b || !/^sign in$/i.test((b.textContent || "").trim())) return;
-    setTimeout(function () { if (!visibleAuthDialog()) openFallback(); }, 350);
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    openFallback();
   }, true);
 })();
