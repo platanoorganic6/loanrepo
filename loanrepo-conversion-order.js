@@ -45,7 +45,25 @@
     d.appendChild(k);d.appendChild(h);d.appendChild(b);
     return d;
   }
+  function makeGuideCta(){
+    var cta=document.createElement("button");
+    cta.type="button";
+    cta.className="btn btn-primary";
+    cta.textContent="GET YOUR PERSONALISED BORROWER'S GUIDE — ₹299";
+    cta.style.cssText="display:inline-block!important;width:auto!important;margin-top:10px;padding:13px 20px;font-size:14px;letter-spacing:.06em;text-transform:uppercase";
+    return cta;
+  }
+  function removeFooterBookNudge(){
+    buttons().forEach(function(el){
+      var t=clean(el.textContent||"");
+      if(/^(?:THE QUIET YEARS|THE QUIET YEARS — OUR GUIDE FOR BORROWERS),?\s*₹299$/i.test(t) || /THE QUIET YEARS.*OUR GUIDE FOR BORROWERS.*₹299/i.test(t)){
+        var footer=el.closest("footer");
+        if(footer)el.remove();
+      }
+    });
+  }
   function apply(){
+    removeFooterBookNudge();
     if(applied)return;
     var pdf=findButton(/^save this result as pdf$/i);
     var track=findButton(/^track this loan(?:\s*[—-].*)?$/i);
@@ -56,12 +74,8 @@
     var actionRow=track.parentElement;
     var bookPanel=cardForText(/^the pdf above\s*[—-]\s*free, always$/i);
     if(!actionRow||!bookPanel)return;
-
-    /* Only touch the completed diagnosis. */
     if(!/The PDF above/i.test(clean(bookPanel.innerText||"")))return;
 
-    /* Preserve the existing Method link and confidence note, but move them
-       below the commercial ladder rather than between PDF and Guide. */
     var method=findButton(/read the method and assumptions/i);
     var confidence=Array.prototype.slice.call(actionRow.children).find(function(x){
       return /confidence/i.test(clean(x.textContent||"")) || (x.tagName==="SPAN"&&clean(x.textContent||"").length>20);
@@ -80,7 +94,6 @@
     intro.innerHTML="<div style=\"font-family:var(--font-heading);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:6px\">What happens next</div><div style=\"font-family:var(--font-heading);font-size:28px;line-height:1.05;font-weight:600\">Diagnosis → Guide → Journey</div>";
     wrap.appendChild(intro);
 
-    /* Step 1: make the free PDF unmistakable. */
     var freeStep=makeStep("FREE PDF — your complete diagnosis","01 · Diagnosis","Your verdict, spec sheet, chart and rate-reset history are yours for free. Save the complete diagnosis as a PDF.",false);
     pdf.textContent="SAVE MY FREE DIAGNOSIS PDF";
     pdf.className="btn btn-primary";
@@ -88,7 +101,6 @@
     freeStep.appendChild(pdf);
     wrap.appendChild(freeStep);
 
-    /* Step 2: retain the existing personalised book card as the paid Guide. */
     var guideStep=makeStep("BORROWER'S GUIDE — ₹299","02 · Guide","The diagnosis tells you what happened. Your personalised guide explains what to look for next and carries your loan numbers into the worked examples.",true);
     var bookChild=null;
     Array.prototype.slice.call(grid.children).forEach(function(ch){
@@ -99,12 +111,10 @@
       guideStep.appendChild(bookChild);
     }else if(book){
       guideStep.appendChild(book);
-    }else{
-      var cta=document.createElement("button");cta.type="button";cta.className="btn btn-primary";cta.textContent="GET THE BORROWER'S GUIDE — ₹299";guideStep.appendChild(cta);
     }
+    guideStep.appendChild(makeGuideCta());
     wrap.appendChild(guideStep);
 
-    /* Step 3: move the existing Track handler, not a new payment/auth flow. */
     var journeyStep=makeStep("TRACK THIS LOAN — ₹149/month","03 · Journey","Keep LoanRepo watching your loan after the diagnosis: future resets, impact on your loan, and the actions that follow.",false);
     track.textContent="TRACK THIS LOAN — ₹149/MONTH";
     track.className="btn btn-primary";
@@ -112,7 +122,6 @@
     journeyStep.appendChild(track);
     wrap.appendChild(journeyStep);
 
-    /* Method stays available, but no longer interrupts the commercial sequence. */
     if(method){
       var methodWrap=document.createElement("div");
       methodWrap.style.cssText="padding:16px 0 0;display:flex;gap:14px;align-items:center;flex-wrap:wrap";
@@ -121,7 +130,6 @@
       wrap.appendChild(methodWrap);
     }
 
-    /* Replace the old result-page action/card pair with the ordered ladder. */
     actionRow.style.display="none";
     bookPanel.style.display="none";
     bookPanel.parentElement.insertBefore(wrap,bookPanel.nextSibling);
