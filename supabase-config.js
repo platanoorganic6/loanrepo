@@ -10,68 +10,43 @@ window.LOANREPO_SUPABASE = {
   anonKey: "sb_publishable_Ytd_Lbk5_5PZ6IjWWzZOBg_qdhBtUJG"
 };
 
-/* Load the readability layer without touching the generated app bundle.
-   It is scoped to the calculator page by its #lr-date marker, so app.html is unaffected. */
 (function () {
   var href = "./loanrepo-readable.css?v=20260916";
   if (!document.querySelector('link[data-loanrepo-readable]')) {
-    var link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = href;
-    link.setAttribute("data-loanrepo-readable", "true");
-    document.head.appendChild(link);
+    var link = document.createElement("link"); link.rel="stylesheet"; link.href=href; link.setAttribute("data-loanrepo-readable","true"); document.head.appendChild(link);
   }
 })();
 
-/* Load the Stage-2 tracking bridge after supabase-client.js has created
-   window.LoanRepoDB. This keeps index.html generated/static and app.html
-   untouched while making Track this loan deterministic. */
+/* New account-first Stage-1A test flow. It runs before the legacy email flow,
+   so the paid guide is now tied to the signed-in borrower account. */
+(function () {
+  function loadAccountFlow() {
+    if (document.querySelector('script[data-loanrepo-ebook-account]')) return;
+    var s=document.createElement("script"); s.src="./loanrepo-ebook-account.js?v=20260916-1"; s.setAttribute("data-loanrepo-ebook-account","true"); document.head.appendChild(s);
+  }
+  if(document.readyState==="loading") window.addEventListener("DOMContentLoaded",loadAccountFlow,{once:true}); else loadAccountFlow();
+})();
+
 (function () {
   function loadBridge() {
     if (document.querySelector('script[data-loanrepo-track-bridge]')) return;
-    var s = document.createElement("script");
-    s.src = "./loanrepo-track-bridge.js?v=20260916";
-    s.setAttribute("data-loanrepo-track-bridge", "true");
-    document.head.appendChild(s);
+    var s=document.createElement("script"); s.src="./loanrepo-track-bridge.js?v=20260916"; s.setAttribute("data-loanrepo-track-bridge","true"); document.head.appendChild(s);
   }
-  if (document.readyState === "loading") {
-    window.addEventListener("DOMContentLoaded", loadBridge, { once: true });
-  } else {
-    loadBridge();
-  }
+  if(document.readyState==="loading") window.addEventListener("DOMContentLoaded",loadBridge,{once:true}); else loadBridge();
 })();
 
-/* Load the Stage-1 commercial sequence after the tracking bridge. It hides
-   the original Track action, promotes the personalised ₹299 borrower guide,
-   and exposes Loan Watch only after the guide. */
 (function () {
   function loadStage1() {
     if (document.querySelector('script[data-loanrepo-stage1-flow]')) return;
-    var s = document.createElement("script");
-    s.src = "./loanrepo-stage1-flow.js?v=20260916-2";
-    s.setAttribute("data-loanrepo-stage1-flow", "true");
-    document.head.appendChild(s);
+    var s=document.createElement("script"); s.src="./loanrepo-stage1-flow.js?v=20260916-3"; s.setAttribute("data-loanrepo-stage1-flow","true"); document.head.appendChild(s);
   }
-  if (document.readyState === "loading") {
-    window.addEventListener("DOMContentLoaded", loadStage1, { once: true });
-  } else {
-    loadStage1();
-  }
+  if(document.readyState==="loading") window.addEventListener("DOMContentLoaded",loadStage1,{once:true}); else loadStage1();
 })();
 
-/* Add an explicit borrower-name field to the ₹299 guide checkout and pass
-   the name into the existing loanQuery used for personalisation. */
 (function () {
   function loadNameLayer() {
     if (document.querySelector('script[data-loanrepo-ebook-name]')) return;
-    var s = document.createElement("script");
-    s.src = "./loanrepo-ebook-name.js?v=20260916-1";
-    s.setAttribute("data-loanrepo-ebook-name", "true");
-    document.head.appendChild(s);
+    var s=document.createElement("script"); s.src="./loanrepo-ebook-name.js?v=20260916-1"; s.setAttribute("data-loanrepo-ebook-name","true"); document.head.appendChild(s);
   }
-  if (document.readyState === "loading") {
-    window.addEventListener("DOMContentLoaded", loadNameLayer, { once: true });
-  } else {
-    loadNameLayer();
-  }
+  if(document.readyState==="loading") window.addEventListener("DOMContentLoaded",loadNameLayer,{once:true}); else loadNameLayer();
 })();
