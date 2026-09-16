@@ -58,3 +58,20 @@ window.LOANREPO_SUPABASE = {
     loadStage1();
   }
 })();
+
+/* Add an explicit borrower-name field to the ₹299 guide checkout and pass
+   the name into the existing loanQuery used for personalisation. */
+(function () {
+  function loadNameLayer() {
+    if (document.querySelector('script[data-loanrepo-ebook-name]')) return;
+    var s = document.createElement("script");
+    s.src = "./loanrepo-ebook-name.js?v=20260916-1";
+    s.setAttribute("data-loanrepo-ebook-name", "true");
+    document.head.appendChild(s);
+  }
+  if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", loadNameLayer, { once: true });
+  } else {
+    loadNameLayer();
+  }
+})();
