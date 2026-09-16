@@ -23,7 +23,7 @@
 
     var label = document.createElement("label");
     label.setAttribute("for", "lr-ebook-name");
-    label.textContent = "Your name";
+    label.textContent = "Your name *";
     label.style.cssText = "display:block;font-size:12px;color:var(--color-neutral-700);margin:14px 0 6px";
 
     var input = document.createElement("input");
@@ -31,12 +31,27 @@
     input.type = "text";
     input.autocomplete = "name";
     input.maxLength = 120;
+    input.required = true;
     input.placeholder = "Your full name";
     input.style.cssText = "width:100%;box-sizing:border-box;padding:11px;border:1px solid var(--color-divider);font:inherit";
 
     email.parentNode.insertBefore(label, email);
     email.parentNode.insertBefore(input, email);
   }
+
+  /* The Stage-1 checkout handler is already attached by the time this field
+     appears. Validate the name in capture phase before that handler runs. */
+  document.addEventListener("click", function (e) {
+    var b = e.target && e.target.closest ? e.target.closest("#lr-ebook-pay") : null;
+    if (!b) return;
+    var input = document.getElementById("lr-ebook-name");
+    if (!input || String(input.value || "").trim()) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    input.focus();
+    var msg = document.getElementById("lr-ebook-modal-msg");
+    if (msg) msg.textContent = "Enter your name to personalise the guide.";
+  }, true);
 
   var observer = new MutationObserver(enhance);
   observer.observe(document.documentElement, { childList: true, subtree: true });
