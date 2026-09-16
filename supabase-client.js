@@ -35,7 +35,7 @@
     deleteCheckIn:function(){return Promise.resolve({ok:false,reason:"stage2-disabled"})},
     fetchSubscription:function(){return Promise.resolve(null)},
     startCheckout:function(){return Promise.resolve({ok:false,reason:"stage2-disabled"})},
-    startEbookOrder:function(email,loanQuery){if(!enabled)return Promise.resolve({ok:false,reason:"not-configured"});return client.functions.invoke("ebook-order",{body:{email:email,loanQuery:loanQuery||null}}).then(function(r){if(r.error||!r.data||!r.data.order_id)return{ok:false,error:(r.error&&r.error.message)||"no-response"};return{ok:true,orderId:r.data.order_id,amount:r.data.amount,keyId:r.data.key_id}}).catch(function(e){return{ok:false,error:String(e)}})},
+    startEbookOrder:function(){return Promise.resolve({ok:false,reason:"stage1-direct-flow"})},
     joinWaitlist:function(email,source){if(!enabled)return Promise.resolve({ok:false,reason:"not-configured"});return client.from("waitlist").insert({email:email,source:source||"app"}).then(function(r){if(r.error&&r.error.code==="23505")return{ok:true,duplicate:true};return{ok:!r.error,error:r.error&&r.error.message}})},
     track:function(event,props){if(!enabled)return;client.from("usage_events").insert({event:event,props:safeAnalyticsProps(props),session_id:sessionId()}).then(function(){},function(){})},
     logAnonymousDiagnosis:function(props){if(!enabled)return Promise.resolve({ok:false,reason:"not-configured"});return client.from("usage_events").insert({event:"diagnosis_completed",props:safeAnalyticsProps(props),session_id:sessionId()}).then(function(r){return{ok:!r.error,error:r.error&&r.error.message}}).catch(function(e){return{ok:false,error:String(e)}})}
@@ -54,4 +54,37 @@
   }
   function start(){if(reorderOnce())return;if(!window.MutationObserver)return;var observer=new MutationObserver(function(){if(reorderOnce())observer.disconnect()});observer.observe(document.body,{childList:true,subtree:true});setTimeout(function(){observer.disconnect()},10000)}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
+})();
+
+/* Stage 1 helpers are deliberately loaded only after the browser has finished
+   the initial page load. This keeps supabase-config.js credentials-only and
+   prevents optional Stage 1 code from participating in the first paint. */
+(function(){
+  var started=false;
+  function loadOne(src,done){
+    var s=document.createElement("script");
+    s.src=src;
+    s.async=true;
+    s.onload=function(){done()};
+    s.onerror=function(){done()};
+    document.head.appendChild(s);
+  }
+  function loadList(files,i){
+    if(i>=files.length)return;
+    loadOne(files[i],function(){loadList(files,i+1)});
+  }
+  function start(){
+    if(started)return;
+    started=true;
+    var p=(location.pathname||"").toLowerCase();
+    var files=[];
+    if(p==="/"||/\/index\.html$/.test(p)){
+      files=["./loanrepo-ebook-account-v3.js?v=20260916-10"];
+    }else if(/\/app\.html$/.test(p)){
+      files=["./loanrepo-documents.js?v=20260916-4"];
+    }
+    loadList(files,0);
+  }
+  if(document.readyState==="complete")setTimeout(start,0);
+  else window.addEventListener("load",function(){setTimeout(start,0)});
 })();
