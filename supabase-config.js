@@ -7,7 +7,7 @@
    auth and saved runs stay hidden. */
 window.LOANREPO_SUPABASE = {
   url: "https://ipshimfcquhjkbbypghj.supabase.co",
-  anonKey: "sb_publishable_Ytd_Lbk5_5PZ6IjWWZxZOBg_qdhBtUJG"
+  anonKey: "sb_publishable_Ytd_Lbk5_5PZ6IjWWzZOBg_qdhBtUJG"
 };
 
 /* Load the readability layer without touching the generated app bundle.
