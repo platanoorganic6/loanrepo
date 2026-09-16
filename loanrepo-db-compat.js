@@ -1,12 +1,15 @@
 /* LoanRepo Stage 2 database compatibility layer.
    The live project uses loan_runs and the existing subscription schema.
-   Keep the public LoanRepoDB contract stable so the UI does not depend on
-   the migration history. */
+   This file is loaded before supabase-client.js and intercepts LoanRepoDB creation
+   so the app's first auth callback already sees the live-schema adapter. */
 (function () {
-  function start() {
-    var db = window.LoanRepoDB;
-    if (!db || !db.enabled || !db.client) return false;
+  var patched = false;
+
+  function patch(db) {
+    if (!db || patched) return;
+    patched = true;
     var client = db.client;
+    if (!client) { patched = false; return; }
 
     db.saveRun = function (run) {
       return client.auth.getUser().then(function (u) {
@@ -114,14 +117,21 @@
       }).catch(function () { return null; });
     };
 
-    window.LoanRepoDB = db;
-    return true;
+    window.__LOANREPO_DB_ADAPTED = true;
   }
 
-  var tries = 0;
-  function boot() {
-    if (start()) return;
-    if (tries++ < 100) setTimeout(boot, 100);
-  }
-  boot();
+  /* Intercept the synchronous assignment performed by supabase-client.js. */
+  try {
+    var existing = window.LoanRepoDB;
+    if (existing) {
+      patch(existing);
+    } else if (!Object.getOwnPropertyDescriptor(window, "LoanRepoDB")) {
+      var value;
+      Object.defineProperty(window, "LoanRepoDB", {
+        configurable: true,
+        get: function () { return value; },
+        set: function (next) { value = next; patch(next); }
+      });
+    }
+  } catch (e) {}
 })();
