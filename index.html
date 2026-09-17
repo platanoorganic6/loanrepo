@@ -97,10 +97,10 @@
         <button type="button" onClick="{{ goCycle }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navCycle }};">Rate cycle</button>
         <button type="button" onClick="{{ goExamples }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navExamples }};">Examples</button>
         </sc-if>
-        <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ stage2 }}" hint-placeholder-val="{{ false }}">
           <button type="button" onClick="{{ goDash }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navDash }};">Home</button>
         </sc-if>
-        <sc-if value="{{ dbEnabled }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ stage2 }}" hint-placeholder-val="{{ false }}">
           <button type="button" onClick="{{ goSaved }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navSaved }};">Saved runs</button>
         </sc-if>
         <button type="button" onClick="{{ goMethod }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navMethod }};">Method</button>
@@ -279,21 +279,21 @@
               <li style="padding:7px 0; border-top:1px solid var(--color-divider);">The result as a PDF, for an email address</li>
             </ul>
           </div>
-          <div class="blueprint" style="padding:24px; border:2px solid var(--color-text);">
+          <div class="blueprint" style="padding:24px;">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:10px;">
               <span style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-600);">Track</span>
-              <span class="tag tag-accent" style="font-size:10px;">Ongoing</span>
+              <span class="tag tag-outline" style="font-size:10px;">{{ trackBadge }}</span>
             </div>
             <div style="font-family:var(--font-heading); font-size:34px; line-height:1; font-variant-numeric:tabular-nums;">₹149<span style="font-size:16px; color:var(--color-neutral-700);">/mo</span></div>
-            <div style="font-size:13px; color:var(--color-neutral-700); margin-top:4px;">Cancel whenever</div>
+            <div style="font-size:13px; color:var(--color-neutral-700); margin-top:4px;">{{ trackSubline }}</div>
             <ul style="margin:18px 0 18px; padding:0; list-style:none; font-size:13.5px; line-height:1.5;">
               <li style="padding:7px 0; border-top:1px solid var(--color-divider);">Emailed within 24h of each RBI decision, with what it does to your loan</li>
               <li style="padding:7px 0; border-top:1px solid var(--color-divider);">Reminded before your own reset, and again to log what the statement said</li>
               <li style="padding:7px 0; border-top:1px solid var(--color-divider);">A dated check-in record that reconciles the model against your bank</li>
               <li style="padding:7px 0; border-top:1px solid var(--color-divider);">Annual year in review</li>
             </ul>
-            <button type="button" class="btn btn-primary btn-block" onClick="{{ goUpgrade }}" style="letter-spacing:0.05em; text-transform:uppercase;">See the plan</button>
+            <button type="button" class="btn btn-secondary btn-block" onClick="{{ goUpgrade }}" style="letter-spacing:0.05em; text-transform:uppercase;">{{ trackTierCta }}</button>
           </div>
           <div class="blueprint" style="padding:24px;">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
@@ -676,9 +676,12 @@
       </div>
 
       <div data-print-hide="true" style="margin-top:48px; display:flex; gap:14px; flex-wrap:wrap; align-items:center; border-top:1px solid var(--color-divider); padding-top:26px;">
-        <sc-if value="{{ dbEnabled }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ stage2 }}" hint-placeholder-val="{{ false }}">
           <button type="button" class="btn btn-primary" onClick="{{ saveRun }}">{{ trackCta }}</button>
           <span style="font-size:12px; color:var(--color-accent-800);">{{ saveMsg }}</span>
+        </sc-if>
+        <sc-if value="{{ stage2Soon }}" hint-placeholder-val="{{ true }}">
+          <button type="button" class="btn btn-secondary" onClick="{{ goUpgrade }}">Tracking — opening soon</button>
         </sc-if>
         <button type="button" class="btn btn-secondary" onClick="{{ print }}">{{ pdfCta }}</button>
         <sc-if value="{{ canSaveReport }}" hint-placeholder-val="{{ false }}">
@@ -982,7 +985,7 @@
         <p style="font-size:14px; line-height:1.6; color:var(--color-neutral-700); margin:0 0 8px;">The calculator, the PDF and the bank message are free and need no account. Tracking is the part that keeps running after you close the tab: your loan re-run against every RBI decision, and an email the week one reaches it.</p>
         <p style="font-size:14px; color:var(--color-neutral-700); margin:0 0 18px;">{{ savedEmptyNote }}</p>
         <div style="display:flex; gap:12px; flex-wrap:wrap;">
-          <button type="button" class="btn btn-primary" onClick="{{ goUpgrade }}">See what tracking does</button>
+          <button type="button" class="btn btn-secondary" onClick="{{ goUpgrade }}">{{ trackTierCta }}</button>
           <button type="button" class="btn btn-secondary" onClick="{{ openAuth }}">Sign in</button>
         </div>
       </div>
@@ -994,8 +997,10 @@
           <span style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase;">Plan</span>
           <span style="font-size:15px; margin-left:14px;">{{ planLabel }}</span>
         </div>
-        <sc-if value="{{ isFree }}" hint-placeholder-val="{{ true }}">
-          <button type="button" class="btn btn-secondary" onClick="{{ goUpgrade }}">Start tracking — ₹149/mo</button>
+        <sc-if value="{{ stage2 }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{ isFree }}" hint-placeholder-val="{{ true }}">
+            <button type="button" class="btn btn-secondary" onClick="{{ goUpgrade }}">Start tracking — ₹149/mo</button>
+          </sc-if>
         </sc-if>
       </div>
 
@@ -1222,7 +1227,7 @@
     <div style="margin-top:40px; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:28px; border-top:1px solid var(--color-divider); padding-top:26px; font-size:13px; line-height:1.6; color:var(--color-neutral-700);">
       <div><b style="color:var(--color-text);">Why monthly and not one-off.</b> A one-time fee would pay us for the first calculation. The value is in the ones years later, after a reset you would otherwise have missed.</div>
       <div><b style="color:var(--color-text);">What we still do not do.</b> We do not sell loans, refer lenders, or take a commission. Paying us changes no number the engine produces.</div>
-      <div><b style="color:var(--color-text);">Cancelling.</b> One click, and no email exchange. Your tracked loans and check-in history stay readable, and you can export them.</div>
+      <div><b style="color:var(--color-text);">Cancelling.</b> Write to us and we stop the next charge, no questions and no retention call. One-click cancellation from your account ships with the tracking launch. Your tracked loans and check-in history stay readable either way, and you can export them.</div>
       <div><b style="color:var(--color-text);">The book is separate.</b> ₹299 once, and not a subscription. Subscribers get no discount and non-subscribers lose nothing.</div>
     </div>
   </main>
@@ -1247,7 +1252,7 @@
     <div style="margin-bottom:30px;">
       <div style="display:flex; justify-content:space-between; align-items:baseline; gap:14px; flex-wrap:wrap; border-bottom:1px solid var(--color-text); padding-bottom:10px; margin-bottom:4px;">
         <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase;">Your documents</div>
-        <button type="button" onClick="{{ goLoan }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-accent-800); border-bottom:1px solid var(--color-accent-800);">New report</button>
+        <button type="button" onClick="{{ goLoan }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-accent-800); border-bottom:1px solid var(--color-accent-800);">Run a new diagnosis</button>
       </div>
 
       <sc-if value="{{ hasReports }}" hint-placeholder-val="{{ false }}">
@@ -1538,7 +1543,7 @@
         </div>
         <div style="padding:22px;">
           <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:10px;">Tracking — ₹149 a month</div>
-          <div style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-800);">Cancel whenever you like, from your account or by email. Cancellation stops the next charge and you keep access to the end of the month already paid for.</div>
+          <div style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-800);">Cancel whenever you like by writing to us; one-click cancellation from your account is coming with the tracking launch. Cancellation stops the next charge and you keep access to the end of the month already paid for.</div>
           <div style="font-size:14.5px; line-height:1.6; color:var(--color-neutral-700); margin-top:12px;">Part-months are not refunded. If you were charged after cancelling, or charged twice, that is our error and we refund it in full.</div>
         </div>
       </div>
@@ -1615,7 +1620,7 @@
 
   <!-- App-style tab bar: only for signed-in users, only on narrow viewports.
        The header nav stays authoritative on desktop. -->
-  <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
+  <sc-if value="{{ stage2 }}" hint-placeholder-val="{{ false }}">
   <div data-print-hide="true" data-tabbar="true" style="position:fixed; left:0; right:0; bottom:0; z-index:40; background:var(--color-bg); border-top:1px solid var(--color-text); display:none;">
     <div style="display:grid; grid-template-columns:repeat(4,1fr);">
       <button type="button" onClick="{{ goDash }}" style="background:none; border:none; border-top:3px solid {{ navDash }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Home</button>
@@ -1715,7 +1720,10 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "d6";
+  static BUILD = "d9";
+  // Stage 2 (₹149/mo tracking) is built but not launched: there is no in-app
+  // cancel flow yet, and the plan copy promises one. Flip to true to release.
+  static STAGE2 = false;
   static LEGAL_TABS = [
     { id: "about", label: "About" },
     { id: "terms", label: "Terms" },
@@ -1789,6 +1797,20 @@ class Component extends DCLogic {
 
   get db() { return window.LoanRepoDB || { enabled: false }; }
 
+  restoreLastRun(passed) {
+    let saved = passed || null;
+    if (!saved) {
+      try { saved = JSON.parse(localStorage.getItem("loanrepo:lastrun") || "null"); } catch (e) {}
+    }
+    if (!saved || !saved.date) return false;
+    this.setState({
+      date: saved.date, amount: saved.amount, tenure: saved.tenure,
+      benchmark: saved.benchmark, ownSpread: saved.ownSpread || "",
+      useOwnSpread: !!saved.useOwnSpread, hasRun: true, screen: "loan"
+    }, () => this.compute());
+    return true;
+  }
+
   componentDidMount() {
     this.compute();
     this.initDb(0);
@@ -1811,7 +1833,16 @@ class Component extends DCLogic {
         this.loadRuns();
         this.loadReports();
         this.db.ownsBook().then(owns => this.setState({ ownsBook: owns }));
-        if (arriving && ["loan", "saved"].indexOf(this.state.screen) >= 0) this.go("dash");
+        if (!arriving) return;
+        // They pressed the PDF button, were sent to their inbox, and came back.
+        // Restoring the run puts them on the report instead of a blank form.
+        let pending = null;
+        try { pending = JSON.parse(localStorage.getItem("loanrepo:lastrun") || "null"); } catch (e) {}
+        if (pending && pending.date) {
+          try { localStorage.removeItem("loanrepo:lastrun"); } catch (e) {}
+          if (this.restoreLastRun(pending) !== false) return;
+        }
+        if (["loan", "saved"].indexOf(this.state.screen) >= 0) this.go("dash");
       });
     });
     db.fetchRepoHistory().then(h => { if (h) this.setState({ repoHistory: h }, () => this.compute()); });
@@ -1901,8 +1932,9 @@ class Component extends DCLogic {
       bm: r.benchmark,
       resets: resets.join(",")
     });
-    const name = (this.state.user && this.state.user.email) ? this.state.user.email.split("@")[0] : "";
-    if (name) q.set("name", name);
+    // Deliberately no name: an email local part ("platanoorganic6") is a
+    // username, not a name. The edition line reads "Prepared for a borrower ·
+    // Jun 2021" instead, which is honest. Collect a real name before using one.
     if (sample) q.set("sample", "1");
     return "Ebook.html?" + q.toString();
   }
@@ -2089,6 +2121,10 @@ class Component extends DCLogic {
   }
 
   startUpgrade() {
+    if (!Component.STAGE2) {
+      this.setState({ screen: "upgrade", upgradeMsg: "Tracking is in final testing. Join the list and we'll tell you the day it opens." });
+      return;
+    }
     if (!this.state.user) { this.setState({ authOpen: true, authMsg: "", authReason: "track" }); return; }
     if (this.isPro) return;
     this.setState({ upgradeMsg: "Opening checkout…" });
@@ -2470,6 +2506,11 @@ class Component extends DCLogic {
       ...this.errand(),
       ...this.cohort(),
       trackCta: this.isPro ? "Track this loan" : "Track this loan — ₹149/mo",
+      stage2: Component.STAGE2,
+      stage2Soon: !Component.STAGE2,
+      trackBadge: Component.STAGE2 ? "Ongoing" : "Opening soon",
+      trackSubline: Component.STAGE2 ? "Cancel whenever" : "In final testing — not yet open",
+      trackTierCta: Component.STAGE2 ? "See the plan" : "Join the list",
       navLoanLabel: s.user ? "Your loan" : "Diagnose",
       noResult: !s.hasRun,
       ...this.demo(),
@@ -2523,7 +2564,9 @@ class Component extends DCLogic {
       isFree: !this.isPro,
       isPro: this.isPro,
       upgradeMsg: s.upgradeMsg,
-      upgradeCta: this.isPro ? "Your tracking is active" : "Start tracking — ₹149/mo",
+      upgradeCta: this.isPro
+        ? "Your tracking is active"
+        : Component.STAGE2 ? "Start tracking — ₹149/mo" : "Tell me when tracking opens",
       upgrade: () => this.startUpgrade(),
       fWaitlist: s.waitlist, waitlistMsg: s.waitlistMsg,
       setWaitlist: e => this.setState({ waitlist: e.target.value }),
@@ -2537,6 +2580,12 @@ class Component extends DCLogic {
       },
       print: () => {
         if (!s.user && this.db.enabled) {
+          try {
+            localStorage.setItem("loanrepo:lastrun", JSON.stringify({
+              date: s.date, amount: s.amount, tenure: s.tenure, benchmark: s.benchmark,
+              ownSpread: s.ownSpread, useOwnSpread: s.useOwnSpread
+            }));
+          } catch (e) {}
           this.setState({ authOpen: true, authMsg: "", authReason: "pdf" });
           this.db.track("pdf_signin_prompt", {});
           return;
