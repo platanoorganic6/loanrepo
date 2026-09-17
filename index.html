@@ -45,6 +45,12 @@
   a { color: var(--color-accent-700); text-decoration: none; }
   a:hover { color: var(--color-accent-900); text-decoration: underline; }
 
+  /* App shell on phones: the tab bar appears and the page clears it. */
+  @media (max-width: 720px) {
+    [data-tabbar] { display: block !important; }
+    body { padding-bottom: 58px; }
+  }
+
   /* Industry declares --color-divider as color-mix(); this engine drops
      color-mix() inside the border shorthand, so every hairline in the
      wireframe vanishes. Same colour, literal form, parses everywhere. */
@@ -91,6 +97,9 @@
         <button type="button" onClick="{{ goCycle }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navCycle }};">Rate cycle</button>
         <button type="button" onClick="{{ goExamples }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navExamples }};">Examples</button>
         </sc-if>
+        <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{ goDash }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navDash }};">Home</button>
+        </sc-if>
         <sc-if value="{{ dbEnabled }}" hint-placeholder-val="{{ false }}">
           <button type="button" onClick="{{ goSaved }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navSaved }};">Saved runs</button>
         </sc-if>
@@ -114,8 +123,8 @@
   <div class="dialog-backdrop" style="z-index:50;">
     <div class="dialog blueprint" style="background:var(--color-bg);">
       <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-      <div class="dialog-title">Sign in to track your loan</div>
-      <div class="dialog-body">Create your private LoanRepo workspace to keep this diagnosis, follow future resets and act when your loan needs attention.</div>
+      <div class="dialog-title">{{ authTitle }}</div>
+      <div class="dialog-body">{{ authBody }}</div>
       <button type="button" class="btn btn-secondary btn-block" onClick="{{ signInGoogle }}">Continue with Google</button>
       <div style="display:flex; align-items:center; gap:12px; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-neutral-600); margin:2px 0;">
         <span style="flex:1; height:1px; background:var(--color-divider);"></span>or<span style="flex:1; height:1px; background:var(--color-divider);"></span>
@@ -139,14 +148,14 @@
         <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">Home loan diagnosis</div>
         <h1 style="font-size:clamp(30px,6vw,46px); line-height:1.04; margin:0 0 18px; max-width:20ch;">Did your home loan quietly get longer?</h1>
         <p style="font-size:16px; line-height:1.6; max-width:52ch; color:var(--color-neutral-800); margin:0 0 12px;">See what the rate cycle did to your loan — tenure, balance and estimated interest — and understand what to check next.</p>
-        <p style="font-size:14px; line-height:1.6; max-width:52ch; color:var(--color-neutral-700); margin:0;">The calculation runs in your browser. Your loan particulars are saved only if you sign in and choose to track the loan. LoanRepo is independent of lenders.</p>
+        <p style="font-size:14px; line-height:1.6; max-width:52ch; color:var(--color-neutral-700); margin:0;">The calculation runs in your browser and your result is never held back. The PDF report asks for an email address; your loan particulars are not sent with it, and are stored only if you subscribe and choose to track the loan. LoanRepo is independent of lenders.</p>
       </div>
 
       <div class="blueprint" style="padding:22px 24px 24px;">
         <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
         <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-700); padding-bottom:16px; border-bottom:1px dashed var(--color-divider); margin-bottom:20px;">Loan particulars</div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div class="field"><label for="lr-date">Loan start month</label><input class="input" id="lr-date" type="month" min="2019-01" max="2026-08" value="{{ fDate }}" onChange="{{ setDate }}"></div>
+          <div class="field"><label for="lr-date">Loan start month</label><input class="input" id="lr-date" type="month" min="2006-01" max="2026-09" value="{{ fDate }}" onChange="{{ setDate }}"></div>
           <div class="field"><label for="lr-ten">Original tenure (years)</label><input class="input" id="lr-ten" type="number" min="1" max="30" step="1" value="{{ fTenure }}" onChange="{{ setTenure }}"></div>
         </div>
         <div class="field" style="margin-top:16px;"><label for="lr-amt">Loan amount (₹)</label><input class="input" id="lr-amt" type="number" min="100000" step="50000" value="{{ fAmount }}" onChange="{{ setAmount }}"></div>
@@ -175,6 +184,164 @@
       </div>
     </div>
 
+    <!-- Landing content: only before a loan has been run. Once there is a
+         result, the result is the page. -->
+    <sc-if value="{{ noResult }}" hint-placeholder-val="{{ true }}">
+    <div style="margin-top:72px;">
+
+      <div style="border-top:1px solid var(--color-text); padding-top:26px;">
+        <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:18px;">See it on a real loan</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:30px; align-items:start;">
+          <div>
+            <div style="font-size:19px; line-height:1.4; font-family:var(--font-heading); margin-bottom:14px;">"₹50 lakh, 20 years, taken June 2021"</div>
+            <div style="font-size:13px; color:var(--color-neutral-700); margin-bottom:18px;">↓ walked through every RBI decision since</div>
+            <div style="display:grid; gap:12px;">
+              <div style="display:flex; justify-content:space-between; gap:14px; align-items:baseline; border-top:1px solid var(--color-divider); padding-top:10px;">
+                <span style="font-size:13px; color:var(--color-neutral-700);">Rate at disbursal</span>
+                <span style="font-family:var(--font-heading); font-size:19px; font-variant-numeric:tabular-nums;">{{ demoRate0 }}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; gap:14px; align-items:baseline; border-top:1px solid var(--color-divider); padding-top:10px;">
+                <span style="font-size:13px; color:var(--color-neutral-700);">Rate today</span>
+                <span style="font-family:var(--font-heading); font-size:19px; font-variant-numeric:tabular-nums;">{{ demoRate1 }}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; gap:14px; align-items:baseline; border-top:1px solid var(--color-divider); padding-top:10px;">
+                <span style="font-size:13px; color:var(--color-neutral-700);">EMI, then and now</span>
+                <span style="font-family:var(--font-heading); font-size:19px; font-variant-numeric:tabular-nums;">{{ demoEmi }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="blueprint" style="padding:24px; background:var(--color-accent-900); color:var(--color-bg);">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.16em; text-transform:uppercase; opacity:0.72; margin-bottom:10px;">Added, unannounced</div>
+            <div style="font-family:var(--font-heading); font-weight:600; font-size:58px; line-height:0.9; font-variant-numeric:tabular-nums;">{{ demoDrift }}</div>
+            <div style="font-family:var(--font-heading); font-size:16px; letter-spacing:0.04em; text-transform:uppercase; margin-top:6px;">years of tenure</div>
+            <div style="font-size:13.5px; line-height:1.5; margin-top:14px; padding-top:14px; border-top:1px solid rgba(242,242,243,0.3);">{{ demoLine }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); margin-top:44px; border-top:1px solid var(--color-text); border-bottom:1px solid var(--color-divider);">
+        <div style="padding:20px; border-right:1px solid var(--color-divider);">
+          <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums;">{{ repoCount }}</div>
+          <div style="font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-top:5px;">RBI decisions modelled</div>
+        </div>
+        <div style="padding:20px; border-right:1px solid var(--color-divider);">
+          <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums;">{{ repoFirstYear }}</div>
+          <div style="font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-top:5px;">History starts</div>
+        </div>
+        <div style="padding:20px; border-right:1px solid var(--color-divider);">
+          <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums;">0</div>
+          <div style="font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-top:5px;">Lender relationships</div>
+        </div>
+        <div style="padding:20px;">
+          <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums;">76%</div>
+          <div style="font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-top:5px;">Borrowers who track only the EMI</div>
+        </div>
+      </div>
+
+      <div style="margin-top:52px;">
+        <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:8px;">What to expect</div>
+        <h2 style="font-family:var(--font-heading); font-size:30px; line-height:1.1; margin:0 0 22px; max-width:26ch;">Built on the record, not on estimates</h2>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:22px;">
+          <div style="border-top:2px solid var(--color-text); padding-top:12px;">
+            <b style="display:block; font-family:var(--font-heading); font-size:15px; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:5px;">Every reset, not two points</b>
+            <span style="font-size:14px; line-height:1.55; color:var(--color-neutral-800);">Your loan is advanced a month at a time and re-rated at each reset date, exactly as a bank does it.</span>
+          </div>
+          <div style="border-top:2px solid var(--color-text); padding-top:12px;">
+            <b style="display:block; font-family:var(--font-heading); font-size:15px; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:5px;">Assumptions stated</b>
+            <span style="font-size:14px; line-height:1.55; color:var(--color-neutral-800);">The spread we assume, the reset frequency and the model date are all on the Method page. Override the spread with your own.</span>
+          </div>
+          <div style="border-top:2px solid var(--color-text); padding-top:12px;">
+            <b style="display:block; font-family:var(--font-heading); font-size:15px; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:5px;">No forecasting</b>
+            <span style="font-size:14px; line-height:1.55; color:var(--color-neutral-800);">Past today the model holds the repo rate where it is. Nobody can forecast it, including us.</span>
+          </div>
+          <div style="border-top:2px solid var(--color-text); padding-top:12px;">
+            <b style="display:block; font-family:var(--font-heading); font-size:15px; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:5px;">Nothing sold to you</b>
+            <span style="font-size:14px; line-height:1.55; color:var(--color-neutral-800);">No lender referrals, no commission, and no different answer depending on what you decide.</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:56px; border-top:1px solid var(--color-text); padding-top:26px;">
+        <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:8px;">What it costs</div>
+        <h2 style="font-family:var(--font-heading); font-size:30px; line-height:1.1; margin:0 0 6px; max-width:26ch;">The diagnosis is free. Always.</h2>
+        <p style="font-size:15px; line-height:1.6; color:var(--color-neutral-800); max-width:58ch; margin:0 0 24px;">Two paid things sit beside it, and neither gates the calculator or the PDF.</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; align-items:start;">
+          <div class="blueprint" style="padding:24px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:10px;">Diagnose</div>
+            <div style="font-family:var(--font-heading); font-size:34px; line-height:1;">Free</div>
+            <div style="font-size:13px; color:var(--color-neutral-700); margin-top:4px;">No signup to see it</div>
+            <ul style="margin:18px 0 0; padding:0; list-style:none; font-size:13.5px; line-height:1.5;">
+              <li style="padding:7px 0; border-top:1px solid var(--color-divider);">Full tenure and balance diagnosis</li>
+              <li style="padding:7px 0; border-top:1px solid var(--color-divider);">Every reset that moved your rate</li>
+              <li style="padding:7px 0; border-top:1px solid var(--color-divider);">Prepayment and payoff arithmetic</li>
+              <li style="padding:7px 0; border-top:1px solid var(--color-divider);">The result as a PDF, for an email address</li>
+            </ul>
+          </div>
+          <div class="blueprint" style="padding:24px; border:2px solid var(--color-text);">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:10px;">
+              <span style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-600);">Track</span>
+              <span class="tag tag-accent" style="font-size:10px;">Ongoing</span>
+            </div>
+            <div style="font-family:var(--font-heading); font-size:34px; line-height:1; font-variant-numeric:tabular-nums;">₹149<span style="font-size:16px; color:var(--color-neutral-700);">/mo</span></div>
+            <div style="font-size:13px; color:var(--color-neutral-700); margin-top:4px;">Cancel whenever</div>
+            <ul style="margin:18px 0 18px; padding:0; list-style:none; font-size:13.5px; line-height:1.5;">
+              <li style="padding:7px 0; border-top:1px solid var(--color-divider);">Emailed within 24h of each RBI decision, with what it does to your loan</li>
+              <li style="padding:7px 0; border-top:1px solid var(--color-divider);">Reminded before your own reset, and again to log what the statement said</li>
+              <li style="padding:7px 0; border-top:1px solid var(--color-divider);">A dated check-in record that reconciles the model against your bank</li>
+              <li style="padding:7px 0; border-top:1px solid var(--color-divider);">Annual year in review</li>
+            </ul>
+            <button type="button" class="btn btn-primary btn-block" onClick="{{ goUpgrade }}" style="letter-spacing:0.05em; text-transform:uppercase;">See the plan</button>
+          </div>
+          <div class="blueprint" style="padding:24px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:10px;">
+              <span style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-600);">The book</span>
+              <span class="tag tag-outline" style="font-size:10px;">One-time</span>
+            </div>
+            <div style="font-family:var(--font-heading); font-size:34px; line-height:1; font-variant-numeric:tabular-nums;">₹299</div>
+            <div style="font-size:13px; color:var(--color-neutral-700); margin-top:4px;">Yours to keep</div>
+            <ul style="margin:18px 0 18px; padding:0; list-style:none; font-size:13.5px; line-height:1.5;">
+              <li style="padding:7px 0; border-top:1px solid var(--color-divider);">Seventeen chapters, eight on ground this site doesn't touch</li>
+              <li style="padding:7px 0; border-top:1px solid var(--color-divider);">Three bank emails, ready to send</li>
+              <li style="padding:7px 0; border-top:1px solid var(--color-divider);">Worked on your own figures, not an invented borrower</li>
+              <li style="padding:7px 0; border-top:1px solid var(--color-divider);">Two chapters free, with your numbers in them</li>
+            </ul>
+            <button type="button" class="btn btn-secondary btn-block" onClick="{{ goBook }}" style="letter-spacing:0.05em; text-transform:uppercase;">Read two chapters</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:56px; border-top:1px solid var(--color-text); padding-top:26px;">
+        <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:8px;">Start here</div>
+        <h2 style="font-family:var(--font-heading); font-size:30px; line-height:1.1; margin:0 0 22px; max-width:26ch;">Which of these is you?</h2>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px;">
+          <div class="blueprint" style="padding:24px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <b style="display:block; font-family:var(--font-heading); font-size:17px; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;">I already have a loan</b>
+            <p style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin:0 0 16px;">Find out what the cycle did to your tenure, and what your statement has not been telling you.</p>
+            <button type="button" class="btn btn-primary" onClick="{{ focusForm }}" style="letter-spacing:0.05em; text-transform:uppercase;">Diagnose my loan</button>
+          </div>
+          <div class="blueprint" style="padding:24px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <b style="display:block; font-family:var(--font-heading); font-size:17px; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;">I'm about to borrow</b>
+            <p style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin:0 0 16px;">See where the cycle stands before you sign, and what EBLR against MCLR does over twenty years.</p>
+            <button type="button" class="btn btn-secondary" onClick="{{ goBuying }}" style="letter-spacing:0.05em; text-transform:uppercase;">Borrowing soon</button>
+          </div>
+          <div class="blueprint" style="padding:24px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <b style="display:block; font-family:var(--font-heading); font-size:17px; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;">I want to check your work</b>
+            <p style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin:0 0 16px;">Every assumption, the reset rules, the rate source, and what this model deliberately does not do.</p>
+            <button type="button" class="btn btn-secondary" onClick="{{ goMethod }}" style="letter-spacing:0.05em; text-transform:uppercase;">Read the method</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </sc-if>
+
     <sc-if value="{{ hasResult }}" hint-placeholder-val="{{ true }}">
     <div ref="{{ resultRef }}" style="margin-top:64px; border-top:1px solid var(--color-text); padding-top:0; scroll-margin-top:16px;">
       <!-- The printed PDF opens on the loan, not on the pitch. -->
@@ -186,6 +353,16 @@
         <div style="font-family:var(--font-heading); font-size:20pt; margin-top:10pt; line-height:1.2;">{{ printSummary }}</div>
         <div style="font-size:10pt; color:var(--color-neutral-700); margin-top:4pt;">{{ printSubhead }}</div>
       </div>
+
+      <!-- Loans older than October 2019 were not repo-linked. Saying so at the
+           top of the result, not in a footnote — the further back the loan, the
+           weaker the model's central assumption. -->
+      <sc-if value="{{ regimePreRepo }}" hint-placeholder-val="{{ false }}">
+      <div data-print-keep="true" style="border:1px solid var(--color-text); border-left:4px solid var(--color-accent-700); padding:18px 20px; margin-bottom:22px;">
+        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:7px;">Read this before the numbers · {{ regimeLabel }}</div>
+        <div style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); max-width:74ch;">{{ regimeNote }}</div>
+      </div>
+      </sc-if>
 
       <!-- Diagnosis card. Folded in from the independent pass, but computed
            from the engine's own numbers rather than scraped from the DOM. -->
@@ -239,7 +416,21 @@
           <div style="font-family:var(--font-heading); font-size:20px; letter-spacing:0.04em; text-transform:uppercase; margin-top:8px;">years of tenure</div>
         </div>
         <div style="padding-bottom:6px;">
-          <p style="font-size:17px; line-height:1.55; margin:0; max-width:46ch;">Rates fell after you borrowed — from <b>{{ startRate }}%</b> at disbursal to <b>{{ nowRate }}%</b> today. On the same EMI, your loan is clearing early rather than stretching. You bought on the right side of the cycle.</p>
+          <p style="font-size:17px; line-height:1.55; margin:0; max-width:46ch;">{{ aheadLede }} You bought on the right side of the cycle.</p>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isFlat }}" hint-placeholder-val="{{ false }}">
+      <div class="blueprint" style="padding:clamp(24px,4vw,40px); margin-top:6px; display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:clamp(24px,3vw,44px); align-items:end;">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div>
+          <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:10px;">Close to your original schedule</div>
+          <div style="font-family:var(--font-heading); font-weight:600; font-size:clamp(56px,11vw,86px); line-height:0.9; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;">{{ flatDrift }}</div>
+          <div style="font-family:var(--font-heading); font-size:clamp(16px,3.5vw,20px); letter-spacing:0.04em; text-transform:uppercase; margin-top:8px;">years of tenure</div>
+        </div>
+        <div style="padding-bottom:6px;">
+          <p style="font-size:17px; line-height:1.55; margin:0; max-width:46ch;">{{ flatLede }} That is worth knowing rather than celebrating: the same mechanism adds years quickly when the cycle turns, and it does so without a letter.</p>
         </div>
       </div>
       </sc-if>
@@ -489,7 +680,11 @@
           <button type="button" class="btn btn-primary" onClick="{{ saveRun }}">{{ trackCta }}</button>
           <span style="font-size:12px; color:var(--color-accent-800);">{{ saveMsg }}</span>
         </sc-if>
-        <button type="button" class="btn btn-secondary" onClick="{{ print }}">Save this result as PDF</button>
+        <button type="button" class="btn btn-secondary" onClick="{{ print }}">{{ pdfCta }}</button>
+        <sc-if value="{{ canSaveReport }}" hint-placeholder-val="{{ false }}">
+          <button type="button" class="btn btn-secondary" onClick="{{ saveReport }}">{{ saveReportCta }}</button>
+          <span style="font-size:12px; color:var(--color-accent-800);">{{ reportMsg }}</span>
+        </sc-if>
         <button type="button" class="btn btn-ghost" onClick="{{ goMethod }}">Read the method and assumptions</button>
         <span style="font-size:12px; color:var(--color-neutral-700); max-width:44ch;">{{ confidence }}</span>
       </div>
@@ -585,8 +780,8 @@
   <sc-if value="{{ onCycle }}" hint-placeholder-val="{{ false }}">
   <main style="max-width:1120px; margin:0 auto; padding:clamp(28px,5vw,44px) clamp(16px,4vw,24px) 88px;">
     <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">Where the cycle stands</div>
-    <h1 style="font-size:clamp(28px,5.5vw,42px); line-height:1.06; margin:0 0 16px; max-width:26ch;">The repo rate sits {{ cyclePctTxt }} of the way up its own six-year range.</h1>
-    <p style="font-size:16px; line-height:1.6; max-width:66ch; color:var(--color-neutral-800); margin:0;">This is a position, not a recommendation. Today's repo rate is <b>{{ nowRepo }}%</b>, against a 2020–2026 floor of 4.00% and a peak of 6.50%. What that means for you depends on whether you already hold a floating loan or are deciding when to take one.</p>
+    <h1 style="font-size:clamp(28px,5.5vw,42px); line-height:1.06; margin:0 0 16px; max-width:26ch;">The repo rate sits {{ cyclePctTxt }} of the way up its own {{ cycleSpanTxt }} range.</h1>
+    <p style="font-size:16px; line-height:1.6; max-width:66ch; color:var(--color-neutral-800); margin:0;">This is a position, not a recommendation. Today's repo rate is <b>{{ nowRepo }}%</b>, against a floor of {{ cycleLo }} in {{ cycleLoWhen }} and a peak of {{ cycleHi }} in {{ cycleHiWhen }}. What that means for you depends on whether you already hold a floating loan or are deciding when to take one.</p>
 
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); margin-top:36px; border-top:1px solid var(--color-text); border-bottom:1px solid var(--color-divider);">
       <div style="padding:22px 20px; border-right:1px solid var(--color-divider);">
@@ -595,24 +790,24 @@
       </div>
       <div style="padding:22px 20px; border-right:1px solid var(--color-divider);">
         <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:7px;">Cycle floor</div>
-        <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums;">4.00%</div>
-        <div style="font-size:12px; color:var(--color-neutral-700); margin-top:3px;">May 2020 — held two years</div>
+        <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums;">{{ cycleLo }}</div>
+        <div style="font-size:12px; color:var(--color-neutral-700); margin-top:3px;">{{ cycleLoWhen }}</div>
       </div>
       <div style="padding:22px 20px; border-right:1px solid var(--color-divider);">
         <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:7px;">Cycle peak</div>
-        <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums;">6.50%</div>
-        <div style="font-size:12px; color:var(--color-neutral-700); margin-top:3px;">Feb 2023 — held two years</div>
+        <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums;">{{ cycleHi }}</div>
+        <div style="font-size:12px; color:var(--color-neutral-700); margin-top:3px;">{{ cycleHiWhen }}</div>
       </div>
       <div style="padding:22px 20px;">
         <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:7px;">Fastest move</div>
-        <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums;">250 bps</div>
-        <div style="font-size:12px; color:var(--color-neutral-700); margin-top:3px;">in nine months, 2022</div>
+        <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums;">{{ cycleFast }}</div>
+        <div style="font-size:12px; color:var(--color-neutral-700); margin-top:3px;">{{ cycleFastWhen }}</div>
       </div>
     </div>
 
     <figure class="blueprint" style="margin-top:44px; padding:26px 26px 18px;">
       <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-      <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:18px;">RBI repo rate, Feb 2020 – Sep 2026</div>
+      <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:18px;">RBI repo rate, {{ cycleFirstLabel }} – {{ cycleLastLabel }}</div>
       <svg viewBox="0 0 920 250" width="100%" height="auto" role="img" aria-label="RBI repo rate 2020 to 2026">
         <g stroke="var(--color-divider)" stroke-width="1">
           <line x1="62" y1="18" x2="62" y2="214"></line>
@@ -621,16 +816,16 @@
           <line x1="62" y1="116" x2="906" y2="116" stroke-dasharray="2 5"></line>
         </g>
         <g font-family="Barlow, Noto Sans, system-ui" font-size="11" fill="var(--color-neutral-700)" style="font-variant-numeric:tabular-nums;">
-          <text x="18" y="22">6.50%</text>
-          <text x="18" y="120">5.25%</text>
-          <text x="18" y="218">4.00%</text>
+          <text x="18" y="22">{{ cycleAxisTop }}</text>
+          <text x="18" y="120">{{ cycleAxisMid }}</text>
+          <text x="18" y="218">{{ cycleAxisBot }}</text>
         </g>
         <polyline fill="none" stroke="var(--color-accent-700)" stroke-width="2.25" points="{{ repoLine }}"></polyline>
         <circle cx="906" cy="{{ repoNowY }}" r="4" fill="var(--color-text)"></circle>
         <g font-family="Barlow Condensed, Noto Sans, system-ui" font-size="12" fill="var(--color-text)" letter-spacing="0.08em">
-          <text x="62" y="234">FEB 2020</text>
-          <text x="430" y="234">FEB 2023 · PEAK</text>
-          <text x="836" y="234">SEP 2026</text>
+          <text x="62" y="234">{{ cycleFirstLabel }}</text>
+          <text x="400" y="234">{{ cycleMidLabel }}</text>
+          <text x="828" y="234">{{ cycleLastLabel }}</text>
         </g>
       </svg>
       <figcaption style="font-size:12px; color:var(--color-neutral-700); margin-top:10px;">Home loan rate ≈ repo + bank spread, typically 2.4–3.0% on EBLR.</figcaption>
@@ -715,10 +910,20 @@
             <tr><td>EBLR reset frequency</td><td style="text-align:right;">quarterly</td></tr>
             <tr><td>MCLR spread (approx.)</td><td style="text-align:right; font-variant-numeric:tabular-nums;">{{ mclrSpreadTxt }}%</td></tr>
             <tr><td>MCLR reset frequency</td><td style="text-align:right;">annual</td></tr>
-            <tr><td>Rate source</td><td style="text-align:right;">RBI MPC decisions</td></tr>
+            <tr><td>Rate source</td><td style="text-align:right;">RBI MPC decisions, {{ cycleFirstLabel }} on</td></tr>
             <tr><td>Model date</td><td style="text-align:right;">8 Sep 2026</td></tr>
           </tbody>
         </table></div>
+        <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.12em; text-transform:uppercase; margin:22px 0 10px; padding-bottom:8px; border-bottom:1px solid var(--color-text);">Which benchmark existed when</div>
+        <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;"><table class="table" style="min-width:520px;">
+          <tbody>
+            <tr><td>Oct 2019 onward</td><td style="text-align:right;">EBLR / RLLR — repo-linked</td></tr>
+            <tr><td>Apr 2016 – Sep 2019</td><td style="text-align:right;">MCLR — bank's cost of funds</td></tr>
+            <tr><td>Jul 2010 – Mar 2016</td><td style="text-align:right;">Base Rate — bank-set</td></tr>
+            <tr><td>Before Jul 2010</td><td style="text-align:right;">BPLR — bank discretion</td></tr>
+          </tbody>
+        </table></div>
+        <div style="font-size:12.5px; line-height:1.55; color:var(--color-neutral-700); margin-top:10px;">Only EBLR is genuinely repo-linked. For a loan taken before October 2019 the model shows the repo path your loan sat inside — the same direction as your rate, but not its timing or size. If your loan was later converted to EBLR, as many were, the recent years are accurate and the early ones indicative. The result page says which regime applies to your dates.</div>
         <div style="font-size:12.5px; line-height:1.55; color:var(--color-neutral-700); margin-top:12px;">These are defaults, used only when you don’t supply your own. Your real spread is printed in your sanction letter — enter it on the calculator and it replaces both, or log a check-in and we calibrate it from what your statement actually said. A spread 0.25% off moves a 20-year result by roughly a year, so this is the assumption worth removing.</div>
       </div>
       <div>
@@ -756,7 +961,7 @@
       <div class="blueprint" style="padding:26px; align-self:start;">
         <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
         <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:10px;">Run your own numbers</div>
-        <p style="font-size:14px; line-height:1.6; color:var(--color-neutral-800);">Takes under a minute. No signup, no email, no result held back.</p>
+        <p style="font-size:14px; line-height:1.6; color:var(--color-neutral-800);">Takes under a minute. Nothing held back, and no account needed to see your result.</p>
         <button type="button" class="btn btn-primary" onClick="{{ goLoan }}" style="letter-spacing:0.06em; text-transform:uppercase;">Check your loan</button>
       </div>
     </div>
@@ -1020,6 +1225,119 @@
       <div><b style="color:var(--color-text);">Cancelling.</b> One click, and no email exchange. Your tracked loans and check-in history stay readable, and you can export them.</div>
       <div><b style="color:var(--color-text);">The book is separate.</b> ₹299 once, and not a subscription. Subscribers get no discount and non-subscribers lose nothing.</div>
     </div>
+  </main>
+  </sc-if>
+
+  <!-- ══ SCREEN: DASHBOARD ══
+       The signed-in home. App-shaped rather than page-shaped: a status header,
+       a metric grid, then what is due. -->
+  <sc-if value="{{ onDash }}" hint-placeholder-val="{{ false }}">
+  <main style="max-width:760px; margin:0 auto; padding:clamp(24px,5vw,40px) clamp(16px,4vw,24px) 104px;">
+
+    <div style="display:flex; justify-content:space-between; align-items:baseline; gap:16px; flex-wrap:wrap; margin-bottom:26px;">
+      <div>
+        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:6px;">Your workspace</div>
+        <h1 style="font-size:clamp(26px,5vw,34px); line-height:1.05; margin:0;">{{ dashName }}</h1>
+      </div>
+      <div style="font-size:12.5px; color:var(--color-neutral-700); text-align:right;">{{ userEmail }}</div>
+    </div>
+
+    <!-- Documents. The workspace exists for these even before anything is
+         tracked, so it sits above the tracking state. -->
+    <div style="margin-bottom:30px;">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; gap:14px; flex-wrap:wrap; border-bottom:1px solid var(--color-text); padding-bottom:10px; margin-bottom:4px;">
+        <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase;">Your documents</div>
+        <button type="button" onClick="{{ goLoan }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-accent-800); border-bottom:1px solid var(--color-accent-800);">New report</button>
+      </div>
+
+      <sc-if value="{{ hasReports }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <sc-for list="{{ reports }}" as="rep" hint-placeholder-count="2">
+          <div style="display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:center; border-bottom:1px solid var(--color-divider); padding:14px 0;">
+            <div style="min-width:0;">
+              <div style="font-family:var(--font-heading); font-size:16px; letter-spacing:0.01em;">{{ rep.title }}</div>
+              <div style="font-size:12.5px; color:var(--color-neutral-700); margin-top:3px;">Saved {{ rep.when }} · {{ rep.verdict }} · {{ rep.rate }}</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button type="button" class="btn btn-secondary" onClick="{{ rep.open }}" style="font-size:12px; padding:7px 11px;">Open</button>
+              <button type="button" class="btn btn-ghost" onClick="{{ rep.remove }}" style="font-size:12px; padding:7px 11px;">Delete</button>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ noReports }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:16px 0; border-bottom:1px solid var(--color-divider); font-size:14px; line-height:1.55; color:var(--color-neutral-800); max-width:52ch;">
+        No reports saved yet. Run your loan, then press <b>Save to my workspace</b> — the report is rebuilt from your particulars each time you open it, so the figures stay current rather than freezing on the day you saved.
+      </div>
+      </sc-if>
+
+      <div style="display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:center; border-bottom:1px solid var(--color-divider); padding:14px 0;">
+        <div style="min-width:0;">
+          <div style="font-family:var(--font-heading); font-size:16px; letter-spacing:0.01em;">The Quiet Years</div>
+          <div style="font-size:12.5px; color:var(--color-neutral-700); margin-top:3px;">{{ bookStatus }}</div>
+        </div>
+        <button type="button" class="btn btn-secondary" onClick="{{ openBook }}" style="font-size:12px; padding:7px 11px;">{{ bookCta }}</button>
+      </div>
+    </div>
+
+    <sc-if value="{{ dashEmpty }}" hint-placeholder-val="{{ true }}">
+    <div class="blueprint" style="padding:30px 26px;">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="font-family:var(--font-heading); font-size:20px; margin-bottom:8px;">Nothing tracked yet</div>
+      <p style="font-size:14.5px; line-height:1.55; color:var(--color-neutral-800); margin:0 0 18px; max-width:44ch;">Run your loan, then press Track this loan. From then on this page tells you where it stands and what is due.</p>
+      <button type="button" class="btn btn-primary" onClick="{{ goLoan }}" style="letter-spacing:0.05em; text-transform:uppercase;">Diagnose a loan</button>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ dashReady }}" hint-placeholder-val="{{ false }}">
+    <div>
+      <div class="blueprint" style="padding:24px; background:var(--color-accent-900); color:var(--color-bg); margin-bottom:2px;">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.16em; text-transform:uppercase; opacity:0.72; margin-bottom:8px;">Against your original schedule</div>
+        <div style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;">
+          <span style="font-family:var(--font-heading); font-weight:600; font-size:62px; line-height:0.88; font-variant-numeric:tabular-nums;">{{ dashDrift }}</span>
+          <span style="font-family:var(--font-heading); font-size:17px; letter-spacing:0.04em; text-transform:uppercase;">{{ dashDriftWord }}</span>
+        </div>
+        <div style="font-size:13px; line-height:1.5; margin-top:12px; opacity:0.85;">{{ dashSub }}</div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); border:1px solid var(--color-divider);">
+        <div style="padding:16px 18px; border-right:1px solid var(--color-divider);">
+          <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:5px;">Rate now</div>
+          <div style="font-family:var(--font-heading); font-size:23px; font-variant-numeric:tabular-nums;">{{ dashRate }}</div>
+        </div>
+        <div style="padding:16px 18px; border-right:1px solid var(--color-divider);">
+          <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:5px;">Outstanding</div>
+          <div style="font-family:var(--font-heading); font-size:23px; font-variant-numeric:tabular-nums;">{{ dashBalance }}</div>
+        </div>
+        <div style="padding:16px 18px; border-right:1px solid var(--color-divider);">
+          <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:5px;">EMI</div>
+          <div style="font-family:var(--font-heading); font-size:23px; font-variant-numeric:tabular-nums;">{{ dashEmi }}</div>
+        </div>
+        <div style="padding:16px 18px;">
+          <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:5px;">Logged</div>
+          <div style="font-family:var(--font-heading); font-size:23px; font-variant-numeric:tabular-nums;">{{ dashLogged }}</div>
+        </div>
+      </div>
+
+      <div class="blueprint" style="padding:22px 24px; margin-top:22px;">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:10px;">Next reset</div>
+        <div style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;">
+          <span style="font-family:var(--font-heading); font-size:34px; line-height:1; font-variant-numeric:tabular-nums;">{{ dashCountdown }}</span>
+          <span style="font-size:14px; color:var(--color-neutral-700);">on or about {{ dashNextReset }}</span>
+        </div>
+        <div style="font-size:13px; line-height:1.5; color:var(--color-neutral-700); margin-top:12px; max-width:48ch;">We email you the week it lands, and again once the statement should be with you. Nothing to remember.</div>
+      </div>
+
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:22px;">
+        <button type="button" class="btn btn-primary" onClick="{{ goSaved }}" style="letter-spacing:0.05em; text-transform:uppercase;">Log a check-in</button>
+        <button type="button" class="btn btn-secondary" onClick="{{ goLoan }}">Recalculate</button>
+      </div>
+    </div>
+    </sc-if>
   </main>
   </sc-if>
 
@@ -1295,12 +1613,25 @@
   </main>
   </sc-if>
 
+  <!-- App-style tab bar: only for signed-in users, only on narrow viewports.
+       The header nav stays authoritative on desktop. -->
+  <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
+  <div data-print-hide="true" data-tabbar="true" style="position:fixed; left:0; right:0; bottom:0; z-index:40; background:var(--color-bg); border-top:1px solid var(--color-text); display:none;">
+    <div style="display:grid; grid-template-columns:repeat(4,1fr);">
+      <button type="button" onClick="{{ goDash }}" style="background:none; border:none; border-top:3px solid {{ navDash }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Home</button>
+      <button type="button" onClick="{{ goLoan }}" style="background:none; border:none; border-top:3px solid {{ navLoan }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Diagnose</button>
+      <button type="button" onClick="{{ goSaved }}" style="background:none; border:none; border-top:3px solid {{ navSaved }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Loans</button>
+      <button type="button" onClick="{{ goCycle }}" style="background:none; border:none; border-top:3px solid {{ navCycle }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Cycle</button>
+    </div>
+  </div>
+  </sc-if>
+
   <footer style="border-top:1px solid var(--color-divider);">
     <div style="max-width:1120px; margin:0 auto; padding:30px 24px 40px; display:grid; gap:18px;">
       <div style="display:flex; justify-content:space-between; gap:18px; flex-wrap:wrap; font-size:12.5px; color:var(--color-neutral-700);">
         <span>LoanRepo — real rate history, no lender affiliation.</span>
         <button type="button" onClick="{{ goBook }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-body); font-size:12.5px; color:var(--color-accent-700); text-decoration:underline;">The Quiet Years — our guide for borrowers, ₹299</button>
-        <span>All figures computed from RBI MPC repo rate records, 2020–2026.</span>
+        <span>All figures computed from RBI MPC repo rate records, {{ cycleFirstLabel }} onward.</span>
       </div>
       <div style="display:flex; gap:20px; flex-wrap:wrap; border-top:1px solid var(--color-divider); padding-top:16px; font-size:12.5px;">
         <sc-for list="{{ legalTabs }}" as="lf" hint-placeholder-count="6">
@@ -1316,11 +1647,38 @@
 <script type="text/x-dc" data-dc-script data-props="{&quot;legalEntity&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;LoanRepo&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;legalAddress&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Address to be confirmed&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;contactEmail&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;hello@loanrepo.in&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;grievanceOfficer&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Ravi, Founder — hello@loanrepo.in&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;jurisdiction&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Bengaluru&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;eblrSpread&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2.65,&quot;min&quot;:1.5,&quot;max&quot;:4,&quot;step&quot;:0.05,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Model assumptions&quot;},&quot;mclrSpread&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:3.75,&quot;min&quot;:2.5,&quot;max&quot;:5,&quot;step&quot;:0.05,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Model assumptions&quot;},&quot;showScenario&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Result screen&quot;},&quot;showChecklist&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Result screen&quot;}}">
 class Component extends DCLogic {
   static REPO = [
-    { d: "2020-02-06", r: 5.15 }, { d: "2020-03-27", r: 4.40 }, { d: "2020-05-22", r: 4.00 },
-    { d: "2022-05-04", r: 4.40 }, { d: "2022-06-08", r: 4.90 }, { d: "2022-08-05", r: 5.40 },
-    { d: "2022-09-30", r: 5.90 }, { d: "2022-12-07", r: 6.25 }, { d: "2023-02-08", r: 6.50 },
-    { d: "2025-02-07", r: 6.25 }, { d: "2025-04-09", r: 6.00 }, { d: "2025-06-06", r: 5.50 },
-    { d: "2025-12-05", r: 5.25 }
+    { d: "2005-10-26", r: 6.25 }, { d: "2006-01-24", r: 6.50 }, { d: "2006-06-08", r: 6.75 },
+    { d: "2006-07-25", r: 7.00 }, { d: "2006-10-30", r: 7.25 }, { d: "2007-01-31", r: 7.50 },
+    { d: "2007-03-30", r: 7.75 }, { d: "2008-06-11", r: 8.00 }, { d: "2008-06-24", r: 8.50 },
+    { d: "2008-07-29", r: 9.00 }, { d: "2008-10-20", r: 8.00 }, { d: "2008-11-03", r: 7.50 },
+    { d: "2008-12-08", r: 6.50 }, { d: "2009-01-02", r: 5.50 }, { d: "2009-03-04", r: 5.00 },
+    { d: "2009-04-21", r: 4.75 }, { d: "2010-03-19", r: 5.00 }, { d: "2010-04-20", r: 5.25 },
+    { d: "2010-07-02", r: 5.50 }, { d: "2010-07-27", r: 5.75 }, { d: "2010-09-16", r: 6.00 },
+    { d: "2010-11-02", r: 6.25 }, { d: "2011-01-25", r: 6.50 }, { d: "2011-03-17", r: 6.75 },
+    { d: "2011-05-03", r: 7.25 }, { d: "2011-06-16", r: 7.50 }, { d: "2011-07-26", r: 8.00 },
+    { d: "2011-09-16", r: 8.25 }, { d: "2011-10-25", r: 8.50 }, { d: "2012-04-17", r: 8.00 },
+    { d: "2013-01-29", r: 7.75 }, { d: "2013-03-19", r: 7.50 }, { d: "2013-05-03", r: 7.25 },
+    { d: "2013-09-20", r: 7.50 }, { d: "2013-10-29", r: 7.75 }, { d: "2014-01-28", r: 8.00 },
+    { d: "2015-01-15", r: 7.75 }, { d: "2015-03-04", r: 7.50 }, { d: "2015-06-02", r: 7.25 },
+    { d: "2015-09-29", r: 6.75 }, { d: "2016-04-05", r: 6.50 }, { d: "2016-10-04", r: 6.25 },
+    { d: "2017-08-02", r: 6.00 }, { d: "2018-06-06", r: 6.25 }, { d: "2018-08-01", r: 6.50 },
+    { d: "2019-02-07", r: 6.25 }, { d: "2019-04-04", r: 6.00 }, { d: "2019-06-06", r: 5.75 },
+    { d: "2019-08-07", r: 5.40 }, { d: "2019-10-04", r: 5.15 }, { d: "2020-03-27", r: 4.40 },
+    { d: "2020-05-22", r: 4.00 }, { d: "2022-05-04", r: 4.40 }, { d: "2022-06-08", r: 4.90 },
+    { d: "2022-08-05", r: 5.40 }, { d: "2022-09-30", r: 5.90 }, { d: "2022-12-07", r: 6.25 },
+    { d: "2023-02-08", r: 6.50 }, { d: "2025-02-07", r: 6.25 }, { d: "2025-04-09", r: 6.00 },
+    { d: "2025-06-06", r: 5.50 }, { d: "2025-12-05", r: 5.25 }
+  ];
+
+  // Home loan benchmarks changed three times in twenty years. A loan taken
+  // before October 2019 was not repo-linked at all, so the model's
+  // pass-through assumption is weaker the further back you go. Stated rather
+  // than hidden.
+  static REGIMES = [
+    { from: "2019-10", label: "EBLR / RLLR", note: "Repo-linked and reset at least quarterly. The model's assumption — that repo changes reach your loan at the next reset — is how these loans actually work." },
+    { from: "2016-04", label: "MCLR", note: "Your bank set MCLR from its own cost of funds, not from the repo rate directly, and reset it annually. The model tracks the repo path instead, which follows the same direction but not the same timing or size." },
+    { from: "2010-07", label: "Base Rate", note: "Base Rate was set by each bank with no published formula tying it to the repo rate. The model treats your loan as following the repo path, which is an approximation of direction rather than a reconstruction of what your bank charged." },
+    { from: "1900-01", label: "BPLR", note: "Before July 2010 home loans were priced off BPLR, which banks set at their own discretion and which moved far less than the repo rate did. Treat this as the shape of the cycle you borrowed into, not as your loan's actual rate history." }
   ];
   static TODAY = new Date(2026, 8, 8);
   static CASES = [
@@ -1357,7 +1715,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "c4";
+  static BUILD = "d6";
   static LEGAL_TABS = [
     { id: "about", label: "About" },
     { id: "terms", label: "Terms" },
@@ -1379,8 +1737,9 @@ class Component extends DCLogic {
     { n: "10", h: "Changes to these terms", b: "We may update them. The date at the top shows when they last changed, and material changes affecting paid users will be emailed rather than quietly posted." }
   ];
   static PRIVACY_ROWS = [
-    { what: "Loan particulars — amount, dates, rate, benchmark", when: "Never, unless you subscribe and press Track this loan", why: "So the loan can be followed across resets and check-ins" },
-    { what: "Email address", when: "When you sign in, join the waitlist, or buy the book", why: "Sign-in links, delivery of what you bought, and — for subscribers — rate and reset emails" },
+    { what: "Loan particulars — amount, dates, rate, benchmark", when: "Only when you press Save to my workspace, or subscribe and press Track this loan. Signing in for the PDF does not send them.", why: "So a report can be reopened, and a tracked loan followed across resets" },
+    { what: "Saved reports", when: "When you save one to your workspace", why: "We keep the inputs, not a PDF — the report is rebuilt each time you open it, so the figures stay current. Delete it and the particulars go with it." },
+    { what: "Email address", when: "When you sign in — including to download the PDF report — join the waitlist, or buy the book", why: "Sign-in links, delivery of what you bought, knowing how many borrowers this reaches, and — for subscribers — rate and reset emails" },
     { what: "Check-in readings you enter", when: "Only for a loan you chose to track", why: "To reconcile your statement against the model over time" },
     { what: "Purchase record — amount, payment reference", when: "When you buy something", why: "Proof of purchase, delivery, refunds, and tax records we must keep" },
     { what: "Your loan figures alongside a purchase", when: "Only if you had run your loan before buying the book", why: "To generate the personalised edition you paid for" },
@@ -1420,6 +1779,8 @@ class Component extends DCLogic {
     ownSpread: "", useOwnSpread: false, buyAmount: 5000000, buyTenure: 20,
     ebookEmail: "", ebookMsg: "", ebookBusy: false, legalTab: "about",
     payoffLump: 500000, payoffExtra: 5000,
+    hasRun: false, authReason: "", reports: [], ownsBook: false,
+    reportBusy: false, reportMsg: "",
     user: null, authOpen: false, email: "", authMsg: "", saveMsg: "",
     runs: [], repoHistory: null, cases: null, waitlist: "", waitlistMsg: "",
     sub: null, selectedLoanId: null, checkIns: [], upgradeMsg: "", ciMsg: "",
@@ -1444,7 +1805,14 @@ class Component extends DCLogic {
     }
     this.forceUpdate();
     this.unsub = db.onAuth(user => {
-      this.setState({ user }, () => { if (user) this.loadRuns(); });
+      const arriving = !!user && !this.state.user;
+      this.setState({ user }, () => {
+        if (!user) return;
+        this.loadRuns();
+        this.loadReports();
+        this.db.ownsBook().then(owns => this.setState({ ownsBook: owns }));
+        if (arriving && ["loan", "saved"].indexOf(this.state.screen) >= 0) this.go("dash");
+      });
     });
     db.fetchRepoHistory().then(h => { if (h) this.setState({ repoHistory: h }, () => this.compute()); });
     db.fetchExamples().then(c => { if (c) this.setState({ cases: c }); });
@@ -1453,6 +1821,10 @@ class Component extends DCLogic {
   componentWillUnmount() {
     if (this.unsub) this.unsub();
     if (this.dbTimer) clearTimeout(this.dbTimer);
+  }
+
+  loadReports() {
+    this.db.listReports().then(reports => this.setState({ reports }));
   }
 
   loadRuns() {
@@ -1571,6 +1943,52 @@ class Component extends DCLogic {
       });
   }
 
+  // The landing's worked example, computed rather than written down.
+  demo() {
+    const sim = this.simulate("2021-06", 5000000, 20, "EBLR");
+    const extra = sim.payoffM === null ? null : sim.payoffM - sim.n;
+    const total = (sim.payoffM || sim.n) / 12;
+    return {
+      demoRate0: sim.startRate.toFixed(2) + "%",
+      demoRate1: sim.nowRate.toFixed(2) + "%",
+      demoEmi: this.inr(sim.e0) + " · unchanged",
+      demoDrift: extra === null ? "—" : "+" + (extra / 12).toFixed(1),
+      demoLine: "A 20-year loan is now a " + total.toFixed(1) + "-year one. The EMI never moved, so no statement ever said so in those words."
+    };
+  }
+
+  // The signed-in home: one loan, its position, and what is due. Kept
+  // deliberately thin — a subscriber visits about four times a year, so the
+  // dashboard's job is to answer "anything I need to do?" in one glance.
+  dashboard() {
+    const s = this.state;
+    if (!s.user) return { dashReady: false, dashEmpty: true, dashName: "Your workspace" };
+    const runs = s.runs || [];
+    if (!runs.length) return { dashReady: false, dashEmpty: true, dashName: "Your workspace" };
+    const row = runs[0];
+    const sim = this.simulate(row.start_month, Number(row.amount), Number(row.tenure_years), row.benchmark);
+    const extra = sim.payoffM === null ? null : sim.payoffM - sim.n;
+    const k = Math.ceil((sim.todayM + 0.001) / sim.resetN);
+    const next = this.addMonths(sim.start, k * sim.resetN);
+    const days = Math.round((next - Component.TODAY) / 86400000);
+    const logged = (s.checkIns || []).length;
+    return {
+      dashReady: true,
+      dashEmpty: false,
+      dashName: row.name || "Your loan",
+      dashSub: this.short(Number(row.amount)) + " · " + row.tenure_years + " yr · " + row.benchmark + " · from " + this.mLabel(sim.start),
+      dashDrift: extra === null ? "—" : (extra > 1 ? "+" : "−") + Math.abs(extra / 12).toFixed(1),
+      dashDriftWord: extra !== null && extra > 1 ? "years added" : "years ahead",
+      dashRate: sim.nowRate.toFixed(2) + "%",
+      dashBalance: this.short(sim.nowBal),
+      dashEmi: this.inr(sim.e0),
+      dashNextReset: this.mLabel(next),
+      dashCountdown: days <= 0 ? "due now" : days + (days === 1 ? " day" : " days"),
+      dashLogged: String(logged),
+      dashLoggedWord: logged === 1 ? "check-in logged" : "check-ins logged"
+    };
+  }
+
   // The single thing a returning subscriber came to find out. Priority order:
   // a reset that has already landed and needs logging, then a reset coming up,
   // then the plain "nothing is due" state.
@@ -1612,7 +2030,7 @@ class Component extends DCLogic {
         errandFigure: days <= 0 ? "today" : days + (days === 1 ? " day" : " days"),
         errandLine: "Falls on or about " + this.mLabel(next) + ". Nothing to do until the statement covering it arrives.",
         errandCta: "Recalculate now",
-        errandAction: () => this.setState({ date: row.start_month, amount: Number(row.amount), tenure: row.tenure_years, benchmark: row.benchmark, screen: "loan" }, () => this.compute()),
+        errandAction: () => this.setState({ date: row.start_month, amount: Number(row.amount), tenure: row.tenure_years, benchmark: row.benchmark, screen: "loan", hasRun: true }, () => this.compute()),
         errandNote: "We will email you the week it lands."
       };
     }
@@ -1624,7 +2042,7 @@ class Component extends DCLogic {
         ? "Your tenure position was " + savedVerdict + " when you saved this loan. Recalculating brings it up to today."
         : "No reset is due for " + Math.round(days / 30) + " months. Your next one falls on or about " + this.mLabel(next) + ".",
       errandCta: moved ? "Recalculate" : "Recalculate anyway",
-      errandAction: () => this.setState({ date: row.start_month, amount: Number(row.amount), tenure: row.tenure_years, benchmark: row.benchmark, screen: "loan" }, () => this.compute()),
+      errandAction: () => this.setState({ date: row.start_month, amount: Number(row.amount), tenure: row.tenure_years, benchmark: row.benchmark, screen: "loan", hasRun: true }, () => this.compute()),
       errandNote: "We email you when the RBI moves and again the week your reset lands, so this page is never the thing you have to remember."
     };
   }
@@ -1671,7 +2089,7 @@ class Component extends DCLogic {
   }
 
   startUpgrade() {
-    if (!this.state.user) { this.setState({ authOpen: true }); return; }
+    if (!this.state.user) { this.setState({ authOpen: true, authMsg: "", authReason: "track" }); return; }
     if (this.isPro) return;
     this.setState({ upgradeMsg: "Opening checkout…" });
     this.loadRazorpay().then(() => this.db.startCheckout()).then(res => {
@@ -1733,7 +2151,7 @@ class Component extends DCLogic {
   go(screen) {
     this.setState({ screen, saveMsg: "" });
     this.db.track("screen_view", { screen });
-    if (screen === "saved" && this.state.user) this.loadRuns();
+    if ((screen === "saved" || screen === "dash") && this.state.user) this.loadRuns();
   }
 
   get spreads() {
@@ -1751,7 +2169,16 @@ class Component extends DCLogic {
     return this.spreads[benchmark];
   }
 
-  get repo() { return this.state.repoHistory || Component.REPO; }
+  get repo() {
+    const db = this.state.repoHistory;
+    if (!db || !db.length) return Component.REPO;
+    // A database series that carries fewer decisions, or starts later, than the
+    // bundled one is stale. Preferring it would price an 18-year-old loan off a
+    // 2020 starting rate without saying so.
+    if (db.length < Component.REPO.length) return Component.REPO;
+    if (new Date(db[0].d) > new Date(Component.REPO[0].d)) return Component.REPO;
+    return db;
+  }
   get cases() { return this.state.cases || Component.CASES; }
 
   repoOn(date) {
@@ -1865,9 +2292,50 @@ class Component extends DCLogic {
     }).join(" ");
   }
 
+  cycleStats() {
+    const rows = this.repo;
+    let lo = rows[0], hi = rows[0];
+    for (const e of rows) { if (e.r < lo.r) lo = e; if (e.r > hi.r) hi = e; }
+    // Fastest move: the largest change in basis points across any twelve
+    // months of the series, in either direction.
+    let best = { bps: 0, months: 0, from: null, to: null };
+    for (let i = 0; i < rows.length; i++) {
+      for (let j = i + 1; j < rows.length; j++) {
+        const months = this.monthsBetween(new Date(rows[i].d), new Date(rows[j].d));
+        if (months > 12) break;
+        const bps = Math.round(Math.abs(rows[j].r - rows[i].r) * 100);
+        if (bps > best.bps) best = { bps, months, from: rows[i], to: rows[j] };
+      }
+    }
+    const ml = d => new Date(d).toLocaleDateString("en-IN", { month: "short", year: "numeric" });
+    return {
+      cycleLo: lo.r.toFixed(2) + "%", cycleLoWhen: ml(lo.d),
+      cycleHi: hi.r.toFixed(2) + "%", cycleHiWhen: ml(hi.d),
+      cycleFast: best.bps + " bps",
+      cycleFastWhen: (best.to && best.to.r < best.from.r ? "cut" : "added") + " in " + best.months + " months, " + new Date(best.to.d).getFullYear(),
+      cycleLoNum: lo.r, cycleHiNum: hi.r,
+      cycleSpanYears: Math.round(this.monthsBetween(new Date(rows[0].d), Component.TODAY) / 12),
+      cycleFirstLabel: ml(rows[0].d).toUpperCase(),
+      cycleLastLabel: ml(Component.TODAY).toUpperCase(),
+      cycleMidLabel: ml(hi.d).toUpperCase() + " · PEAK",
+      cycleAxisTop: hi.r.toFixed(2) + "%",
+      cycleAxisMid: ((hi.r + lo.r) / 2).toFixed(2) + "%",
+      cycleAxisBot: lo.r.toFixed(2) + "%"
+    };
+  }
+
+  // The benchmark regime in force when this loan was taken. Loans older than
+  // October 2019 were not repo-linked, and the model has to say so.
+  regimeFor(startMonth) {
+    for (const r of Component.REGIMES) if (startMonth >= r.from) return r;
+    return Component.REGIMES[Component.REGIMES.length - 1];
+  }
+
   repoLinePoints() {
-    const x0 = 62, x1 = 906, yTop = 18, yBot = 214, lo = 4.0, hi = 6.5;
-    const start = new Date(2020, 1, 6), end = Component.TODAY;
+    const x0 = 62, x1 = 906, yTop = 18, yBot = 214;
+    const st = this.cycleStats();
+    const lo = st.cycleLoNum, hi = st.cycleHiNum;
+    const start = new Date(this.repo[0].d), end = Component.TODAY;
     const total = this.monthsBetween(start, end);
     const pts = [];
     for (let i = 0; i <= total; i++) {
@@ -1946,8 +2414,16 @@ class Component extends DCLogic {
       signedIn: !!s.user, signedOut: !s.user,
       userEmail: s.user ? s.user.email : "",
       authOpen: s.authOpen, authMsg: s.authMsg,
+      authTitle: s.authReason === "pdf"
+        ? "Your email, and the report is yours"
+        : s.authReason === "track" ? "Sign in to track your loan" : "Sign in to LoanRepo",
+      authBody: s.authReason === "pdf"
+        ? "We ask for an address before the PDF so we know how many borrowers this is reaching. Signing in stores your email and nothing else — your loan particulars stay in this browser unless you later choose to save the report to your workspace."
+        : s.authReason === "track"
+          ? "Tracking keeps this loan's particulars in your private workspace so it can be followed across resets and check-ins. That is the one thing tracking stores, and you can delete the loan at any time."
+          : "A link arrives by email; there is no password. Signing in gets you the PDF report and, if you subscribe, your tracking workspace.",
       fEmail: s.email, setEmail: e => this.setState({ email: e.target.value }),
-      openAuth: () => this.setState({ authOpen: true, authMsg: "" }),
+      openAuth: () => this.setState({ authOpen: true, authMsg: "", authReason: "signin" }),
       closeAuth: () => this.setState({ authOpen: false }),
       signOut: () => this.db.signOut().then(() => this.setState({ runs: [], screen: "loan" })),
       signInGoogle: () => this.db.signInGoogle(),
@@ -1962,7 +2438,7 @@ class Component extends DCLogic {
       },
       saveMsg: s.saveMsg,
       saveRun: () => {
-        if (!s.user) { this.setState({ authOpen: true }); return; }
+        if (!s.user) { this.setState({ authOpen: true, authMsg: "", authReason: "track" }); return; }
         if (!r) return;
         this.db.saveRun({
           name: s.date + " · " + this.short(Number(s.amount)),
@@ -1971,13 +2447,13 @@ class Component extends DCLogic {
           tenure_years: Number(s.tenure), benchmark: s.benchmark,
           result: { verdict: v.isLeak ? "+" + v.leakYears + " yrs" : "−" + v.aheadYears + " yrs", startRate: v.startRate, nowRate: v.nowRate, balance: Math.round(r.nowBal), emi: Math.round(r.e0) }
         }).then(res => {
-          this.setState({ saveMsg: res.ok ? "Tracked. Find it under Saved runs." : this.friendly(res, "Couldn't save that run. Try again.") });
+          this.setState({ saveMsg: res.ok ? "Tracked. Opening your workspace." : this.friendly(res, "Couldn't save that run. Try again.") });
           if (res.ok) {
             this.loadRuns();
             this.db.track("run_saved", { benchmark: s.benchmark });
             // Take them into the workspace rather than leaving them on the
             // diagnosis wondering whether anything happened.
-            setTimeout(() => this.go("saved"), 400);
+            setTimeout(() => this.go("dash"), 400);
           }
           if (!res.ok && (res.reason === "loan-limit" || /subscription-required/.test(String(res.error || "")))) this.go("upgrade");
         });
@@ -1988,13 +2464,54 @@ class Component extends DCLogic {
         started: row.start_month, benchmark: row.benchmark,
         verdict: (row.result && row.result.verdict) || "—",
         select: () => this.setState({ selectedLoanId: row.id, ciMsg: "" }, () => this.loadCheckIns()),
-        load: () => this.setState({ date: row.start_month, amount: Number(row.amount), tenure: row.tenure_years, benchmark: row.benchmark, screen: "loan" }, () => this.compute()),
+        load: () => this.setState({ date: row.start_month, amount: Number(row.amount), tenure: row.tenure_years, benchmark: row.benchmark, screen: "loan", hasRun: true }, () => this.compute()),
         remove: () => this.db.deleteRun(row.id).then(() => this.setState({ selectedLoanId: null, checkIns: [] }, () => this.loadRuns()))
       })),
       ...this.errand(),
       ...this.cohort(),
       trackCta: this.isPro ? "Track this loan" : "Track this loan — ₹149/mo",
       navLoanLabel: s.user ? "Your loan" : "Diagnose",
+      noResult: !s.hasRun,
+      ...this.demo(),
+      repoCount: String(this.repo.length),
+      repoFirstYear: String(new Date(this.repo[0].d).getFullYear()),
+      onDash: s.screen === "dash",
+      navDash: nav("dash"),
+      goDash: () => this.go("dash"),
+      dashHome: () => this.go(s.user ? "dash" : "loan"),
+      ...this.dashboard(),
+      reports: (s.reports || []).map(row => ({
+        id: row.id,
+        title: row.label || "Loan report",
+        when: new Date(row.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
+        verdict: (row.snapshot && row.snapshot.verdict) || "—",
+        rate: (row.snapshot && row.snapshot.nowRate) ? row.snapshot.nowRate + "%" : "—",
+        open: () => this.setState({
+          date: row.start_month, amount: Number(row.amount), tenure: row.tenure_years,
+          benchmark: row.benchmark, hasRun: true, screen: "loan"
+        }, () => this.compute()),
+        remove: () => this.db.deleteReport(row.id).then(() => this.loadReports())
+      })),
+      hasReports: !!(s.reports || []).length,
+      noReports: !(s.reports || []).length,
+      ownsBook: !!s.ownsBook,
+      lacksBook: !s.ownsBook,
+      bookStatus: s.ownsBook
+        ? "Purchased — your personalised edition, rebuilt from your latest figures"
+        : "Seventeen chapters · ₹299 · two chapters free with your numbers in them",
+      bookCta: s.ownsBook ? "Read" : "Preview",
+      openBook: () => {
+        if (s.ownsBook && s.result) { window.open(this.personalisedBookHref(), "_blank"); return; }
+        this.go("book");
+      },
+      // Sends them up to the form rather than to another screen — the form is
+      // the whole point of the landing.
+      focusForm: () => {
+        const el = document.getElementById("lr-date");
+        if (!el) return;
+        window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 90, behavior: "smooth" });
+        setTimeout(() => el.focus(), 420);
+      },
       hookKicker: "What to do about it",
       hookTitle: "The site tells you what happened. The book tells you what to do.",
       hookLine: "Eight chapters this site doesn't touch — when not to prepay, what your statement hides, balance transfers, what gets bundled at signing, and what to do if you cannot pay.",
@@ -2018,7 +2535,45 @@ class Component extends DCLogic {
             : this.friendly(res, "Couldn't add you just now. Try again in a moment.")
         }));
       },
-      print: () => window.print(),
+      print: () => {
+        if (!s.user && this.db.enabled) {
+          this.setState({ authOpen: true, authMsg: "", authReason: "pdf" });
+          this.db.track("pdf_signin_prompt", {});
+          return;
+        }
+        this.db.track("pdf_printed", {});
+        window.print();
+      },
+      pdfCta: s.user || !this.db.enabled ? "Save this result as PDF" : "Sign in to get this report",
+      saveReportCta: s.reportBusy ? "Saving…" : "Save to my workspace",
+      reportMsg: s.reportMsg || "",
+      canSaveReport: !!s.user && this.db.enabled,
+      saveReport: () => {
+        if (!r) return;
+        this.setState({ reportBusy: true, reportMsg: "" });
+        this.db.saveReport({
+          label: this.short(r.principal) + " · " + this.mLabel(r.start),
+          startMonth: s.date,
+          amount: r.principal,
+          tenureYears: r.tenureYears,
+          benchmark: r.benchmark,
+          ownSpread: s.useOwnSpread && s.ownSpread ? Number(s.ownSpread) : null,
+          snapshot: {
+            verdict: v.isLeak ? "+" + v.leakYears + " yrs" : "−" + v.aheadYears + " yrs",
+            startRate: r.startRate.toFixed(2),
+            nowRate: r.nowRate.toFixed(2),
+            balance: Math.round(r.nowBal),
+            emi: Math.round(r.e0),
+            health: v.health
+          }
+        }).then(res => {
+          this.setState({
+            reportBusy: false,
+            reportMsg: res.ok ? "Saved. It's in your workspace." : this.friendly(res, "Couldn't save that report.")
+          });
+          if (res.ok) { this.loadReports(); this.db.track("report_saved", {}); }
+        });
+      },
       fDate: s.date, fAmount: s.amount, fTenure: s.tenure, fPrepay: s.prepay,
       isEblr: s.benchmark === "EBLR", isMclr: s.benchmark === "MCLR",
       isModeTenure: s.prepayMode === "tenure", isModeEmi: s.prepayMode === "emi",
@@ -2037,20 +2592,28 @@ class Component extends DCLogic {
       resultRef: el => { this.resultEl = el; },
       // The result sits below the fold, so a click with no movement reads as a
       // dead button. Bring it to the top of the viewport instead.
-      run: () => this.compute(() => {
+      run: () => this.setState({ hasRun: true }, () => this.compute(() => {
         const el = this.resultEl;
         if (!el || !window.scrollTo) return;
         const y = el.getBoundingClientRect().top + window.pageYOffset - 16;
         window.scrollTo({ top: y, behavior: "smooth" });
-      }),
+      })),
       showScenario: this.props.showScenario !== false,
       showChecklist: this.props.showChecklist !== false,
       questions: Component.QUESTIONS,
       nowRepo: nowRepo.toFixed(2),
       eblrSpreadTxt: sp.EBLR.toFixed(2), mclrSpreadTxt: sp.MCLR.toFixed(2),
-      cyclePctTxt: Math.round(((nowRepo - 4.0) / 2.5) * 100) + "%",
+      ...this.cycleStats(),
+      cyclePctTxt: (() => {
+        const st = this.cycleStats();
+        return Math.round(((nowRepo - st.cycleLoNum) / (st.cycleHiNum - st.cycleLoNum)) * 100) + "%";
+      })(),
+      cycleSpanTxt: this.cycleStats().cycleSpanYears + "-year",
       repoLine: this.repoLinePoints(),
-      repoNowY: (214 - ((nowRepo - 4.0) / 2.5) * 196).toFixed(1),
+      repoNowY: (() => {
+        const st = this.cycleStats();
+        return (214 - ((nowRepo - st.cycleLoNum) / (st.cycleHiNum - st.cycleLoNum)) * 196).toFixed(1);
+      })(),
       repoRows: this.repo.map((e, i) => {
         const prev = i === 0 ? null : this.repo[i - 1].r;
         return {
@@ -2069,7 +2632,7 @@ class Component extends DCLogic {
           effect: extraM === null ? "not clearing" : (leak ? "+" : "−") + Math.abs(extraM / 12).toFixed(1) + " yrs",
           cost: extraM === null ? "—" : (leak ? this.short(extraM * r.e0) : "−" + this.short(Math.abs(extraM) * r.e0)),
           tag: extraM === null ? "Underwater" : leak ? "Leakage" : "Advantage",
-          load: () => this.setState({ date: c.date, amount: c.amt, tenure: c.ten, benchmark: "EBLR", screen: "loan" }, () => this.compute())
+          load: () => this.setState({ date: c.date, amount: c.amt, tenure: c.ten, benchmark: "EBLR", screen: "loan", hasRun: true }, () => this.compute())
         };
       })
     };
@@ -2174,7 +2737,7 @@ class Component extends DCLogic {
           recOurs: ours.toFixed(2) + "%",
           recSpread: realSpread > 0 ? realSpread.toFixed(2) + "%" : "—",
           canApplySpread: realSpread > 0.5 && realSpread < 8,
-          applySpread: () => this.setState({ useOwnSpread: true, ownSpread: realSpread.toFixed(2), screen: "loan" }, () => this.compute()),
+          applySpread: () => this.setState({ useOwnSpread: true, ownSpread: realSpread.toFixed(2), screen: "loan", hasRun: true }, () => this.compute()),
           recNote: Math.abs(gap) < 0.06
             ? "Within a rounding error. Our assumed spread matches yours, so every figure on your result page holds."
             : "We were " + (gap > 0 ? "under" : "over") + " by " + Math.abs(gap).toFixed(2) +
@@ -2210,7 +2773,7 @@ class Component extends DCLogic {
     }
 
     const r = s.result;
-    v.hasResult = !!r;
+    v.hasResult = !!r && !!s.hasRun;
     if (!r) return v;
 
     const extraM = r.payoffM === null ? null : r.payoffM - r.n;
@@ -2247,7 +2810,17 @@ class Component extends DCLogic {
         { head: "Log the next reset", body: "Record the actual rate, EMI, outstanding and remaining months so LoanRepo can reconcile the model with your statement." }
       ],
       isLeak: leak,
-      isAhead: extraM !== null && extraM <= 1,
+      isFlat: extraM !== null && !leak && extraM >= -1.2,
+      isAhead: extraM !== null && extraM < -1.2,
+      aheadLede: r.nowRate < r.startRate - 0.005
+        ? "Rates fell after you borrowed — from " + r.startRate.toFixed(2) + "% at disbursal to " + r.nowRate.toFixed(2) + "% today. On the same EMI, your loan is clearing early rather than stretching."
+        : "Your rate has gone from " + r.startRate.toFixed(2) + "% at disbursal to " + r.nowRate.toFixed(2) + "% today, and on the same EMI your loan is still clearing ahead of the schedule you signed for.",
+      flatLede: r.nowRate > r.startRate + 0.005
+        ? "Your rate rose from " + r.startRate.toFixed(2) + "% at disbursal to " + r.nowRate.toFixed(2) + "% today, but the rises and the cuts have very nearly cancelled out over the life of the loan so far. Your tenure sits close to where you signed for it."
+        : r.nowRate < r.startRate - 0.005
+          ? "Your rate fell from " + r.startRate.toFixed(2) + "% at disbursal to " + r.nowRate.toFixed(2) + "% today, but not early enough or for long enough to move your tenure much. It sits close to where you signed for it."
+          : "Your rate is where it started, at " + r.startRate.toFixed(2) + "%, and so is your tenure. The cycle has been neutral for this loan so far.",
+      flatDrift: extraM === null ? "0.0" : (extraM >= 0 ? "+" : "−") + Math.abs(extraM / 12).toFixed(1),
       leakYears: leak ? (extraM / 12).toFixed(1) : "0",
       aheadYears: extraM !== null && extraM <= 1 ? Math.abs(extraM / 12).toFixed(1) : "0",
       totalYears: (Math.round(((r.payoffM || r.n) / 12) * 10) / 10).toFixed(0),
@@ -2301,7 +2874,10 @@ class Component extends DCLogic {
         : "EBLR loans must reset at least quarterly under RBI rules. Only resets that actually changed your rate are listed.",
       confidence: r.benchmark === "MCLR"
         ? "MCLR is set by your bank, not the repo rate directly. This is an approximation using a typical spread and annual reset."
-        : "Modelled on the RBI-mandated quarterly EBLR reset. If your sanction letter says RLLR, that is the same mechanism."
+        : "Modelled on the RBI-mandated quarterly EBLR reset. If your sanction letter says RLLR, that is the same mechanism.",
+      regimeLabel: this.regimeFor(s.date).label,
+      regimeNote: this.regimeFor(s.date).note,
+      regimePreRepo: this.regimeFor(s.date).label !== "EBLR / RLLR"
     });
 
     // The reset date is the borrower's own, derived from disbursal + cycle —

@@ -137,6 +137,43 @@
       if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
       return client.functions.invoke("razorpay-order", { body: {} }).then(function (r) { if (r.error || !r.data) return { ok: false, error: (r.error && r.error.message) || "no-response" }; return { ok: true, subscriptionId: r.data.subscription_id, keyId: r.data.key_id }; }).catch(function (e) { return { ok: false, error: String(e) }; });
     },
+    /* ── saved reports: the user's own workspace ──────────────────────── */
+    // Stores the loan inputs plus a snapshot of what the model said, not a PDF
+    // binary. The report is regenerated on demand, so it cannot go stale and
+    // there is no file sitting in storage to leak.
+    saveReport: function (payload) {
+      if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
+      return client.auth.getUser().then(function (u) {
+        var id = u && u.data && u.data.user && u.data.user.id;
+        if (!id) return { ok: false, reason: "signin-required" };
+        return client.from("saved_reports").insert({
+          user_id: id,
+          label: payload.label || null,
+          start_month: payload.startMonth,
+          amount: payload.amount,
+          tenure_years: payload.tenureYears,
+          benchmark: payload.benchmark,
+          own_spread: payload.ownSpread == null ? null : payload.ownSpread,
+          snapshot: payload.snapshot || null
+        }).then(function (r) { return { ok: !r.error, error: r.error && r.error.message }; });
+      });
+    },
+    listReports: function () {
+      if (!enabled) return Promise.resolve([]);
+      return client.from("saved_reports").select("*").order("created_at", { ascending: false })
+        .then(function (r) { return (r.error ? [] : r.data) || []; });
+    },
+    deleteReport: function (id) {
+      if (!enabled) return Promise.resolve({ ok: false });
+      return client.from("saved_reports").delete().eq("id", id).then(function (r) { return { ok: !r.error }; });
+    },
+    // Does this account hold the book? Drives whether the workspace offers it
+    // to read or to buy.
+    ownsBook: function () {
+      if (!enabled) return Promise.resolve(false);
+      return client.from("purchases").select("id").eq("product", "ebook").eq("status", "paid").limit(1)
+        .then(function (r) { return !r.error && !!(r.data && r.data.length); });
+    },
     startEbookOrder: function (email, loanQuery) {
       if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
       return client.functions.invoke("ebook-order", { body: { email: email, loanQuery: loanQuery || null } }).then(function (r) { if (r.error || !r.data || !r.data.order_id) return { ok: false, error: (r.error && r.error.message) || "no-response" }; return { ok: true, orderId: r.data.order_id, amount: r.data.amount, keyId: r.data.key_id }; }).catch(function (e) { return { ok: false, error: String(e) }; });
