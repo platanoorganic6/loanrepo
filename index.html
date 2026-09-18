@@ -45,11 +45,30 @@
   a { color: var(--color-accent-700); text-decoration: none; }
   a:hover { color: var(--color-accent-900); text-decoration: underline; }
 
+  /* The widget's footprint is declared once. Both its own box and the strip
+     the page reserves derive from it, so they cannot drift apart — and the
+     label is never clipped, because its natural width is what was declared. */
+  :root { --support-w: 64px; --support-gap: 24px; }
+  [data-support] { width: var(--support-w); }
+  [data-support] > span { width: 100%; text-align: center; padding: 2px 0; }
+
+  /* Reserve the strip only where the 1120px column would reach into it, and
+     reserve it on both sides so the column stays centred rather than being
+     shoved left. Above 1120 + 2 × 88 the column clears the widget unaided. */
+  @media (max-width: 1295px) {
+    body { padding-left: calc(var(--support-w) + var(--support-gap)); padding-right: calc(var(--support-w) + var(--support-gap)); }
+  }
+
   /* App shell on phones: the tab bar appears and the page clears it. */
   @media (max-width: 720px) {
     [data-tabbar] { display: block !important; }
     body { padding-bottom: 58px; }
     [data-support] { bottom: 70px !important; }
+    /* Keep the label, but size it to the tile so the gutter can be narrower on
+       a small screen. */
+    :root { --support-w: 52px; --support-gap: 14px; }
+    body { padding-left: 0; padding-right: calc(var(--support-w) + var(--support-gap)); }
+    [data-support] > span { font-size: 9px; letter-spacing: 0.04em; }
   }
 
   /* Industry declares --color-divider as color-mix(); this engine drops
@@ -65,6 +84,7 @@
     main { padding: 0 !important; max-width: none !important; }
     body { background: #fff; }
     table, tr, figure, [data-print-keep] { break-inside: avoid; }
+    [data-report-only] { display: block !important; }
     thead { display: table-header-group; }
     [data-print-only] { display: block !important; }
     /* A textarea keeps its scroll height on paper and clips its own content,
@@ -90,7 +110,10 @@
 
   <header style="border-bottom:1px solid var(--color-divider);">
     <div style="max-width:1120px; margin:0 auto; padding:10px 18px; display:flex; align-items:center; gap:16px 24px; flex-wrap:wrap; min-height:62px;">
-      <div style="font-family:var(--font-heading); font-weight:600; font-size:21px; letter-spacing:0.01em; margin-right:auto;">LOAN<span style="color:var(--color-accent-700);">REPO</span></div>
+      <div style="margin-right:auto;">
+        <div style="font-family:var(--font-heading); font-weight:600; font-size:21px; letter-spacing:0.01em;">LOAN<span style="color:var(--color-accent-700);">REPO</span></div>
+        <div style="font-family:var(--font-heading); font-size:9.5px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-neutral-700); margin-top:1px; white-space:nowrap;">Floating loan · Diagnose · Guide · Track</div>
+      </div>
       <nav style="display:flex; gap:14px 20px; flex-wrap:wrap;">
         <button type="button" onClick="{{ goLoan }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navLoan }};">{{ navLoanLabel }}</button>
         <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
@@ -148,7 +171,7 @@
       <div>
         <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">Home loan diagnosis</div>
         <h1 style="font-size:clamp(30px,6vw,46px); line-height:1.04; margin:0 0 18px; max-width:20ch;">Did your home loan quietly get longer?</h1>
-        <p style="font-size:16px; line-height:1.6; max-width:52ch; color:var(--color-neutral-800); margin:0 0 12px;">See what the rate cycle did to your loan — tenure, balance and estimated interest — and understand what to check next.</p>
+        <p style="font-size:16px; line-height:1.6; max-width:52ch; color:var(--color-neutral-800); margin:0 0 12px;">Free diagnosis, a borrower's guide, and reset-by-reset tracking. Start with the diagnosis — see what the rate cycle did to your tenure, balance and lifetime cost.</p>
         <p style="font-size:14px; line-height:1.6; max-width:52ch; color:var(--color-neutral-700); margin:0;">The calculation runs in your browser and your result is never held back. The PDF report asks for an email address; your loan particulars are not sent with it, and are stored only if you subscribe and choose to track the loan. LoanRepo is independent of lenders.</p>
       </div>
 
@@ -189,6 +212,47 @@
          result, the result is the page. -->
     <sc-if value="{{ noResult }}" hint-placeholder-val="{{ true }}">
     <div style="margin-top:72px;">
+
+      <!-- What this is. The form alone read as a calculator; these are the
+           three things LoanRepo actually does, in the order a borrower meets
+           them. -->
+      <div style="border-top:1px solid var(--color-text); padding-top:26px; margin-bottom:clamp(40px,6vw,64px);">
+        <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:10px;">What LoanRepo is</div>
+        <h2 style="font-family:var(--font-heading); font-size:clamp(24px,4vw,34px); line-height:1.08; margin:0 0 12px; max-width:30ch;">Not a calculator. A record of what your loan actually did, and what to do next.</h2>
+        <p style="font-size:16px; line-height:1.6; max-width:64ch; color:var(--color-neutral-800); margin:0 0 26px;">An EMI calculator tells you what a loan would cost if the rate never moved. It always moves. LoanRepo walks your loan through every real RBI decision since you borrowed, then stays with you through the resets still to come.</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px;">
+          <div class="blueprint" style="padding:24px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:10px;">
+              <span style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.12em; color:var(--color-accent-700);">01</span>
+              <span class="tag tag-outline" style="font-size:10px;">Free</span>
+            </div>
+            <b style="display:block; font-family:var(--font-heading); font-size:19px; text-transform:uppercase; letter-spacing:0.03em; margin-bottom:8px;">The diagnosis</b>
+            <p style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin:0 0 14px;">What the rate cycle did to your tenure, balance and lifetime cost — reset by reset, against the published record. A dated report you keep.</p>
+            <button type="button" onClick="{{ focusForm }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-accent-800); border-bottom:1px solid var(--color-accent-800);">Start here</button>
+          </div>
+          <div class="blueprint" style="padding:24px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:10px;">
+              <span style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.12em; color:var(--color-accent-700);">02</span>
+              <span class="tag tag-outline" style="font-size:10px;">₹299 once</span>
+            </div>
+            <b style="display:block; font-family:var(--font-heading); font-size:19px; text-transform:uppercase; letter-spacing:0.03em; margin-bottom:8px;">The guide</b>
+            <p style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin:0 0 14px;">Seventeen chapters on the decisions the diagnosis raises — when not to prepay, balance transfers, what your statement hides. Worked on your own figures.</p>
+            <button type="button" onClick="{{ goBook }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-accent-800); border-bottom:1px solid var(--color-accent-800);">Read two chapters free</button>
+          </div>
+          <div class="blueprint" style="padding:24px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:10px;">
+              <span style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.12em; color:var(--color-accent-700);">03</span>
+              <span class="tag tag-outline" style="font-size:10px;">{{ trackBadge }}</span>
+            </div>
+            <b style="display:block; font-family:var(--font-heading); font-size:19px; text-transform:uppercase; letter-spacing:0.03em; margin-bottom:8px;">The journey</b>
+            <p style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); margin:0 0 14px;">A loan changes at its own reset dates, not when the news breaks. Tracking tells you the week yours lands, and keeps a dated record your bank has never produced.</p>
+            <button type="button" onClick="{{ goUpgrade }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-accent-800); border-bottom:1px solid var(--color-accent-800);">{{ trackTierCta }}</button>
+          </div>
+        </div>
+      </div>
 
       <div style="border-top:1px solid var(--color-text); padding-top:26px;">
         <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:18px;">See it on a real loan</div>
@@ -364,6 +428,19 @@
         <div style="font-size:14px; line-height:1.55; color:var(--color-neutral-800); max-width:74ch;">{{ regimeNote }}</div>
       </div>
       </sc-if>
+
+      <div data-report-only="true" style="display:none; border-bottom:2px solid var(--color-text); padding-bottom:14px; margin-bottom:22px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:18px; flex-wrap:wrap;">
+          <div>
+            <div style="font-family:var(--font-heading); font-weight:600; font-size:24px; letter-spacing:0.01em;">LOAN<span style="color:var(--color-accent-700);">REPO</span></div>
+            <div style="font-family:var(--font-heading); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-neutral-700); margin-top:2px;">Floating loan · Diagnose · Guide · Track</div>
+            <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-top:6px;">Home loan diagnosis · free report</div>
+          </div>
+          <div style="font-size:11.5px; line-height:1.5; color:var(--color-neutral-700); text-align:right;">
+            Prepared {{ reportDate }}<br>loanrepo.in · no lender affiliation
+          </div>
+        </div>
+      </div>
 
       <!-- Diagnosis card. Folded in from the independent pass, but computed
            from the engine's own numbers rather than scraped from the DOM. -->
@@ -667,7 +744,7 @@
         <div>
           <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:6px;">A message you can send your bank</div>
           <p style="font-size:13px; color:var(--color-neutral-700); margin:0 0 14px;">Your figures, already filled in. Every answer it asks for is something your bank is required to hold.</p>
-          <textarea class="input" readOnly="{{ true }}" rows="14" style="font-size:13px; line-height:1.6; resize:vertical;" value="{{ draft }}"></textarea>
+          <div class="input" style="white-space:pre-wrap; font-size:13px; line-height:1.6; min-height:180px; max-height:340px; overflow:auto; background:var(--color-bg);">{{ draft }}</div>
           <div data-print-draft="true" data-print-only="true">{{ draft }}</div>
           <div style="display:flex; gap:12px; align-items:center; margin-top:12px; flex-wrap:wrap;">
             <button type="button" class="btn btn-secondary" onClick="{{ copyDraft }}">Copy the message</button>
@@ -1748,7 +1825,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "e5";
+  static BUILD = "f2";
   // Stage 2 (₹149/mo tracking) is built but not launched: there is no in-app
   // cancel flow yet, and the plan copy promises one. Flip to true to release.
   static STAGE2 = false;
@@ -1815,7 +1892,7 @@ class Component extends DCLogic {
     ownSpread: "", useOwnSpread: false, buyAmount: 5000000, buyTenure: 20,
     ebookEmail: "", ebookMsg: "", ebookBusy: false, legalTab: "about",
     payoffLump: 500000, payoffExtra: 5000,
-    hasRun: false, authReason: "", reports: [], ownsBook: false,
+    hasRun: false, authReason: "", ownsBook: false,
     documents: [], pendingOrder: null, docMsg: "", returnTo: "",
     reportBusy: false, reportMsg: "",
     user: null, authOpen: false, email: "", authMsg: "", saveMsg: "",
@@ -1860,7 +1937,6 @@ class Component extends DCLogic {
       this.setState({ user }, () => {
         if (!user) return;
         this.loadRuns();
-        this.loadReports();
         this.loadDocuments();
         this.db.ownsBook().then(owns => this.setState({ ownsBook: owns }));
         if (!arriving) return;
@@ -1892,9 +1968,6 @@ class Component extends DCLogic {
     if (this.dbTimer) clearTimeout(this.dbTimer);
   }
 
-  loadReports() {
-    this.db.listReports().then(reports => this.setState({ reports }));
-  }
 
   loadRuns() {
     this.db.listRuns().then(runs => {
@@ -2053,6 +2126,17 @@ class Component extends DCLogic {
   // figures never leave the browser to make the file; only the finished PDF is
   // uploaded, into their own folder.
   buildAndStoreGuide(orderId, loanQuery) {
+    // Without the loan figures this would render the general edition, upload
+    // it, and mark the order fulfilled — quietly giving a paying buyer the
+    // generic book with no way back. Refuse instead.
+    if (!loanQuery) {
+      this.setState({
+        ebookBusy: false,
+        docMsg: "Run your diagnosis first — your copy is written from it. Your purchase stays safe until then.",
+        ebookMsg: "Run your diagnosis first — your copy is written from it."
+      });
+      return Promise.resolve();
+    }
     this.setState({ ebookBusy: true, ebookMsg: "Generating your personalised copy…" });
     return this.loadHtml2Pdf()
       .then(ok => {
@@ -2110,6 +2194,12 @@ class Component extends DCLogic {
         el.querySelectorAll("[data-print-hide]").forEach(n => {
           hidden.push([n, n.style.display]);
           n.style.display = "none";
+        });
+        // The report header is screen-hidden; the stored PDF is exactly where
+        // it belongs, so show it for the capture.
+        el.querySelectorAll("[data-report-only]").forEach(n => {
+          hidden.push([n, n.style.display]);
+          n.style.display = "block";
         });
         return window.html2pdf().set({
           margin: 8,
@@ -2643,7 +2733,19 @@ class Component extends DCLogic {
       hasPendingOrder: !!s.pendingOrder,
       retryGuide: () => {
         const p = s.pendingOrder;
-        if (p) this.buildAndStoreGuide(p.id, p.loan_query || this.personalisedLoanQuery());
+        if (!p) return;
+        const q = p.loan_query || this.personalisedLoanQuery();
+        if (!q) {
+          this.setState({
+            docMsg: "",
+            ebookMsg: "",
+            saveMsg: "Run your loan below first — your paid copy is written from this diagnosis. Nothing further will be charged."
+          });
+          this.go("loan");
+          return;
+        }
+        this.setState({ docMsg: "Generating your personalised copy — this takes a few seconds…" });
+        this.buildAndStoreGuide(p.id, q);
       },
       goUpgrade: () => this.go("upgrade"),
       goBuying: () => this.go("buying"),
@@ -2726,6 +2828,7 @@ class Component extends DCLogic {
       navLoanLabel: s.user ? "Your loan" : "Diagnose",
       noResult: !s.hasRun,
       ...this.demo(),
+      reportDate: Component.TODAY.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }),
       repoCount: String(this.repo.length),
       repoFirstYear: String(new Date(this.repo[0].d).getFullYear()),
       onDash: s.screen === "dash",
@@ -2734,20 +2837,6 @@ class Component extends DCLogic {
       navBook: nav("book"),
       dashHome: () => this.go(s.user ? "dash" : "loan"),
       ...this.dashboard(),
-      reports: (s.reports || []).map(row => ({
-        id: row.id,
-        title: row.label || "Loan report",
-        when: new Date(row.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
-        verdict: (row.snapshot && row.snapshot.verdict) || "—",
-        rate: (row.snapshot && row.snapshot.nowRate) ? row.snapshot.nowRate + "%" : "—",
-        open: () => this.setState({
-          date: row.start_month, amount: Number(row.amount), tenure: row.tenure_years,
-          benchmark: row.benchmark, hasRun: true, screen: "loan"
-        }, () => this.compute()),
-        remove: () => this.db.deleteReport(row.id).then(() => this.loadReports())
-      })),
-      hasReports: !!(s.reports || []).length,
-      noReports: !(s.reports || []).length,
       ownsBook: !!s.ownsBook,
       lacksBook: !s.ownsBook,
       bookStatus: s.ownsBook
@@ -2810,35 +2899,6 @@ class Component extends DCLogic {
       canStoreReport: !!s.user && this.db.enabled,
       storeReportCta: "Save report to My Space",
       storeReport: () => this.storeDiagnosisReport(true),
-      saveReportCta: s.reportBusy ? "Saving…" : "Save to my workspace",
-      reportMsg: s.reportMsg || "",
-      canSaveReport: !!s.user && this.db.enabled,
-      saveReport: () => {
-        if (!r) return;
-        this.setState({ reportBusy: true, reportMsg: "" });
-        this.db.saveReport({
-          label: this.short(r.principal) + " · " + this.mLabel(r.start),
-          startMonth: s.date,
-          amount: r.principal,
-          tenureYears: r.tenureYears,
-          benchmark: r.benchmark,
-          ownSpread: s.useOwnSpread && s.ownSpread ? Number(s.ownSpread) : null,
-          snapshot: {
-            verdict: v.isLeak ? "+" + v.leakYears + " yrs" : "−" + v.aheadYears + " yrs",
-            startRate: r.startRate.toFixed(2),
-            nowRate: r.nowRate.toFixed(2),
-            balance: Math.round(r.nowBal),
-            emi: Math.round(r.e0),
-            health: v.health
-          }
-        }).then(res => {
-          this.setState({
-            reportBusy: false,
-            reportMsg: res.ok ? "Saved. It's in your workspace." : this.friendly(res, "Couldn't save that report.")
-          });
-          if (res.ok) { this.loadReports(); this.db.track("report_saved", {}); }
-        });
-      },
       fDate: s.date, fAmount: s.amount, fTenure: s.tenure, fPrepay: s.prepay,
       isEblr: s.benchmark === "EBLR", isMclr: s.benchmark === "MCLR",
       isModeTenure: s.prepayMode === "tenure", isModeEmi: s.prepayMode === "emi",
