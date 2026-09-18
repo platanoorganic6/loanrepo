@@ -188,6 +188,37 @@
       });
     },
 
+    // The free diagnosis report: rendered in the browser, uploaded to the
+    // owner's own folder, recorded directly. No order and no function involved,
+    // which is why 0010 adds the narrow insert policy this relies on.
+    storeDiagnosisReport: function (blob, title) {
+      if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
+      return client.auth.getUser().then(function (r) {
+        var u = r.data && r.data.user;
+        if (!u) return { ok: false, reason: "signin-required" };
+        var path = u.id + "/diagnosis-" + Date.now() + ".pdf";
+        return client.storage.from("loanrepo-documents")
+          .upload(path, blob, { contentType: "application/pdf", cacheControl: "3600", upsert: true })
+          .then(function (up) {
+            if (up.error) return { ok: false, error: up.error.message };
+            return client.from("user_documents").insert({
+              user_id: u.id,
+              title: title || "Loan diagnosis report",
+              document_type: "diagnosis",
+              storage_path: path
+            }).then(function (ins) {
+              return ins.error ? { ok: false, error: ins.error.message } : { ok: true, path: path };
+            });
+          });
+      });
+    },
+
+    deleteDocument: function (id) {
+      if (!enabled) return Promise.resolve({ ok: false });
+      return client.from("user_documents").delete().eq("id", id)
+        .then(function (r) { return { ok: !r.error }; });
+    },
+
     createGuideOrder: function (email, loanQuery) {
       if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
       return client.functions.invoke("ebook-order-auth", { body: { email: email, loanQuery: loanQuery } })

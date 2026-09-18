@@ -685,9 +685,9 @@
           <button type="button" class="btn btn-secondary" onClick="{{ goUpgrade }}">Tracking — opening soon</button>
         </sc-if>
         <button type="button" class="btn btn-secondary" onClick="{{ print }}">{{ pdfCta }}</button>
-        <sc-if value="{{ canSaveReport }}" hint-placeholder-val="{{ false }}">
-          <button type="button" class="btn btn-secondary" onClick="{{ saveReport }}">{{ saveReportCta }}</button>
-          <span style="font-size:12px; color:var(--color-accent-800);">{{ reportMsg }}</span>
+        <sc-if value="{{ canStoreReport }}" hint-placeholder-val="{{ false }}">
+          <button type="button" class="btn btn-primary" onClick="{{ storeReport }}">{{ storeReportCta }}</button>
+          <span style="font-size:12px; color:var(--color-accent-800);">{{ docMsg }}</span>
         </sc-if>
         <button type="button" class="btn btn-ghost" onClick="{{ goMethod }}">Read the method and assumptions</button>
         <span style="font-size:12px; color:var(--color-neutral-700); max-width:44ch;">{{ confidence }}</span>
@@ -1289,29 +1289,6 @@
       </div>
       </sc-if>
 
-      <sc-if value="{{ hasReports }}" hint-placeholder-val="{{ false }}">
-      <div>
-        <sc-for list="{{ reports }}" as="rep" hint-placeholder-count="2">
-          <div style="display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:center; border-bottom:1px solid var(--color-divider); padding:14px 0;">
-            <div style="min-width:0;">
-              <div style="font-family:var(--font-heading); font-size:16px; letter-spacing:0.01em;">{{ rep.title }}</div>
-              <div style="font-size:12.5px; color:var(--color-neutral-700); margin-top:3px;">Saved {{ rep.when }} · {{ rep.verdict }} · {{ rep.rate }}</div>
-            </div>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <button type="button" class="btn btn-secondary" onClick="{{ rep.open }}" style="font-size:12px; padding:7px 11px;">Open</button>
-              <button type="button" class="btn btn-ghost" onClick="{{ rep.remove }}" style="font-size:12px; padding:7px 11px;">Delete</button>
-            </div>
-          </div>
-        </sc-for>
-      </div>
-      </sc-if>
-
-      <sc-if value="{{ noReports }}" hint-placeholder-val="{{ true }}">
-      <div style="padding:16px 0; border-bottom:1px solid var(--color-divider); font-size:14px; line-height:1.55; color:var(--color-neutral-800); max-width:52ch;">
-        No reports saved yet. Run your loan, then press <b>Save to my workspace</b> — the report is rebuilt from your particulars each time you open it, so the figures stay current rather than freezing on the day you saved.
-      </div>
-      </sc-if>
-
       <div style="display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:center; border-bottom:1px solid var(--color-divider); padding:14px 0;">
         <div style="min-width:0;">
           <div style="font-family:var(--font-heading); font-size:16px; letter-spacing:0.01em;">The Quiet Years</div>
@@ -1771,7 +1748,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "e4";
+  static BUILD = "e5";
   // Stage 2 (₹149/mo tracking) is built but not launched: there is no in-app
   // cancel flow yet, and the plan copy promises one. Flip to true to release.
   static STAGE2 = false;
@@ -1895,7 +1872,13 @@ class Component extends DCLogic {
         try { pending = JSON.parse(localStorage.getItem("loanrepo:lastrun") || "null"); } catch (e) {}
         if (pending && pending.date) {
           try { localStorage.removeItem("loanrepo:lastrun"); } catch (e) {}
-          if (this.restoreLastRun(pending) !== false) return;
+          if (this.restoreLastRun(pending) !== false) {
+            if (pending.intent === "pdf") {
+              // The result must be on screen before it can be rendered.
+              setTimeout(() => this.storeDiagnosisReport(true), 900);
+            }
+            return;
+          }
         }
         if (["loan", "saved"].indexOf(this.state.screen) >= 0) this.go("dash");
       });
@@ -2113,6 +2096,50 @@ class Component extends DCLogic {
       }));
   }
 
+  storeDiagnosisReport(thenGo) {
+    if (!this.state.user || !this.db.enabled) return Promise.resolve();
+    const el = this.resultEl;
+    if (!el) return Promise.resolve();
+    this.setState({ docMsg: "Saving your report to My Space…" });
+    return this.loadHtml2Pdf()
+      .then(ok => {
+        if (!ok) throw new Error("PDF generator could not load");
+        // Controls carry no meaning on paper and the print rules already mark
+        // them; hide them for the capture and put them back afterwards.
+        const hidden = [];
+        el.querySelectorAll("[data-print-hide]").forEach(n => {
+          hidden.push([n, n.style.display]);
+          n.style.display = "none";
+        });
+        return window.html2pdf().set({
+          margin: 8,
+          filename: "LoanRepo-Diagnosis.pdf",
+          image: { type: "jpeg", quality: 0.96 },
+          html2canvas: { scale: 1.4, useCORS: true, logging: false },
+          jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
+          pagebreak: { mode: ["css", "legacy"] }
+        }).from(el).outputPdf("blob").then(blob => {
+          hidden.forEach(([n, v]) => { n.style.display = v; });
+          return blob;
+        }).catch(err => {
+          hidden.forEach(([n, v]) => { n.style.display = v; });
+          throw err;
+        });
+      })
+      .then(blob => {
+        const s = this.state;
+        const title = this.short(Number(s.amount)) + " · " + s.date + " · " + s.benchmark;
+        return this.db.storeDiagnosisReport(blob, title);
+      })
+      .then(res => {
+        if (!res || !res.ok) throw new Error((res && (res.error || res.reason)) || "save-failed");
+        this.setState({ docMsg: "" });
+        this.loadDocuments();
+        if (thenGo) this.go("dash");
+      })
+      .catch(e => this.setState({ docMsg: "Couldn't save the report: " + String(e.message || e) }));
+  }
+
   loadHtml2Pdf() {
     if (window.html2pdf) return Promise.resolve(true);
     return new Promise(resolve => {
@@ -2152,9 +2179,9 @@ class Component extends DCLogic {
   // dashboard's job is to answer "anything I need to do?" in one glance.
   dashboard() {
     const s = this.state;
-    if (!s.user) return { dashReady: false, dashEmpty: true, dashName: "Your workspace" };
+    if (!s.user) return { dashReady: false, dashEmpty: true, dashName: "My Space" };
     const runs = s.runs || [];
-    if (!runs.length) return { dashReady: false, dashEmpty: true, dashName: "Your workspace" };
+    if (!runs.length) return { dashReady: false, dashEmpty: true, dashName: "My Space" };
     const row = runs[0];
     const sim = this.simulate(row.start_month, Number(row.amount), Number(row.tenure_years), row.benchmark);
     const extra = sim.payoffM === null ? null : sim.payoffM - sim.n;
@@ -2769,7 +2796,7 @@ class Component extends DCLogic {
           try {
             localStorage.setItem("loanrepo:lastrun", JSON.stringify({
               date: s.date, amount: s.amount, tenure: s.tenure, benchmark: s.benchmark,
-              ownSpread: s.ownSpread, useOwnSpread: s.useOwnSpread
+              ownSpread: s.ownSpread, useOwnSpread: s.useOwnSpread, intent: "pdf"
             }));
           } catch (e) {}
           this.setState({ authOpen: true, authMsg: "", authReason: "pdf" });
@@ -2779,7 +2806,10 @@ class Component extends DCLogic {
         this.db.track("pdf_printed", {});
         window.print();
       },
-      pdfCta: s.user || !this.db.enabled ? "Save this result as PDF" : "Sign in to get this report",
+      pdfCta: s.user || !this.db.enabled ? "Print or save as PDF" : "Sign in to get this report",
+      canStoreReport: !!s.user && this.db.enabled,
+      storeReportCta: "Save report to My Space",
+      storeReport: () => this.storeDiagnosisReport(true),
       saveReportCta: s.reportBusy ? "Saving…" : "Save to my workspace",
       reportMsg: s.reportMsg || "",
       canSaveReport: !!s.user && this.db.enabled,
