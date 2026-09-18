@@ -744,7 +744,7 @@
         <div>
           <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:6px;">A message you can send your bank</div>
           <p style="font-size:13px; color:var(--color-neutral-700); margin:0 0 14px;">Your figures, already filled in. Every answer it asks for is something your bank is required to hold.</p>
-          <div class="input" style="white-space:pre-wrap; font-size:13px; line-height:1.6; min-height:180px; max-height:340px; overflow:auto; background:var(--color-bg);">{{ draft }}</div>
+          <div class="input" style="white-space:pre-wrap; font-size:13px; line-height:1.6; background:var(--color-bg);">{{ draft }}</div>
           <div data-print-draft="true" data-print-only="true">{{ draft }}</div>
           <div style="display:flex; gap:12px; align-items:center; margin-top:12px; flex-wrap:wrap;">
             <button type="button" class="btn btn-secondary" onClick="{{ copyDraft }}">Copy the message</button>
@@ -1494,7 +1494,15 @@
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             {{ ebookCta }}
           </button>
-          <div style="font-size:12.5px; color:var(--color-accent-800); margin-top:12px; min-height:18px;">{{ ebookMsg }}</div>
+          <sc-if value="{{ ebookFailed }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:12px; border:1px solid var(--color-text); border-left:3px solid var(--color-accent-900); padding:12px 14px;">
+              <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:5px;">Payment could not start</div>
+              <div style="font-size:13px; line-height:1.5; color:var(--color-neutral-800);">{{ ebookMsg }}</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ ebookWorking }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:12.5px; color:var(--color-accent-800); margin-top:12px; min-height:18px;">{{ ebookMsg }}</div>
+          </sc-if>
           <div style="font-size:12.5px; line-height:1.55; color:var(--color-neutral-700); margin-top:6px;">{{ ebookNote }}</div>
           <div style="font-size:12.5px; line-height:1.55; color:var(--color-neutral-700); margin-top:10px; border-top:1px dashed var(--color-divider); padding-top:12px;">Your copy is stored in your own account and stays downloadable — there is no expiring link to lose. Payment is taken by Razorpay; we never see your card.</div>
         </div>
@@ -1825,7 +1833,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "f2";
+  static BUILD = "f4";
   // Stage 2 (₹149/mo tracking) is built but not launched: there is no in-app
   // cancel flow yet, and the plan copy promises one. Flip to true to release.
   static STAGE2 = false;
@@ -1890,7 +1898,7 @@ class Component extends DCLogic {
     screen: "loan", date: "2021-06", amount: 5000000, tenure: 20,
     benchmark: "EBLR", prepay: 500000, prepayMode: "tenure", result: null,
     ownSpread: "", useOwnSpread: false, buyAmount: 5000000, buyTenure: 20,
-    ebookEmail: "", ebookMsg: "", ebookBusy: false, legalTab: "about",
+    ebookEmail: "", ebookMsg: "", ebookBusy: false, ebookFailed: false, legalTab: "about",
     payoffLump: 500000, payoffExtra: 5000,
     hasRun: false, authReason: "", ownsBook: false,
     documents: [], pendingOrder: null, docMsg: "", returnTo: "",
@@ -2069,11 +2077,13 @@ class Component extends DCLogic {
       this.setState({ ebookMsg: "Run your free diagnosis first — your copy is written from it." });
       return;
     }
-    this.setState({ ebookBusy: true, ebookMsg: "Checking your account…" });
+    this.setState({ ebookBusy: true, ebookFailed: false, ebookMsg: "Checking your account…" });
 
     // A paid order with no file means a previous attempt was interrupted.
     // Finish that rather than charging again.
-    this.db.pendingGuideOrder().then(pending => {
+    let chain;
+    try {
+      chain = this.db.pendingGuideOrder().then(pending => {
       if (pending) {
         this.setState({ ebookMsg: "Your ₹299 purchase is already confirmed. Saving your copy…" });
         return this.buildAndStoreGuide(pending.id, pending.loan_query || loanQuery);
@@ -2082,7 +2092,13 @@ class Component extends DCLogic {
         .then(() => this.db.createGuideOrder(this.state.user.email, loanQuery))
         .then(res => {
           if (!res.ok || !window.Razorpay) {
-            this.setState({ ebookBusy: false, ebookMsg: this.friendly(res, "Checkout isn't available right now. Try again shortly.") });
+            this.setState({
+              ebookBusy: false,
+              ebookFailed: true,
+              ebookMsg: !window.Razorpay
+                ? "Razorpay's checkout script did not load. Check your connection or any blocker, then try again."
+                : this.friendly(res, "The payment service isn't reachable. Nothing has been charged.")
+            });
             return;
           }
           const d = res.data;
@@ -2111,7 +2127,15 @@ class Component extends DCLogic {
           rz.open();
           this.db.track("ebook_checkout_opened", {});
         });
-    }).catch(e => this.setState({ ebookBusy: false, ebookMsg: "Couldn't start payment: " + String(e.message || e) }));
+      });
+    } catch (e) {
+      chain = Promise.reject(e);
+    }
+    chain.catch(e => this.setState({
+      ebookBusy: false,
+      ebookFailed: true,
+      ebookMsg: "Couldn't start payment: " + String((e && e.message) || e)
+    }));
   }
 
   pollGuidePaid(orderId, loanQuery, n) {
@@ -2709,6 +2733,8 @@ class Component extends DCLogic {
       canPersonalise: !!s.result,
       personalHref: this.personalisedBookHref(true),
       ebookMsg: s.ebookMsg,
+      ebookFailed: !!s.ebookFailed,
+      ebookWorking: !s.ebookFailed,
       ebookCta: s.ebookBusy ? "Working…" : (s.user ? "Pay ₹299 and add to My Space" : "Sign in to buy — ₹299"),
       ebookNote: s.user
         ? "Charged once to " + (s.user.email || "your account") + ". Your copy is written from your diagnosis and saved to My Space — no email attachment to lose."
