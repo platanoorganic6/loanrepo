@@ -167,26 +167,11 @@
         .then(function (r) { return (r.error || !r.data) ? null : r.data.signedUrl; });
     },
 
-    uploadGuide: function (orderId, blob) {
-      if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
-      return client.auth.getUser().then(function (r) {
-        var u = r.data && r.data.user;
-        if (!u) return { ok: false, reason: "session-expired" };
-        var path = u.id + "/borrowers-guide-" + orderId + ".pdf";
-        return client.storage.from("loanrepo-documents")
-          .upload(path, blob, { contentType: "application/pdf", cacheControl: "3600", upsert: true })
-          .then(function (up) {
-            if (up.error) return { ok: false, error: up.error.message };
-            return client.functions.invoke("ebook-document", {
-              body: { loanrepo_order_id: orderId, storage_path: path }
-            }).then(function (fn) {
-              var ok = !fn.error && fn.data && fn.data.ok;
-              return ok ? { ok: true, path: path }
-                        : { ok: false, error: (fn.error && fn.error.message) || (fn.data && fn.data.error) || "document-record-failed" };
-            });
-          });
-      });
-    },
+    // uploadGuide and ebook-document were the browser-render fulfilment path.
+    // guide-assemble owns fulfilment now — it writes document_path and the
+    // user_documents row under the service role. Two writers on the same
+    // columns is what produced duplicate entries before, so this is removed
+    // rather than left dormant.
 
     // The free diagnosis report: rendered in the browser, uploaded to the
     // owner's own folder, recorded directly. No order and no function involved,
@@ -217,6 +202,24 @@
       if (!enabled) return Promise.resolve({ ok: false });
       return client.from("user_documents").delete().eq("id", id)
         .then(function (r) { return { ok: !r.error }; });
+    },
+
+    // Server-side assembly. The browser no longer renders the book: it asks
+    // for it and gets a storage path back. Figures are read from the paid
+    // order server-side, so the client cannot influence what is typeset.
+    assembleGuide: function (orderId, loanQuery) {
+      if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
+      return client.functions.invoke("guide-assemble", {
+        body: { loanrepo_order_id: orderId, loan_query: loanQuery || null }
+      })
+        .then(function (r) {
+          var d = r.data || {};
+          if (r.error || !d.ok) {
+            return { ok: false, error: (r.error && r.error.message) || d.error || "assemble-failed" };
+          }
+          return { ok: true, path: d.path, already: !!d.already };
+        })
+        .catch(function (e) { return { ok: false, error: String(e && e.message || e) }; });
     },
 
     createGuideOrder: function (email, loanQuery) {

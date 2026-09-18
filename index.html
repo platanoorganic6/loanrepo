@@ -51,17 +51,11 @@
      actually see. Within the system — no new hues. */
   :root {
     --font-heading-weight: 700;
-    /* Hairline dividers read as absent on a phone; 16% ink becomes 34%. */
-    --color-divider: color-mix(in srgb, #1d1f20 34%, transparent);
     /* Supporting copy was mid-grey at body sizes. Pull the lower ramp
        steps toward ink so secondary text is still fully legible. */
-    --color-neutral-600: #5d5d60;
+    --color-neutral-600: #6a6a6d;
     --color-neutral-700: #3f3f41;
     --color-neutral-800: #2b2b2d;
-    /* The accent carries paragraph text in places, so deepen it past the
-       3:1 chrome threshold the system warns about. */
-    --color-accent-700: #2c455d;
-    --color-accent-800: #1d2d3d;
   }
 
   h1, h2, h3 { font-weight: 700; letter-spacing: -0.01em; }
@@ -121,7 +115,7 @@
   /* Industry declares --color-divider as color-mix(); this engine drops
      color-mix() inside the border shorthand, so every hairline in the
      wireframe vanishes. Same colour, literal form, parses everywhere. */
-  :root { --color-divider: rgba(29, 31, 32, 0.16); }
+  :root { --color-divider: rgba(29, 31, 32, 0.34); }
 
   /* The result PDF is a deliverable, not a screenshot of the app: drop the
      chrome, keep the evidence, and let the tables break across pages. */
@@ -1879,7 +1873,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "f9";
+  static BUILD = "g5";
   // Stage 2 (₹149/mo tracking) is built but not launched: there is no in-app
   // cancel flow yet, and the plan copy promises one. Flip to true to release.
   static STAGE2 = false;
@@ -2132,7 +2126,7 @@ class Component extends DCLogic {
       chain = this.db.pendingGuideOrder().then(pending => {
       if (pending) {
         this.setState({ ebookMsg: "Your ₹299 purchase is already confirmed. Saving your copy…" });
-        return this.buildAndStoreGuide(pending.id, pending.loan_query || loanQuery);
+        return this.buildAndStoreGuide(pending.id);
       }
       return this.loadRazorpay()
         .then(() => this.db.createGuideOrder(this.state.user.email, loanQuery))
@@ -2186,7 +2180,7 @@ class Component extends DCLogic {
 
   pollGuidePaid(orderId, loanQuery, n) {
     this.db.guideOrderStatus(orderId).then(row => {
-      if (row && row.status === "paid") { this.buildAndStoreGuide(orderId, loanQuery); return; }
+      if (row && row.status === "paid") { this.buildAndStoreGuide(orderId); return; }
       if (n < 30) { setTimeout(() => this.pollGuidePaid(orderId, loanQuery, n + 1), 2000); return; }
       this.setState({ ebookBusy: false, ebookMsg: "Payment is still being confirmed. Don't pay again — open My Space shortly." });
     });
@@ -2195,62 +2189,59 @@ class Component extends DCLogic {
   // Render the personalised edition off-screen and store it. The reader's
   // figures never leave the browser to make the file; only the finished PDF is
   // uploaded, into their own folder.
+  // Ask the server for the personalised copy. This used to render the whole
+  // 17-chapter book with html2canvas in a hidden iframe: slow, memory-hungry,
+  // produced an image-based PDF with unselectable text, and hung silently on
+  // large documents. The Edge Function assembles it from the typeset book in
+  // a few seconds, as real text.
   buildAndStoreGuide(orderId, loanQuery) {
-    // Without the loan figures this would render the general edition, upload
-    // it, and mark the order fulfilled — quietly giving a paying buyer the
-    // generic book with no way back. Refuse instead.
-    if (!loanQuery) {
+    this.setState({
+      ebookBusy: true,
+      ebookMsg: "Assembling your personalised copy…",
+      docMsg: "Assembling your personalised copy — a few seconds…"
+    });
+    const q = loanQuery || this.personalisedLoanQuery() || null;
+    return this.db.assembleGuide(orderId, q).then(res => {
+      if (!res.ok) {
+        const msg = this.guideError(res.error);
+        this.setState({ ebookBusy: false, ebookMsg: msg, docMsg: msg });
+        return;
+      }
       this.setState({
         ebookBusy: false,
-        docMsg: "Run your diagnosis first — your copy is written from it. Your purchase stays safe until then.",
-        ebookMsg: "Run your diagnosis first — your copy is written from it."
+        ebookMsg: "",
+        docMsg: "Your guide is ready. It's in Downloads below."
       });
-      return Promise.resolve();
-    }
-    this.setState({ ebookBusy: true, ebookMsg: "Generating your personalised copy…", docMsg: "Generating your personalised copy — this takes up to a minute…" });
-    return this.loadHtml2Pdf()
-      .then(ok => {
-        if (!ok) throw new Error("PDF generator could not load");
-        return new Promise((resolve, reject) => {
-          const frame = document.createElement("iframe");
-          frame.style.cssText = "position:fixed;left:-10000px;top:0;width:900px;height:1200px;border:0;opacity:0";
-          frame.src = "Ebook.html?" + loanQuery;
-          frame.onload = () => setTimeout(() => {
-            try {
-              const body = frame.contentDocument && frame.contentDocument.body;
-              if (!body) throw new Error("ebook-render-failed");
-              window.html2pdf().set({
-                margin: 0,
-                filename: "LoanRepo-Personalised-Borrowers-Guide.pdf",
-                image: { type: "jpeg", quality: 0.96 },
-                html2canvas: { scale: 1.4, useCORS: true, logging: false },
-                jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
-                pagebreak: { mode: ["css", "legacy"] }
-              }).from(body).outputPdf("blob").then(blob => { frame.remove(); resolve(blob); })
-                .catch(err => { frame.remove(); reject(err); });
-            } catch (err) { frame.remove(); reject(err); }
-          }, 2500);
-          frame.onerror = () => { frame.remove(); reject(new Error("ebook-render-failed")); };
-          document.body.appendChild(frame);
-        });
-      })
-      .then(blob => {
-        this.setState({ ebookMsg: "Saving it to My Space…", docMsg: "Saving it to My Space…" });
-        return this.db.uploadGuide(orderId, blob);
-      })
-      .then(res => {
-        if (!res.ok) throw new Error(res.error || res.reason || "save-failed");
-        this.setState({ ebookBusy: false, ebookMsg: "", docMsg: "" });
-        this.loadDocuments();
-        this.go("dash");
-      })
-      .catch(e => {
-        const why = String((e && e.message) || e);
-        const msg = "Your purchase is safe and nothing further will be charged, but the copy could not be built: " + why + ". Try again, or message support.";
-        this.setState({ ebookBusy: false, ebookMsg: msg, docMsg: msg });
-      });
+      this.loadDocuments();
+      this.go("dash");
+    });
   }
 
+  // Server-side codes are for logs, not for a buyer who has paid ₹299. Each
+  // maps to what they should actually do; "try again" is wrong for most.
+  guideError(code) {
+    const safe = "Your purchase is safe and nothing further will be charged. ";
+    switch (String(code)) {
+      case "loan-figures-missing":
+        return safe + "We need your loan figures to write your copy — run your diagnosis, then press this again.";
+      case "book-missing":
+        return safe + "The guide file is temporarily unavailable on our side. Nothing for you to fix — message support and we'll sort it.";
+      case "not-paid":
+        return "This order hasn't been confirmed as paid yet. If you have just paid, give it a minute and reload.";
+      case "not-your-order":
+        return "That purchase belongs to a different account. Sign in with the address you bought it on.";
+      case "document-record-failed":
+        return safe + "Your copy was built but could not be filed to your space. Message support and we'll place it there.";
+      case "signin-required":
+        return "Your session expired. Sign in again and press this once more.";
+      default:
+        return safe + "We couldn't assemble your copy just now. Try once more, and message support if it persists.";
+    }
+  }
+
+  // Render the diagnosis on screen to PDF and file it in My Space. This is a
+  // single-page capture of an element already laid out, which rasterises fine
+  // — unlike the 40-page book, which is why that moved to the server.
   storeDiagnosisReport(thenGo) {
     if (!this.state.user || !this.db.enabled) return Promise.resolve();
     const el = this.resultEl;
@@ -2259,19 +2250,18 @@ class Component extends DCLogic {
     return this.loadHtml2Pdf()
       .then(ok => {
         if (!ok) throw new Error("PDF generator could not load");
-        // Controls carry no meaning on paper and the print rules already mark
-        // them; hide them for the capture and put them back afterwards.
-        const hidden = [];
+        // Controls carry no meaning on paper; the report header is the
+        // opposite — screen-hidden, and wanted in the file.
+        const toggled = [];
         el.querySelectorAll("[data-print-hide]").forEach(n => {
-          hidden.push([n, n.style.display]);
+          toggled.push([n, n.style.display]);
           n.style.display = "none";
         });
-        // The report header is screen-hidden; the stored PDF is exactly where
-        // it belongs, so show it for the capture.
         el.querySelectorAll("[data-report-only]").forEach(n => {
-          hidden.push([n, n.style.display]);
+          toggled.push([n, n.style.display]);
           n.style.display = "block";
         });
+        const restore = () => toggled.forEach(([n, v]) => { n.style.display = v; });
         return window.html2pdf().set({
           margin: 8,
           filename: "LoanRepo-Diagnosis.pdf",
@@ -2279,13 +2269,9 @@ class Component extends DCLogic {
           html2canvas: { scale: 1.4, useCORS: true, logging: false },
           jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
           pagebreak: { mode: ["css", "legacy"] }
-        }).from(el).outputPdf("blob").then(blob => {
-          hidden.forEach(([n, v]) => { n.style.display = v; });
-          return blob;
-        }).catch(err => {
-          hidden.forEach(([n, v]) => { n.style.display = v; });
-          throw err;
-        });
+        }).from(el).outputPdf("blob")
+          .then(blob => { restore(); return blob; })
+          .catch(err => { restore(); throw err; });
       })
       .then(blob => {
         const s = this.state;
@@ -2294,11 +2280,13 @@ class Component extends DCLogic {
       })
       .then(res => {
         if (!res || !res.ok) throw new Error((res && (res.error || res.reason)) || "save-failed");
-        this.setState({ docMsg: "" });
+        this.setState({ docMsg: "Your report is saved. It's in Downloads below." });
         this.loadDocuments();
         if (thenGo) this.go("dash");
       })
-      .catch(e => this.setState({ docMsg: "Couldn't save the report: " + String(e.message || e) }));
+      .catch(e => this.setState({
+        docMsg: "Couldn't save the report: " + String((e && e.message) || e)
+      }));
   }
 
   loadHtml2Pdf() {
@@ -2807,6 +2795,10 @@ class Component extends DCLogic {
       retryGuide: () => {
         const p = s.pendingOrder;
         if (!p) return;
+        // The server prefers the figures recorded at purchase, but an order
+        // created before those were captured has none — so the live diagnosis
+        // is the only route to fulfilment. Send them, and if there are none,
+        // say so rather than firing a request that must fail.
         const q = p.loan_query || this.personalisedLoanQuery();
         if (!q) {
           this.setState({
@@ -2817,7 +2809,6 @@ class Component extends DCLogic {
           this.go("loan");
           return;
         }
-        this.setState({ docMsg: "Generating your personalised copy — this takes a few seconds…" });
         this.buildAndStoreGuide(p.id, q);
       },
       goUpgrade: () => this.go("upgrade"),
