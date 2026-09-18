@@ -244,14 +244,19 @@
         }
       }).then(function (r) {
         var d = r.data || {};
-        return { ok: !r.error && (d.paid || d.already_paid), error: (r.error && r.error.message) || d.error };
+        var done = d.paid === true || d.already_paid === true || d.ok === true || d.status === "paid";
+        return { ok: !r.error && done, error: (r.error && r.error.message) || d.error };
       });
     },
 
     guideOrderStatus: function (orderId) {
       if (!enabled) return Promise.resolve(null);
       return client.functions.invoke("ebook-status", { body: { loanrepo_order_id: orderId } })
-        .then(function (r) { return (r.error || !r.data) ? null : r.data.order; })
+        .then(function (r) {
+          if (r.error || !r.data) return null;
+          // Deployed shape is {ok:true, order:{…}}; tolerate a bare order too.
+          return r.data.order || (r.data.status ? r.data : null);
+        })
         .catch(function () { return null; });
     },
 
