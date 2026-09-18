@@ -1866,7 +1866,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "g6";
+  static BUILD = "g7";
   // Stage 2 (₹149/mo tracking) is built but not launched: there is no in-app
   // cancel flow yet, and the plan copy promises one. Flip to true to release.
   static STAGE2 = false;
@@ -2773,11 +2773,19 @@ class Component extends DCLogic {
         kind: d.document_type === "diagnosis" ? "Diagnosis report" : "Borrower's Guide",
         when: new Date(d.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
         download: () => {
+          const tab = window.open("", "_blank");
           this.setState({ docMsg: "Preparing your download…" });
           this.db.documentUrl(d.storage_path).then(url => {
-            if (!url) { this.setState({ docMsg: "That file couldn't be opened. Try again in a moment." }); return; }
+            if (!url) {
+              if (tab) tab.close();
+              this.setState({ docMsg: "That file couldn't be opened. Try again in a moment." });
+              return;
+            }
             this.setState({ docMsg: "" });
-            window.open(url, "_blank", "noopener");
+            // Same-tab navigation is never popup-blocked, so it is the
+            // fallback when the tab could not be opened at all.
+            if (tab) { tab.opener = null; tab.location.href = url; }
+            else window.location.href = url;
           });
         }
       })),
