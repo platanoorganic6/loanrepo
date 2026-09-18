@@ -137,6 +137,90 @@
       if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
       return client.functions.invoke("razorpay-order", { body: {} }).then(function (r) { if (r.error || !r.data) return { ok: false, error: (r.error && r.error.message) || "no-response" }; return { ok: true, subscriptionId: r.data.subscription_id, keyId: r.data.key_id }; }).catch(function (e) { return { ok: false, error: String(e) }; });
     },
+    /* ── My Space documents ───────────────────────────────────────────── */
+    // Contract matches the repo's ebook-* functions exactly: orders live in
+    // ebook_orders, finished files in user_documents, PDFs in the private
+    // loanrepo-documents bucket under <user_id>/. Nothing here is new
+    // server-side — only the UI moved into the app.
+    listDocuments: function () {
+      if (!enabled) return Promise.resolve([]);
+      return client.from("user_documents")
+        .select("id,title,document_type,storage_path,created_at,order_id")
+        .order("created_at", { ascending: false })
+        .then(function (r) { return (r.error ? [] : r.data) || []; });
+    },
+
+    // A paid order with no document yet: payment cleared but the PDF was never
+    // rendered (closed tab, failed upload). My Space retries it.
+    pendingGuideOrder: function () {
+      if (!enabled) return Promise.resolve(null);
+      return client.from("ebook_orders")
+        .select("id,status,document_path,loan_query,created_at")
+        .eq("status", "paid").is("document_path", null)
+        .order("created_at", { ascending: false }).limit(1)
+        .then(function (r) { return (r.error || !r.data || !r.data.length) ? null : r.data[0]; });
+    },
+
+    documentUrl: function (path) {
+      if (!enabled) return Promise.resolve(null);
+      return client.storage.from("loanrepo-documents").createSignedUrl(path, 600)
+        .then(function (r) { return (r.error || !r.data) ? null : r.data.signedUrl; });
+    },
+
+    uploadGuide: function (orderId, blob) {
+      if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
+      return client.auth.getUser().then(function (r) {
+        var u = r.data && r.data.user;
+        if (!u) return { ok: false, reason: "session-expired" };
+        var path = u.id + "/borrowers-guide-" + orderId + ".pdf";
+        return client.storage.from("loanrepo-documents")
+          .upload(path, blob, { contentType: "application/pdf", cacheControl: "3600", upsert: true })
+          .then(function (up) {
+            if (up.error) return { ok: false, error: up.error.message };
+            return client.functions.invoke("ebook-document", {
+              body: { loanrepo_order_id: orderId, storage_path: path }
+            }).then(function (fn) {
+              var ok = !fn.error && fn.data && fn.data.ok;
+              return ok ? { ok: true, path: path }
+                        : { ok: false, error: (fn.error && fn.error.message) || (fn.data && fn.data.error) || "document-record-failed" };
+            });
+          });
+      });
+    },
+
+    createGuideOrder: function (email, loanQuery) {
+      if (!enabled) return Promise.resolve({ ok: false, reason: "not-configured" });
+      return client.functions.invoke("ebook-order-auth", { body: { email: email, loanQuery: loanQuery } })
+        .then(function (r) {
+          if (r.error || !r.data || !r.data.order_id) {
+            return { ok: false, error: (r.error && r.error.message) || "order-failed" };
+          }
+          return { ok: true, data: r.data };
+        });
+    },
+
+    // Signature verification is server-side; the browser only reports back.
+    confirmGuidePayment: function (orderId, response) {
+      if (!enabled) return Promise.resolve({ ok: false });
+      return client.functions.invoke("ebook-payment-confirm", {
+        body: {
+          loanrepo_order_id: orderId,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature
+        }
+      }).then(function (r) {
+        var d = r.data || {};
+        return { ok: !r.error && (d.paid || d.already_paid), error: (r.error && r.error.message) || d.error };
+      });
+    },
+
+    guideOrderStatus: function (orderId) {
+      if (!enabled) return Promise.resolve(null);
+      return client.functions.invoke("ebook-status", { body: { loanrepo_order_id: orderId } })
+        .then(function (r) { return (r.error || !r.data) ? null : r.data.order; })
+        .catch(function () { return null; });
+    },
+
     /* ── saved reports: the user's own workspace ──────────────────────── */
     // Stores the loan inputs plus a snapshot of what the model said, not a PDF
     // binary. The report is regenerated on demand, so it cannot go stale and
@@ -171,7 +255,7 @@
     // to read or to buy.
     ownsBook: function () {
       if (!enabled) return Promise.resolve(false);
-      return client.from("purchases").select("id").eq("product", "ebook").eq("status", "paid").limit(1)
+      return client.from("user_documents").select("id").eq("document_type", "ebook").limit(1)
         .then(function (r) { return !r.error && !!(r.data && r.data.length); });
     },
     startEbookOrder: function (email, loanQuery) {

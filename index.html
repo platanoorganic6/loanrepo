@@ -49,6 +49,7 @@
   @media (max-width: 720px) {
     [data-tabbar] { display: block !important; }
     body { padding-bottom: 58px; }
+    [data-support] { bottom: 70px !important; }
   }
 
   /* Industry declares --color-divider as color-mix(); this engine drops
@@ -97,8 +98,8 @@
         <button type="button" onClick="{{ goCycle }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navCycle }};">Rate cycle</button>
         <button type="button" onClick="{{ goExamples }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navExamples }};">Examples</button>
         </sc-if>
-        <sc-if value="{{ stage2 }}" hint-placeholder-val="{{ false }}">
-          <button type="button" onClick="{{ goDash }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navDash }};">Home</button>
+        <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{ goDash }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navDash }};">My Space</button>
         </sc-if>
         <sc-if value="{{ stage2 }}" hint-placeholder-val="{{ false }}">
           <button type="button" onClick="{{ goSaved }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navSaved }};">Saved runs</button>
@@ -1241,7 +1242,7 @@
 
     <div style="display:flex; justify-content:space-between; align-items:baseline; gap:16px; flex-wrap:wrap; margin-bottom:26px;">
       <div>
-        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:6px;">Your workspace</div>
+        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:6px;">My Space</div>
         <h1 style="font-size:clamp(26px,5vw,34px); line-height:1.05; margin:0;">{{ dashName }}</h1>
       </div>
       <div style="font-size:12.5px; color:var(--color-neutral-700); text-align:right;">{{ userEmail }}</div>
@@ -1251,9 +1252,42 @@
          tracked, so it sits above the tracking state. -->
     <div style="margin-bottom:30px;">
       <div style="display:flex; justify-content:space-between; align-items:baseline; gap:14px; flex-wrap:wrap; border-bottom:1px solid var(--color-text); padding-bottom:10px; margin-bottom:4px;">
-        <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase;">Your documents</div>
+        <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase;">Downloads</div>
         <button type="button" onClick="{{ goLoan }}" style="background:none; border:none; padding:0; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-accent-800); border-bottom:1px solid var(--color-accent-800);">Run a new diagnosis</button>
       </div>
+
+      <!-- Stored files: the diagnosis report and the purchased guide. Signed
+           URLs are minted on demand, so nothing here is a public link. -->
+      <sc-if value="{{ hasPendingOrder }}" hint-placeholder-val="{{ false }}">
+      <div style="border-bottom:1px solid var(--color-divider); padding:14px 0; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:center;">
+        <div style="min-width:0;">
+          <div style="font-family:var(--font-heading); font-size:16px;">Your guide is paid for but not yet saved</div>
+          <div style="font-size:12.5px; color:var(--color-neutral-700); margin-top:3px;">A previous attempt was interrupted. Nothing further will be charged.</div>
+        </div>
+        <button type="button" class="btn btn-primary" onClick="{{ retryGuide }}" style="font-size:12px; padding:7px 11px;">Finish saving it</button>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ hasDocuments }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <sc-for list="{{ documents }}" as="doc" hint-placeholder-count="2">
+          <div style="display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:center; border-bottom:1px solid var(--color-divider); padding:14px 0;">
+            <div style="min-width:0;">
+              <div style="font-family:var(--font-heading); font-size:16px; letter-spacing:0.01em;">{{ doc.title }}</div>
+              <div style="font-size:12.5px; color:var(--color-neutral-700); margin-top:3px;">{{ doc.kind }} · saved {{ doc.when }}</div>
+            </div>
+            <button type="button" class="btn btn-secondary" onClick="{{ doc.download }}" style="font-size:12px; padding:7px 11px;">Download</button>
+          </div>
+        </sc-for>
+        <div style="font-size:12px; color:var(--color-accent-800); min-height:16px; padding-top:8px;">{{ docMsg }}</div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ noDocuments }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:16px 0; border-bottom:1px solid var(--color-divider); font-size:14px; line-height:1.55; color:var(--color-neutral-800); max-width:52ch;">
+        No stored files yet. Your diagnosis report and your copy of the guide both land here, and stay downloadable — no expiring links.
+      </div>
+      </sc-if>
 
       <sc-if value="{{ hasReports }}" hint-placeholder-val="{{ false }}">
       <div>
@@ -1400,15 +1434,15 @@
 
           <div style="display:flex; align-items:baseline; gap:12px; margin-bottom:18px;">
             <span style="font-family:var(--font-heading); font-size:42px; line-height:1; font-variant-numeric:tabular-nums;">₹299</span>
-            <span style="font-size:13px; color:var(--color-neutral-700);">one-time · PDF emailed to you</span>
+            <span style="font-size:13px; color:var(--color-neutral-700);">one-time · saved to My Space</span>
           </div>
-          <div class="field"><label for="eb-email">Where should we send it?</label><input class="input" id="eb-email" type="email" placeholder="you@example.com" value="{{ ebookEmail }}" onChange="{{ setEbookEmail }}"></div>
           <button type="button" class="btn btn-primary btn-block blueprint" onClick="{{ buyEbook }}" style="margin-top:16px; padding:13px; letter-spacing:0.06em; text-transform:uppercase;">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             {{ ebookCta }}
           </button>
           <div style="font-size:12.5px; color:var(--color-accent-800); margin-top:12px; min-height:18px;">{{ ebookMsg }}</div>
-          <div style="font-size:12.5px; line-height:1.55; color:var(--color-neutral-700); margin-top:10px; border-top:1px dashed var(--color-divider); padding-top:12px;">No account needed. The download link arrives by email and works for fourteen days. We keep your address to send the book and to resend it if the link expires.</div>
+          <div style="font-size:12.5px; line-height:1.55; color:var(--color-neutral-700); margin-top:6px;">{{ ebookNote }}</div>
+          <div style="font-size:12.5px; line-height:1.55; color:var(--color-neutral-700); margin-top:10px; border-top:1px dashed var(--color-divider); padding-top:12px;">Your copy is stored in your own account and stays downloadable — there is no expiring link to lose. Payment is taken by Razorpay; we never see your card.</div>
         </div>
 
         <sc-if value="{{ canPersonalise }}" hint-placeholder-val="{{ false }}">
@@ -1620,16 +1654,33 @@
 
   <!-- App-style tab bar: only for signed-in users, only on narrow viewports.
        The header nav stays authoritative on desktop. -->
-  <sc-if value="{{ stage2 }}" hint-placeholder-val="{{ false }}">
+  <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
   <div data-print-hide="true" data-tabbar="true" style="position:fixed; left:0; right:0; bottom:0; z-index:40; background:var(--color-bg); border-top:1px solid var(--color-text); display:none;">
-    <div style="display:grid; grid-template-columns:repeat(4,1fr);">
-      <button type="button" onClick="{{ goDash }}" style="background:none; border:none; border-top:3px solid {{ navDash }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Home</button>
-      <button type="button" onClick="{{ goLoan }}" style="background:none; border:none; border-top:3px solid {{ navLoan }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Diagnose</button>
-      <button type="button" onClick="{{ goSaved }}" style="background:none; border:none; border-top:3px solid {{ navSaved }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Loans</button>
-      <button type="button" onClick="{{ goCycle }}" style="background:none; border:none; border-top:3px solid {{ navCycle }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Cycle</button>
+    <div style="display:flex;">
+      <button type="button" onClick="{{ goDash }}" style="flex:1; background:none; border:none; border-top:3px solid {{ navDash }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">My Space</button>
+      <button type="button" onClick="{{ goLoan }}" style="flex:1; background:none; border:none; border-top:3px solid {{ navLoan }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Diagnose</button>
+      <sc-if value="{{ stage2 }}" hint-placeholder-val="{{ false }}">
+      <button type="button" onClick="{{ goSaved }}" style="flex:1; background:none; border:none; border-top:3px solid {{ navSaved }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Loans</button>
+      </sc-if>
+      <sc-if value="{{ stage2Soon }}" hint-placeholder-val="{{ true }}">
+        <button type="button" onClick="{{ goBook }}" style="flex:1; background:none; border:none; border-top:3px solid {{ navBook }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Book</button>
+      </sc-if>
+      <button type="button" onClick="{{ goCycle }}" style="flex:1; background:none; border:none; border-top:3px solid {{ navCycle }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Cycle</button>
     </div>
   </div>
   </sc-if>
+
+  <!-- Support. Sits above the mobile tab bar so it never covers it. -->
+  <div data-print-hide="true" data-support="true" style="position:fixed; right:clamp(14px,3vw,24px); bottom:clamp(14px,3vw,24px); z-index:45; display:flex; flex-direction:column; align-items:center; gap:7px;">
+    <span style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; font-weight:600; color:var(--color-text); background:var(--color-bg); padding:2px 7px; border:1px solid var(--color-divider);">Support</span>
+    <a href="https://wa.me/919019754079?text=Need%20help%20about%20LoanRepo" target="_blank" rel="noopener" aria-label="Message LoanRepo support on WhatsApp" class="blueprint" style="display:flex; align-items:center; justify-content:center; width:52px; height:52px; background:var(--color-accent-900); text-decoration:none;">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-bg)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+        <path d="M9.4 9.1c.2-.5.4-.5.7-.5h.5c.2 0 .4 0 .6.4l.7 1.6c.1.2 0 .4-.1.6l-.4.5c-.1.2-.2.3 0 .6a6 6 0 0 0 2.6 2.3c.3.1.4.1.6-.1l.5-.6c.2-.2.3-.2.6-.1l1.5.8c.3.2.3.4.3.6a1.9 1.9 0 0 1-1.4 1.4c-.6.1-1.6 0-3.5-1.1a9.1 9.1 0 0 1-3.5-3.8c-.4-1-.4-2 .3-2.8z" fill="var(--color-bg)" stroke="none"></path>
+      </svg>
+    </a>
+  </div>
 
   <footer style="border-top:1px solid var(--color-divider);">
     <div style="max-width:1120px; margin:0 auto; padding:30px 24px 40px; display:grid; gap:18px;">
@@ -1649,7 +1700,7 @@
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;legalEntity&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;LoanRepo&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;legalAddress&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Address to be confirmed&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;contactEmail&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;hello@loanrepo.in&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;grievanceOfficer&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Ravi, Founder — hello@loanrepo.in&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;jurisdiction&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Bengaluru&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;eblrSpread&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2.65,&quot;min&quot;:1.5,&quot;max&quot;:4,&quot;step&quot;:0.05,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Model assumptions&quot;},&quot;mclrSpread&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:3.75,&quot;min&quot;:2.5,&quot;max&quot;:5,&quot;step&quot;:0.05,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Model assumptions&quot;},&quot;showScenario&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Result screen&quot;},&quot;showChecklist&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Result screen&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;legalEntity&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;LoanRepo&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;legalAddress&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;No 31 Sri Sai Enclave, Flat No 14, 4th Cross, Navodaya Nagar, JP Nagar 7th Phase, Bengaluru 560076&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;contactEmail&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;hello@loanrepo.in&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;grievanceOfficer&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Ravi, Founder — hello@loanrepo.in&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;jurisdiction&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Bengaluru&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Legal details&quot;},&quot;eblrSpread&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2.65,&quot;min&quot;:1.5,&quot;max&quot;:4,&quot;step&quot;:0.05,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Model assumptions&quot;},&quot;mclrSpread&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:3.75,&quot;min&quot;:2.5,&quot;max&quot;:5,&quot;step&quot;:0.05,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Model assumptions&quot;},&quot;showScenario&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Result screen&quot;},&quot;showChecklist&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Result screen&quot;}}">
 class Component extends DCLogic {
   static REPO = [
     { d: "2005-10-26", r: 6.25 }, { d: "2006-01-24", r: 6.50 }, { d: "2006-06-08", r: 6.75 },
@@ -1720,7 +1771,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "d9";
+  static BUILD = "e4";
   // Stage 2 (₹149/mo tracking) is built but not launched: there is no in-app
   // cancel flow yet, and the plan copy promises one. Flip to true to release.
   static STAGE2 = false;
@@ -1788,6 +1839,7 @@ class Component extends DCLogic {
     ebookEmail: "", ebookMsg: "", ebookBusy: false, legalTab: "about",
     payoffLump: 500000, payoffExtra: 5000,
     hasRun: false, authReason: "", reports: [], ownsBook: false,
+    documents: [], pendingOrder: null, docMsg: "", returnTo: "",
     reportBusy: false, reportMsg: "",
     user: null, authOpen: false, email: "", authMsg: "", saveMsg: "",
     runs: [], repoHistory: null, cases: null, waitlist: "", waitlistMsg: "",
@@ -1832,8 +1884,11 @@ class Component extends DCLogic {
         if (!user) return;
         this.loadRuns();
         this.loadReports();
+        this.loadDocuments();
         this.db.ownsBook().then(owns => this.setState({ ownsBook: owns }));
         if (!arriving) return;
+        const want = this.state.returnTo;
+        if (want) { this.setState({ returnTo: "" }); this.go(want); return; }
         // They pressed the PDF button, were sent to their inbox, and came back.
         // Restoring the run puts them on the report instead of a blank form.
         let pending = null;
@@ -1939,41 +1994,144 @@ class Component extends DCLogic {
     return "Ebook.html?" + q.toString();
   }
 
+  // Account-first purchase. Payment is confirmed server-side; the browser only
+  // reports the Razorpay response and then renders the PDF it is entitled to.
+  // Same functions and tables the standalone flow used, so the backend contract
+  // is unchanged.
   startEbookPurchase() {
-    const email = (this.state.ebookEmail || "").trim();
-    if (!email || email.indexOf("@") < 1) {
-      this.setState({ ebookMsg: "Enter the email address the book should go to." });
+    if (this.state.ebookBusy) return;
+    if (!this.db.enabled) {
+      this.setState({ ebookMsg: "Purchasing needs the account service, which isn't switched on here." });
       return;
     }
-    this.setState({ ebookBusy: true, ebookMsg: "" });
-    this.loadRazorpay()
-      .then(() => this.db.startEbookOrder(email, this.personalisedLoanQuery()))
-      .then(res => {
-        if (!res.ok || !window.Razorpay) {
-          this.setState({ ebookBusy: false, ebookMsg: this.friendly(res, "Checkout isn't available right now. Try again shortly.") });
-          return;
-        }
-        const rz = new window.Razorpay({
-          key: res.keyId,
-          order_id: res.orderId,
-          amount: res.amount,
-          currency: "INR",
-          name: "LoanRepo",
-          description: "The Quiet Years (PDF)",
-          prefill: { email: email },
-          theme: { color: "#5980a6" },
-          // Delivery is the webhook's job; the browser only confirms.
-          handler: () => this.setState({
-            ebookBusy: false,
-            ebookMsg: "Paid. The download link is on its way to " + email + " — check spam if it hasn't landed in a minute."
-          }),
-          modal: { ondismiss: () => this.setState({ ebookBusy: false, ebookMsg: "Checkout closed. Nothing was charged." }) }
+    if (!this.state.user) {
+      this.setState({ authOpen: true, authMsg: "", authReason: "book", returnTo: "book" });
+      return;
+    }
+    const loanQuery = this.personalisedLoanQuery();
+    if (!loanQuery) {
+      this.setState({ ebookMsg: "Run your free diagnosis first — your copy is written from it." });
+      return;
+    }
+    this.setState({ ebookBusy: true, ebookMsg: "Checking your account…" });
+
+    // A paid order with no file means a previous attempt was interrupted.
+    // Finish that rather than charging again.
+    this.db.pendingGuideOrder().then(pending => {
+      if (pending) {
+        this.setState({ ebookMsg: "Your ₹299 purchase is already confirmed. Saving your copy…" });
+        return this.buildAndStoreGuide(pending.id, pending.loan_query || loanQuery);
+      }
+      return this.loadRazorpay()
+        .then(() => this.db.createGuideOrder(this.state.user.email, loanQuery))
+        .then(res => {
+          if (!res.ok || !window.Razorpay) {
+            this.setState({ ebookBusy: false, ebookMsg: this.friendly(res, "Checkout isn't available right now. Try again shortly.") });
+            return;
+          }
+          const d = res.data;
+          const rz = new window.Razorpay({
+            key: d.key_id,
+            order_id: d.order_id,
+            amount: d.amount,
+            currency: d.currency || "INR",
+            name: "LoanRepo",
+            description: "Personalised Borrower's Guide — ₹299",
+            prefill: { email: this.state.user.email },
+            theme: { color: "#5980a6" },
+            handler: response => {
+              this.setState({ ebookMsg: "Confirming payment…" });
+              this.db.confirmGuidePayment(d.loanrepo_order_id || d.order_id, response).then(c => {
+                if (!c.ok) {
+                  this.setState({ ebookBusy: false, ebookMsg: "We couldn't confirm the payment yet. Don't pay again — open My Space shortly and it will finish there." });
+                  return;
+                }
+                this.pollGuidePaid(d.loanrepo_order_id || d.order_id, loanQuery, 0);
+              });
+            },
+            modal: { ondismiss: () => this.setState({ ebookBusy: false, ebookMsg: "Checkout closed. Nothing was charged." }) }
+          });
+          this.setState({ ebookMsg: "" });
+          rz.open();
+          this.db.track("ebook_checkout_opened", {});
         });
-        this.setState({ ebookBusy: false });
-        rz.open();
-        this.db.track("ebook_checkout_opened", {});
-      });
+    }).catch(e => this.setState({ ebookBusy: false, ebookMsg: "Couldn't start payment: " + String(e.message || e) }));
   }
+
+  pollGuidePaid(orderId, loanQuery, n) {
+    this.db.guideOrderStatus(orderId).then(row => {
+      if (row && row.status === "paid") { this.buildAndStoreGuide(orderId, loanQuery); return; }
+      if (n < 30) { setTimeout(() => this.pollGuidePaid(orderId, loanQuery, n + 1), 2000); return; }
+      this.setState({ ebookBusy: false, ebookMsg: "Payment is still being confirmed. Don't pay again — open My Space shortly." });
+    });
+  }
+
+  // Render the personalised edition off-screen and store it. The reader's
+  // figures never leave the browser to make the file; only the finished PDF is
+  // uploaded, into their own folder.
+  buildAndStoreGuide(orderId, loanQuery) {
+    this.setState({ ebookBusy: true, ebookMsg: "Generating your personalised copy…" });
+    return this.loadHtml2Pdf()
+      .then(ok => {
+        if (!ok) throw new Error("PDF generator could not load");
+        return new Promise((resolve, reject) => {
+          const frame = document.createElement("iframe");
+          frame.style.cssText = "position:fixed;left:-10000px;top:0;width:900px;height:1200px;border:0;opacity:0";
+          frame.src = "Ebook.html?" + loanQuery;
+          frame.onload = () => setTimeout(() => {
+            try {
+              const body = frame.contentDocument && frame.contentDocument.body;
+              if (!body) throw new Error("ebook-render-failed");
+              window.html2pdf().set({
+                margin: 0,
+                filename: "LoanRepo-Personalised-Borrowers-Guide.pdf",
+                image: { type: "jpeg", quality: 0.96 },
+                html2canvas: { scale: 1.4, useCORS: true, logging: false },
+                jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
+                pagebreak: { mode: ["css", "legacy"] }
+              }).from(body).outputPdf("blob").then(blob => { frame.remove(); resolve(blob); })
+                .catch(err => { frame.remove(); reject(err); });
+            } catch (err) { frame.remove(); reject(err); }
+          }, 2500);
+          frame.onerror = () => { frame.remove(); reject(new Error("ebook-render-failed")); };
+          document.body.appendChild(frame);
+        });
+      })
+      .then(blob => {
+        this.setState({ ebookMsg: "Saving it to My Space…" });
+        return this.db.uploadGuide(orderId, blob);
+      })
+      .then(res => {
+        if (!res.ok) throw new Error(res.error || res.reason || "save-failed");
+        this.setState({ ebookBusy: false, ebookMsg: "" });
+        this.loadDocuments();
+        this.go("dash");
+      })
+      .catch(e => this.setState({
+        ebookBusy: false,
+        ebookMsg: "Your purchase is safe, but the file couldn't be saved: " + String(e.message || e) + ". Open My Space to retry."
+      }));
+  }
+
+  loadHtml2Pdf() {
+    if (window.html2pdf) return Promise.resolve(true);
+    return new Promise(resolve => {
+      const s = document.createElement("script");
+      s.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+      s.integrity = "sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==";
+      s.crossOrigin = "anonymous";
+      s.referrerPolicy = "no-referrer";
+      s.onload = () => resolve(true);
+      s.onerror = () => resolve(false);
+      document.head.appendChild(s);
+    });
+  }
+
+  loadDocuments() {
+    this.db.listDocuments().then(docs => this.setState({ documents: docs }));
+    this.db.pendingGuideOrder().then(p => this.setState({ pendingOrder: p }));
+  }
+
 
   // The landing's worked example, computed rather than written down.
   demo() {
@@ -2188,6 +2346,7 @@ class Component extends DCLogic {
     this.setState({ screen, saveMsg: "" });
     this.db.track("screen_view", { screen });
     if ((screen === "saved" || screen === "dash") && this.state.user) this.loadRuns();
+    if (screen === "dash" && this.state.user) this.loadDocuments();
   }
 
   get spreads() {
@@ -2426,16 +2585,39 @@ class Component extends DCLogic {
       privacyRows: Component.PRIVACY_ROWS,
       // The facts only the operator holds. Set these before launch.
       legalEntity: this.props.legalEntity ?? "LoanRepo",
-      legalAddress: this.props.legalAddress ?? "Address to be confirmed",
+      legalAddress: this.props.legalAddress ?? "No 31 Sri Sai Enclave, Flat No 14, 4th Cross, Navodaya Nagar, JP Nagar 7th Phase, Bengaluru 560076",
       contactEmail: this.props.contactEmail ?? "hello@loanrepo.in",
       grievanceOfficer: this.props.grievanceOfficer ?? "Ravi, Founder — hello@loanrepo.in",
       jurisdiction: this.props.jurisdiction ?? "Bengaluru",
       canPersonalise: !!s.result,
       personalHref: this.personalisedBookHref(true),
-      ebookEmail: s.ebookEmail, ebookMsg: s.ebookMsg,
-      ebookCta: s.ebookBusy ? "Opening checkout…" : "Buy the book — ₹299",
-      setEbookEmail: e => this.setState({ ebookEmail: e.target.value }),
+      ebookMsg: s.ebookMsg,
+      ebookCta: s.ebookBusy ? "Working…" : (s.user ? "Pay ₹299 and add to My Space" : "Sign in to buy — ₹299"),
+      ebookNote: s.user
+        ? "Charged once to " + (s.user.email || "your account") + ". Your copy is written from your diagnosis and saved to My Space — no email attachment to lose."
+        : "You'll sign in first, so the book lands in My Space and stays downloadable. No password — a link arrives by email.",
       buyEbook: () => this.startEbookPurchase(),
+      documents: (s.documents || []).map(d => ({
+        title: d.title || "Document",
+        kind: d.document_type === "diagnosis" ? "Diagnosis report" : "Borrower's Guide",
+        when: new Date(d.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
+        download: () => {
+          this.setState({ docMsg: "Preparing your download…" });
+          this.db.documentUrl(d.storage_path).then(url => {
+            if (!url) { this.setState({ docMsg: "That file couldn't be opened. Try again in a moment." }); return; }
+            this.setState({ docMsg: "" });
+            window.open(url, "_blank", "noopener");
+          });
+        }
+      })),
+      hasDocuments: !!(s.documents || []).length,
+      noDocuments: !(s.documents || []).length,
+      docMsg: s.docMsg,
+      hasPendingOrder: !!s.pendingOrder,
+      retryGuide: () => {
+        const p = s.pendingOrder;
+        if (p) this.buildAndStoreGuide(p.id, p.loan_query || this.personalisedLoanQuery());
+      },
       goUpgrade: () => this.go("upgrade"),
       goBuying: () => this.go("buying"),
       navLoan: nav("loan"), navCycle: nav("cycle"), navExamples: nav("examples"),
@@ -2452,9 +2634,12 @@ class Component extends DCLogic {
       authOpen: s.authOpen, authMsg: s.authMsg,
       authTitle: s.authReason === "pdf"
         ? "Your email, and the report is yours"
+        : s.authReason === "book" ? "Sign in, then pay"
         : s.authReason === "track" ? "Sign in to track your loan" : "Sign in to LoanRepo",
       authBody: s.authReason === "pdf"
         ? "We ask for an address before the PDF so we know how many borrowers this is reaching. Signing in stores your email and nothing else — your loan particulars stay in this browser unless you later choose to save the report to your workspace."
+        : s.authReason === "book"
+          ? "Your copy is stored in your account rather than emailed, so it stays downloadable from My Space and there is no link to expire. A sign-in link arrives by email — no password."
         : s.authReason === "track"
           ? "Tracking keeps this loan's particulars in your private workspace so it can be followed across resets and check-ins. That is the one thing tracking stores, and you can delete the loan at any time."
           : "A link arrives by email; there is no password. Signing in gets you the PDF report and, if you subscribe, your tracking workspace.",
@@ -2519,6 +2704,7 @@ class Component extends DCLogic {
       onDash: s.screen === "dash",
       navDash: nav("dash"),
       goDash: () => this.go("dash"),
+      navBook: nav("book"),
       dashHome: () => this.go(s.user ? "dash" : "loan"),
       ...this.dashboard(),
       reports: (s.reports || []).map(row => ({
