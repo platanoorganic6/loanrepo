@@ -75,6 +75,35 @@
     body { padding-left: calc(var(--support-w) + var(--support-gap)); padding-right: calc(var(--support-w) + var(--support-gap)); }
   }
 
+  /* The rail is a column on desktop and a scrolling strip on narrow screens,
+     where a fixed 224px would leave nothing for the content. */
+  @media (max-width: 900px) {
+    [data-shell] { display: block !important; }
+    [data-rail] {
+      width: auto !important;
+      position: static !important;
+      border-right: none !important;
+      border-bottom: 1px solid var(--color-divider);
+      padding: 0 !important;
+      overflow-x: auto;
+    }
+    [data-rail] nav {
+      flex-direction: row !important;
+      align-items: stretch;
+      gap: 0;
+      min-width: max-content;
+    }
+    [data-rail] nav > div { display: none !important; }
+    [data-rail] button {
+      width: auto !important;
+      white-space: nowrap;
+      border-left: none !important;
+      border-bottom: 3px solid transparent;
+      padding: 12px 14px !important;
+      font-size: 13.5px !important;
+    }
+  }
+
   /* App shell on phones: the tab bar appears and the page clears it. */
   @media (max-width: 720px) {
     [data-tabbar] { display: block !important; }
@@ -144,7 +173,7 @@
 <div style="min-height:100vh; background:var(--color-bg); color:var(--color-text); font-family:var(--font-body);">
 
   <header style="border-bottom:1px solid var(--color-divider);">
-    <div style="max-width:1120px; margin:0 auto; padding:10px 18px; display:flex; align-items:center; gap:16px 24px; flex-wrap:wrap; min-height:62px;">
+    <div style="max-width:1400px; margin:0 auto; padding:10px clamp(16px,3vw,26px); display:flex; align-items:center; gap:16px 24px; flex-wrap:wrap; min-height:62px;">
       <div style="margin-right:auto; display:flex; align-items:center; gap:11px;">
         {{ markHeader }}
         <div>
@@ -152,23 +181,8 @@
         <div style="font-family:var(--font-heading); font-size:10.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-text); margin-top:2px; white-space:nowrap;">Floating loan · Diagnose · Guide · Track</div>
         </div>
       </div>
-      <nav style="display:flex; gap:14px 20px; flex-wrap:wrap;">
-        <button type="button" onClick="{{ goLoan }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navLoan }};">{{ navLoanLabel }}</button>
-        <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
-        <button type="button" onClick="{{ goBuying }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navBuying }};">Buying soon</button>
-        <button type="button" onClick="{{ goCycle }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navCycle }};">Rate cycle</button>
-        <button type="button" onClick="{{ goExamples }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navExamples }};">Examples</button>
-        </sc-if>
-        <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
-          <button type="button" onClick="{{ goDash }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navDash }};">My Space</button>
-        </sc-if>
-        <sc-if value="{{ stage2 }}" hint-placeholder-val="{{ false }}">
-          <button type="button" onClick="{{ goSaved }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navSaved }};">Saved runs</button>
-        </sc-if>
-        <button type="button" onClick="{{ goMethod }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navMethod }};">Method</button>
-      </nav>
       <sc-if value="{{ dbEnabled }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex; align-items:center; gap:12px; padding-left:8px; border-left:1px solid var(--color-divider);">
+        <div style="display:flex; align-items:center; gap:12px; margin-left:auto; padding-left:8px; border-left:1px solid var(--color-divider);">
           <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
             <span style="font-size:12.5px; color:var(--color-neutral-700); max-width:22ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ userEmail }}</span>
             <button type="button" class="btn btn-ghost" onClick="{{ signOut }}" style="font-size:12px;">Sign out</button>
@@ -201,9 +215,32 @@
   </div>
   </sc-if>
 
+  <div style="max-width:1400px; margin:0 auto; display:flex; align-items:stretch; gap:0;" data-shell="true">
+    <aside data-rail="true" style="flex:none; width:224px; border-right:1px solid var(--color-divider);">
+      <nav style="display:flex; flex-direction:column; position:sticky; top:0; padding:18px 0 40px;">
+          <div style="font-family:var(--font-heading); font-size:10.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-600); padding:16px 12px 6px;">Your loan</div>
+          <button type="button" onClick="{{ goLoan }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navLoan }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">{{ navLoanLabel }}</button>
+        <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{ goDash }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navDash }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">My Space</button>
+        </sc-if>
+        <sc-if value="{{ stage2 }}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{ goSaved }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navSaved }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">Saved runs</button>
+        </sc-if>
+          <div style="font-family:var(--font-heading); font-size:10.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-600); padding:16px 12px 6px;">The guide</div>
+          <button type="button" onClick="{{ goBook }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navBook }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">The Quiet Years</button>
+          <div style="font-family:var(--font-heading); font-size:10.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-600); padding:16px 12px 6px;">Reference</div>
+        <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{ goBuying }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navBuying }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">Buying soon</button>
+          <button type="button" onClick="{{ goCycle }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navCycle }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">Rate cycle</button>
+          <button type="button" onClick="{{ goExamples }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navExamples }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">Examples</button>
+        </sc-if>
+          <button type="button" onClick="{{ goMethod }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navMethod }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">Method</button>
+      </nav>
+    </aside>
+    <div style="flex:1; min-width:0;">
   <!-- ══ SCREEN: YOUR LOAN ══ -->
   <sc-if value="{{ onLoan }}" hint-placeholder-val="{{ true }}">
-  <main style="max-width:1120px; margin:0 auto; padding:clamp(28px,5vw,44px) clamp(16px,4vw,24px) 88px;">
+  <main style="max-width:1120px; margin:0; padding:clamp(28px,5vw,44px) clamp(20px,3vw,34px) 88px;">
 
     <div data-print-hide="true" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:56px; align-items:start;">
       <div>
@@ -933,7 +970,7 @@
 
   <!-- ══ SCREEN: BUYING SOON ══ -->
   <sc-if value="{{ onBuying }}" hint-placeholder-val="{{ false }}">
-  <main style="max-width:1120px; margin:0 auto; padding:clamp(28px,5vw,44px) clamp(16px,4vw,24px) 88px;">
+  <main style="max-width:1120px; margin:0; padding:clamp(28px,5vw,44px) clamp(20px,3vw,34px) 88px;">
     <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">Before you sign</div>
     <h1 style="font-size:clamp(28px,5.5vw,42px); line-height:1.06; margin:0 0 16px; max-width:26ch;">Two decisions you make once, and live with for twenty years.</h1>
     <p style="font-size:16px; line-height:1.6; max-width:68ch; color:var(--color-neutral-800); margin:0 0 34px;">Nobody can tell you where rates go next, and anyone who does is selling something. What can be shown is the range — what the same loan looks like if rates rise, hold, or fall by as much as they actually have in the last six years. And the benchmark you pick at signing, which most people never think about, is worth more than the rate you negotiate.</p>
@@ -993,7 +1030,7 @@
 
   <!-- ══ SCREEN: RATE CYCLE ══ -->
   <sc-if value="{{ onCycle }}" hint-placeholder-val="{{ false }}">
-  <main style="max-width:1120px; margin:0 auto; padding:clamp(28px,5vw,44px) clamp(16px,4vw,24px) 88px;">
+  <main style="max-width:1120px; margin:0; padding:clamp(28px,5vw,44px) clamp(20px,3vw,34px) 88px;">
     <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">Where the cycle stands</div>
     <h1 style="font-size:clamp(28px,5.5vw,42px); line-height:1.06; margin:0 0 16px; max-width:26ch;">The repo rate sits {{ cyclePctTxt }} of the way up its own {{ cycleSpanTxt }} range.</h1>
     <p style="font-size:16px; line-height:1.6; max-width:66ch; color:var(--color-neutral-800); margin:0;">This is a position, not a recommendation. Today's repo rate is <b>{{ nowRepo }}%</b>, against a floor of {{ cycleLo }} in {{ cycleLoWhen }} and a peak of {{ cycleHi }} in {{ cycleHiWhen }}. What that means for you depends on whether you already hold a floating loan or are deciding when to take one.</p>
@@ -1078,7 +1115,7 @@
 
   <!-- ══ SCREEN: EXAMPLES ══ -->
   <sc-if value="{{ onExamples }}" hint-placeholder-val="{{ false }}">
-  <main style="max-width:1120px; margin:0 auto; padding:clamp(28px,5vw,44px) clamp(16px,4vw,24px) 88px;">
+  <main style="max-width:1120px; margin:0; padding:clamp(28px,5vw,44px) clamp(20px,3vw,34px) 88px;">
     <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">Real examples, not projections</div>
     <h1 style="font-size:clamp(28px,5.5vw,42px); line-height:1.06; margin:0 0 16px; max-width:24ch;">Five purchase dates. Two very different outcomes.</h1>
     <p style="font-size:16px; line-height:1.6; max-width:70ch; color:var(--color-neutral-800); margin:0 0 34px;">Every figure below is computed live by the same engine your own loan runs through — walked month by month against the actual repo history, not a single before-and-after estimate. The finding is uncomfortable in a useful way: the trap isn't universal, it's specific to <em>when</em> you bought. Click any row to load it into the calculator.</p>
@@ -1106,7 +1143,7 @@
 
   <!-- ══ SCREEN: METHOD ══ -->
   <sc-if value="{{ onMethod }}" hint-placeholder-val="{{ false }}">
-  <main style="max-width:1120px; margin:0 auto; padding:clamp(28px,5vw,44px) clamp(16px,4vw,24px) 88px;">
+  <main style="max-width:1120px; margin:0; padding:clamp(28px,5vw,44px) clamp(20px,3vw,34px) 88px;">
     <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">Method</div>
     <h1 style="font-size:clamp(28px,5.5vw,42px); line-height:1.06; margin:0 0 16px; max-width:24ch;">Every assumption, stated.</h1>
     <p style="font-size:16px; line-height:1.6; max-width:70ch; color:var(--color-neutral-800); margin:0 0 40px;">This tool is descriptive. It tells you what the rate cycle did to a loan with your particulars. It does not tell you to buy, wait, prepay or refinance, and it earns nothing from any of those.</p>
@@ -1185,7 +1222,7 @@
 
   <!-- ══ SCREEN: SAVED RUNS ══ -->
   <sc-if value="{{ onSaved }}" hint-placeholder-val="{{ false }}">
-  <main style="max-width:1120px; margin:0 auto; padding:clamp(28px,5vw,44px) clamp(16px,4vw,24px) 88px;">
+  <main style="max-width:1120px; margin:0; padding:clamp(28px,5vw,44px) clamp(20px,3vw,34px) 88px;">
     <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">Your account</div>
     <h1 style="font-size:clamp(28px,5.5vw,42px); line-height:1.06; margin:0 0 16px; max-width:24ch;">Runs you've saved.</h1>
     <p style="font-size:16px; line-height:1.6; max-width:68ch; color:var(--color-neutral-800); margin:0 0 34px;">Each row is a snapshot: the particulars you entered and the verdict at the time you saved it. Rates move, so a run saved last year will read differently if you run it again today. Only you can read these.</p>
@@ -1367,7 +1404,7 @@
 
   <!-- ══ SCREEN: UPGRADE ══ -->
   <sc-if value="{{ onUpgrade }}" hint-placeholder-val="{{ false }}">
-  <main style="max-width:1120px; margin:0 auto; padding:clamp(28px,5vw,44px) clamp(16px,4vw,24px) 88px;">
+  <main style="max-width:1120px; margin:0; padding:clamp(28px,5vw,44px) clamp(20px,3vw,34px) 88px;">
     <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">Tracking</div>
     <h1 style="font-size:clamp(28px,5.5vw,42px); line-height:1.06; margin:0 0 16px; max-width:26ch;">The calculator is free. Watching it for twenty years is the subscription.</h1>
     <p style="font-size:16px; line-height:1.6; max-width:70ch; color:var(--color-neutral-800); margin:0 0 40px;">Everything you have used so far — the engine, the rate history, the examples, the bank message, the PDF — is free and stays free, with no account. What ₹149 a month buys is the part that happens while you are not looking: your loan re-run against every rate decision, and an email the week anything reaches it.</p>
@@ -1449,7 +1486,7 @@
        The signed-in home. App-shaped rather than page-shaped: a status header,
        a metric grid, then what is due. -->
   <sc-if value="{{ onDash }}" hint-placeholder-val="{{ false }}">
-  <main style="max-width:760px; margin:0 auto; padding:clamp(24px,5vw,40px) clamp(16px,4vw,24px) 104px;">
+  <main style="max-width:760px; margin:0; padding:clamp(24px,5vw,40px) clamp(20px,3vw,34px) 104px;">
 
     <div style="display:flex; justify-content:space-between; align-items:baseline; gap:16px; flex-wrap:wrap; margin-bottom:26px;">
       <div>
@@ -1573,7 +1610,7 @@
 
   <!-- ══ SCREEN: THE BOOK ══ -->
   <sc-if value="{{ onBook }}" hint-placeholder-val="{{ false }}">
-  <main style="max-width:1120px; margin:0 auto; padding:clamp(28px,5vw,44px) clamp(16px,4vw,24px) 88px;">
+  <main style="max-width:1120px; margin:0; padding:clamp(28px,5vw,44px) clamp(20px,3vw,34px) 88px;">
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:56px; align-items:start;">
       <div>
         <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">The book · ₹299</div>
@@ -1666,7 +1703,7 @@
 
   <!-- ══ SCREEN: LEGAL ══ -->
   <sc-if value="{{ onLegal }}" hint-placeholder-val="{{ false }}">
-  <main style="max-width:1120px; margin:0 auto; padding:clamp(28px,5vw,44px) clamp(16px,4vw,24px) 88px;">
+  <main style="max-width:1120px; margin:0; padding:clamp(28px,5vw,44px) clamp(20px,3vw,34px) 88px;">
     <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:12px;">The small print, written plainly</div>
     <h1 style="font-size:clamp(30px,6vw,42px); line-height:1.04; margin:0 0 16px; max-width:22ch;">About, terms and how we handle your data.</h1>
     <p style="font-size:16px; line-height:1.6; max-width:66ch; color:var(--color-neutral-800); margin:0 0 34px;">Written to be read rather than clicked past. Where a term affects what you can expect from us, it is stated in the same words we would use on a phone call.</p>
@@ -1869,6 +1906,9 @@
   </div>
   </sc-if>
 
+    </div>
+  </div>
+
   <!-- Support. Sits above the mobile tab bar so it never covers it. -->
   <div data-print-hide="true" data-support="true" style="position:fixed; right:clamp(14px,3vw,24px); bottom:clamp(14px,3vw,24px); z-index:45; display:flex; flex-direction:column; align-items:center; gap:7px;">
     <span style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; font-weight:600; color:var(--color-text); background:var(--color-bg); padding:2px 7px; border:1px solid var(--color-divider);">Support</span>
@@ -1970,7 +2010,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "i1";
+  static BUILD = "i3";
   // Stage 2 (₹149/mo tracking) is built but not launched: there is no in-app
   // cancel flow yet, and the plan copy promises one. Flip to true to release.
   static STAGE2 = false;
