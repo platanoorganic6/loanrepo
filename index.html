@@ -72,7 +72,7 @@
      reserve it on both sides so the column stays centred rather than being
      shoved left. Above 1120 + 2 × 88 the column clears the widget unaided. */
   @media (max-width: 1295px) {
-    body { padding-left: calc(var(--support-w) + var(--support-gap)); padding-right: calc(var(--support-w) + var(--support-gap)); }
+    body { padding-right: calc(var(--support-w) + var(--support-gap)); }
   }
 
   /* The rail is a column on desktop and a scrolling strip on narrow screens,
@@ -97,18 +97,17 @@
     [data-rail] button {
       width: auto !important;
       white-space: nowrap;
-      border-left: none !important;
-      border-bottom: 3px solid transparent;
+      border-left: 3px solid transparent !important;
+      border-bottom: 3px solid var(--nav-active) !important;
       padding: 12px 14px !important;
       font-size: 13.5px !important;
     }
   }
 
-  /* App shell on phones: the tab bar appears and the page clears it. */
+  /* Phone spacing. The rail is the only nav now, so nothing is pinned to
+     the bottom edge to clear. */
   @media (max-width: 720px) {
-    [data-tabbar] { display: block !important; }
-    body { padding-bottom: 58px; }
-    [data-support] { bottom: 70px !important; }
+    body { padding-bottom: 24px; }
     /* Keep the label, but size it to the tile so the gutter can be narrower on
        a small screen. */
     :root { --support-w: 52px; --support-gap: 14px; }
@@ -129,7 +128,6 @@
     /* 48px minimum tap target. */
     .btn { font-size: 15px !important; padding: 14px 18px !important; min-height: 48px !important; }
     nav button { font-size: 15px !important; padding: 10px 0 !important; min-height: 44px !important; }
-    [data-tabbar] button { font-size: 12.5px !important; }
 
     /* Table rows wrap rather than forcing a horizontal scroll. */
     main td, main th { padding: 10px 8px !important; }
@@ -219,22 +217,27 @@
     <aside data-rail="true" style="flex:none; width:224px; border-right:1px solid var(--color-divider);">
       <nav style="display:flex; flex-direction:column; position:sticky; top:0; padding:18px 0 40px;">
           <div style="font-family:var(--font-heading); font-size:10.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-600); padding:16px 12px 6px;">Your loan</div>
-          <button type="button" onClick="{{ goLoan }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navLoan }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">{{ navLoanLabel }}</button>
+          <button type="button" onClick="{{ goLoan }}" style="display:block; width:100%; text-align:left; background:none; border:none; --nav-active:{{ navLoan }}; border-left:3px solid var(--nav-active); padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">{{ navLoanLabel }}</button>
+        <sc-if value="{{ onLanding }}" hint-placeholder-val="{{ true }}">
+        <button type="button" onClick="{{ jumpWhat }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid transparent; padding:6px 12px 6px 26px; cursor:pointer; font-family:var(--font-body); font-size:13.5px; color:var(--color-neutral-700);" style-hover="color:var(--color-text);">What LoanRepo is</button>
+        <button type="button" onClick="{{ jumpCosts }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid transparent; padding:6px 12px 6px 26px; cursor:pointer; font-family:var(--font-body); font-size:13.5px; color:var(--color-neutral-700);" style-hover="color:var(--color-text);">What it costs</button>
+        <button type="button" onClick="{{ jumpStart }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid transparent; padding:6px 12px 6px 26px; cursor:pointer; font-family:var(--font-body); font-size:13.5px; color:var(--color-neutral-700);" style-hover="color:var(--color-text);">Start here</button>
+        </sc-if>
         <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
-          <button type="button" onClick="{{ goDash }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navDash }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">My Space</button>
+          <button type="button" onClick="{{ goDash }}" style="display:block; width:100%; text-align:left; background:none; border:none; --nav-active:{{ navDash }}; border-left:3px solid var(--nav-active); padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">My Space</button>
         </sc-if>
         <sc-if value="{{ stage2 }}" hint-placeholder-val="{{ false }}">
-          <button type="button" onClick="{{ goSaved }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navSaved }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">Saved runs</button>
+          <button type="button" onClick="{{ goSaved }}" style="display:block; width:100%; text-align:left; background:none; border:none; --nav-active:{{ navSaved }}; border-left:3px solid var(--nav-active); padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">Saved runs</button>
         </sc-if>
           <div style="font-family:var(--font-heading); font-size:10.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-600); padding:16px 12px 6px;">The guide</div>
-          <button type="button" onClick="{{ goBook }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navBook }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">The Quiet Years</button>
+          <button type="button" onClick="{{ goBook }}" style="display:block; width:100%; text-align:left; background:none; border:none; --nav-active:{{ navBook }}; border-left:3px solid var(--nav-active); padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">The Quiet Years</button>
           <div style="font-family:var(--font-heading); font-size:10.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-neutral-600); padding:16px 12px 6px;">Reference</div>
         <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
-          <button type="button" onClick="{{ goBuying }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navBuying }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">Buying soon</button>
-          <button type="button" onClick="{{ goCycle }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navCycle }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">Rate cycle</button>
-          <button type="button" onClick="{{ goExamples }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navExamples }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">Examples</button>
+          <button type="button" onClick="{{ goBuying }}" style="display:block; width:100%; text-align:left; background:none; border:none; --nav-active:{{ navBuying }}; border-left:3px solid var(--nav-active); padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">Buying soon</button>
+          <button type="button" onClick="{{ goCycle }}" style="display:block; width:100%; text-align:left; background:none; border:none; --nav-active:{{ navCycle }}; border-left:3px solid var(--nav-active); padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">Rate cycle</button>
+          <button type="button" onClick="{{ goExamples }}" style="display:block; width:100%; text-align:left; background:none; border:none; --nav-active:{{ navExamples }}; border-left:3px solid var(--nav-active); padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">Examples</button>
         </sc-if>
-          <button type="button" onClick="{{ goMethod }}" style="display:block; width:100%; text-align:left; background:none; border:none; border-left:3px solid {{ navMethod }}; padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">Method</button>
+          <button type="button" onClick="{{ goMethod }}" style="display:block; width:100%; text-align:left; background:none; border:none; --nav-active:{{ navMethod }}; border-left:3px solid var(--nav-active); padding:9px 12px; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text);" style-hover="background:var(--color-accent-100);">Method</button>
       </nav>
     </aside>
     <div style="flex:1; min-width:0;">
@@ -291,7 +294,7 @@
       <!-- What this is. The form alone read as a calculator; these are the
            three things LoanRepo actually does, in the order a borrower meets
            them. -->
-      <div style="border-top:1px solid var(--color-text); padding-top:26px; margin-bottom:clamp(40px,6vw,64px);">
+      <div id="lr-what" style="scroll-margin-top:16px; border-top:1px solid var(--color-text); padding-top:26px; margin-bottom:clamp(40px,6vw,64px);">
         <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:10px;">What LoanRepo is</div>
         <h2 style="font-family:var(--font-heading); font-size:clamp(24px,4vw,34px); line-height:1.08; margin:0 0 12px; max-width:30ch;">Not a calculator. A record of what your loan actually did, and what to do next.</h2>
         <p style="font-size:16px; line-height:1.6; max-width:64ch; color:var(--color-neutral-800); margin:0 0 26px;">An EMI calculator tells you what a loan would cost if the rate never moved. It always moves. LoanRepo walks your loan through every real RBI decision since you borrowed, then stays with you through the resets still to come.</p>
@@ -433,7 +436,7 @@
         </div>
       </div>
 
-      <div style="margin-top:56px; border-top:1px solid var(--color-text); padding-top:26px;">
+      <div id="lr-costs" style="scroll-margin-top:16px; margin-top:56px; border-top:1px solid var(--color-text); padding-top:26px;">
         <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:8px;">What it costs</div>
         <h2 style="font-family:var(--font-heading); font-size:30px; line-height:1.1; margin:0 0 6px; max-width:26ch;">The diagnosis is free. Always.</h2>
         <p style="font-size:15px; line-height:1.6; color:var(--color-neutral-800); max-width:58ch; margin:0 0 24px;">Two paid things sit beside it, and neither gates the calculator or the PDF.</p>
@@ -485,7 +488,7 @@
         </div>
       </div>
 
-      <div style="margin-top:56px; border-top:1px solid var(--color-text); padding-top:26px;">
+      <div id="lr-start" style="scroll-margin-top:16px; margin-top:56px; border-top:1px solid var(--color-text); padding-top:26px;">
         <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:8px;">Start here</div>
         <h2 style="font-family:var(--font-heading); font-size:30px; line-height:1.1; margin:0 0 22px; max-width:26ch;">Which of these is you?</h2>
         <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px;">
@@ -1888,23 +1891,9 @@
   </main>
   </sc-if>
 
-  <!-- App-style tab bar: only for signed-in users, only on narrow viewports.
-       The header nav stays authoritative on desktop. -->
-  <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
-  <div data-print-hide="true" data-tabbar="true" style="position:fixed; left:0; right:0; bottom:0; z-index:40; background:var(--color-bg); border-top:1px solid var(--color-text); display:none;">
-    <div style="display:flex;">
-      <button type="button" onClick="{{ goDash }}" style="flex:1; background:none; border:none; border-top:3px solid {{ navDash }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">My Space</button>
-      <button type="button" onClick="{{ goLoan }}" style="flex:1; background:none; border:none; border-top:3px solid {{ navLoan }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Diagnose</button>
-      <sc-if value="{{ stage2 }}" hint-placeholder-val="{{ false }}">
-      <button type="button" onClick="{{ goSaved }}" style="flex:1; background:none; border:none; border-top:3px solid {{ navSaved }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Loans</button>
-      </sc-if>
-      <sc-if value="{{ stage2Soon }}" hint-placeholder-val="{{ true }}">
-        <button type="button" onClick="{{ goBook }}" style="flex:1; background:none; border:none; border-top:3px solid {{ navBook }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Book</button>
-      </sc-if>
-      <button type="button" onClick="{{ goCycle }}" style="flex:1; background:none; border:none; border-top:3px solid {{ navCycle }}; padding:11px 4px 13px; cursor:pointer; font-family:var(--font-heading); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--color-text); min-height:52px;">Cycle</button>
-    </div>
-  </div>
-  </sc-if>
+  <!-- The bottom tab bar is gone: the left rail collapses to a scrolling
+       strip on narrow screens and carries every section, where the tab bar
+       carried four. Two navs on one phone screen is worse than either. -->
 
     </div>
   </div>
@@ -2010,7 +1999,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "i3";
+  static BUILD = "i6";
   // Stage 2 (₹149/mo tracking) is built but not launched: there is no in-app
   // cancel flow yet, and the plan copy promises one. Flip to true to release.
   static STAGE2 = false;
@@ -2475,6 +2464,17 @@ class Component extends DCLogic {
         };
       })()
     };
+  }
+
+  // Rail sub-items scroll within the landing instead of switching screen.
+  jumpTo(id) {
+    const go = () => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 16, behavior: "smooth" });
+    };
+    if (this.state.screen !== "loan") this.setState({ screen: "loan" }, () => setTimeout(go, 80));
+    else go();
   }
 
   // The four marks, drawn once. React elements rather than template markup
@@ -3100,6 +3100,10 @@ class Component extends DCLogic {
       trackSubline: Component.STAGE2 ? "Cancel whenever" : "In final testing — not yet open",
       trackTierCta: Component.STAGE2 ? "See the plan" : "Join the list",
       navLoanLabel: s.user ? "Your loan" : "Diagnose",
+      onLanding: s.screen === "loan" && !s.hasRun,
+      jumpWhat: () => this.jumpTo("lr-what"),
+      jumpCosts: () => this.jumpTo("lr-costs"),
+      jumpStart: () => this.jumpTo("lr-start"),
       ...this.mark(),
       noResult: !s.hasRun,
       ...this.demo(),
