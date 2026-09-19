@@ -7,10 +7,9 @@
 <template id="__bundler_thumbnail" data-bg-color="#f2f2f3">
   <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
     <rect width="1200" height="800" fill="#f2f2f3"/>
-    <g stroke="#5980a6" stroke-width="10" fill="none"><path d="M180 560 L420 560 L420 400 L660 400 L660 300 L900 300 L900 220 L1020 220"/></g>
-    <path d="M180 560 L420 560 L420 470 L660 470 L660 430 L900 430 L900 410 L1020 410" stroke="#9aa3ad" stroke-width="8" stroke-dasharray="26 18" fill="none"/>
-    <g fill="#1d1f20" font-family="Barlow Condensed, sans-serif" font-weight="600"><text x="180" y="185" font-size="128" letter-spacing="2">LOAN<tspan fill="#41618a">REPO</tspan></text></g>
-    <g stroke="#1d1f20" stroke-width="6"><path d="M140 120 L140 160 M120 140 L160 140"/><path d="M1060 640 L1060 680 M1040 660 L1080 660"/></g>
+    <rect x="120" y="300" width="220" height="220" fill="#1d2d3d"/>
+    <path d="M155 470 L205 470 L205 428 L255 428 L255 385 L310 385" fill="none" stroke="#f2f2f3" stroke-width="22"/>
+    <g fill="#1d1f20" font-family="Barlow Condensed, sans-serif" font-weight="600"><text x="390" y="440" font-size="112" letter-spacing="2">LOAN<tspan fill="#41618a">REPO</tspan></text></g>
   </svg>
 </template>
 </head>
@@ -19,6 +18,8 @@
 <helmet>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LoanRepo — what your rate actually did</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect width='128' height='128' fill='%231d2d3d'/%3E%3Cpath d='M20 96 L48 96 L48 72 L76 72 L76 48 L108 48' fill='none' stroke='%23f2f2f3' stroke-width='14'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#1d2d3d">
 <link rel="stylesheet" href="_ds/industry-0aee6b66-0396-4d31-a389-4f4990a07af6/styles.css">
 <script src="_ds/industry-0aee6b66-0396-4d31-a389-4f4990a07af6/_ds_bundle.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -144,9 +145,12 @@
 
   <header style="border-bottom:1px solid var(--color-divider);">
     <div style="max-width:1120px; margin:0 auto; padding:10px 18px; display:flex; align-items:center; gap:16px 24px; flex-wrap:wrap; min-height:62px;">
-      <div style="margin-right:auto;">
+      <div style="margin-right:auto; display:flex; align-items:center; gap:11px;">
+        {{ markHeader }}
+        <div>
         <div style="font-family:var(--font-heading); font-weight:600; font-size:21px; letter-spacing:0.01em;">LOAN<span style="color:var(--color-accent-700);">REPO</span></div>
         <div style="font-family:var(--font-heading); font-size:10.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-text); margin-top:2px; white-space:nowrap;">Floating loan · Diagnose · Guide · Track</div>
+        </div>
       </div>
       <nav style="display:flex; gap:14px 20px; flex-wrap:wrap;">
         <button type="button" onClick="{{ goLoan }}" style="background:none; border:none; padding:8px 0; cursor:pointer; font-family:var(--font-heading); font-weight:600; font-size:14px; letter-spacing:0.06em; text-transform:uppercase; color:var(--color-text); border-bottom:2px solid {{ navLoan }};">{{ navLoanLabel }}</button>
@@ -497,7 +501,7 @@
       <div data-report-only="true" style="display:none; border-bottom:2px solid var(--color-text); padding-bottom:14px; margin-bottom:22px;">
         <div style="display:flex; justify-content:space-between; align-items:baseline; gap:18px; flex-wrap:wrap;">
           <div>
-            <div style="font-family:var(--font-heading); font-weight:600; font-size:24px; letter-spacing:0.01em;">LOAN<span style="color:var(--color-accent-700);">REPO</span></div>
+            <div style="display:flex; align-items:center; gap:10px;">{{ markReport }}<span style="font-family:var(--font-heading); font-weight:600; font-size:24px; letter-spacing:0.01em;">LOAN<span style="color:var(--color-accent-700);">REPO</span></span></div>
             <div style="font-family:var(--font-heading); font-size:10.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-text); margin-top:2px;">Floating loan · Diagnose · Guide · Track</div>
             <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-top:6px;">Home loan diagnosis · free report</div>
           </div>
@@ -1966,10 +1970,13 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "h7";
+  static BUILD = "i1";
   // Stage 2 (₹149/mo tracking) is built but not launched: there is no in-app
   // cancel flow yet, and the plan copy promises one. Flip to true to release.
   static STAGE2 = false;
+  // Which mark the site wears: "A" the drift, "B" the gap, "C" the plate,
+  // "D" the reset. Header, report header and favicon all read from here.
+  static ICON = "D";
   static LEGAL_TABS = [
     { id: "about", label: "About" },
     { id: "terms", label: "Terms" },
@@ -2428,6 +2435,38 @@ class Component extends DCLogic {
         };
       })()
     };
+  }
+
+  // The four marks, drawn once. React elements rather than template markup
+  // because an SVG path set is opaque to editing either way, and this keeps
+  // the switch to a single constant.
+  mark() {
+    const h = React.createElement;
+    const P = (d, o) => h("path", Object.assign({ d, fill: "none", stroke: "#f2f2f3" }, o));
+    const box = (size, kids) => h("svg", {
+      viewBox: "0 0 128 128", width: size, height: size, "aria-hidden": "true",
+      style: { flex: "none", background: "var(--color-accent-900)" }
+    }, kids);
+    const draw = (size, w) => {
+      const k = Component.ICON;
+      if (k === "B") return box(size, [
+        h("rect", { key: "a", x: 20, y: 34, width: 52, height: 24, fill: "rgba(242,242,243,0.5)" }),
+        h("rect", { key: "b", x: 20, y: 70, width: 88, height: 24, fill: "#f2f2f3" })
+      ]);
+      if (k === "C") return box(size, [
+        h("text", { key: "t", x: 64, y: 88, textAnchor: "middle",
+          fontFamily: "Barlow Condensed, sans-serif", fontSize: 74, fontWeight: 700,
+          fill: "#f2f2f3", letterSpacing: "1" }, "LR")
+      ]);
+      if (k === "D") return box(size, [
+        P("M20 96 L48 96 L48 72 L76 72 L76 48 L108 48", { key: "s", strokeWidth: w + 2 })
+      ]);
+      return box(size, [
+        P("M20 94 L52 94 L52 74 L84 74", { key: "d", stroke: "rgba(242,242,243,0.5)", strokeWidth: w - 2, strokeDasharray: "8 7" }),
+        P("M20 94 L52 94 L52 74 L84 74 L84 48 L110 48", { key: "s", strokeWidth: w })
+      ]);
+    };
+    return { markHeader: draw(34, 9), markReport: draw(30, 10) };
   }
 
   // The signed-in home: one loan, its position, and what is due. Kept
@@ -3021,6 +3060,7 @@ class Component extends DCLogic {
       trackSubline: Component.STAGE2 ? "Cancel whenever" : "In final testing — not yet open",
       trackTierCta: Component.STAGE2 ? "See the plan" : "Join the list",
       navLoanLabel: s.user ? "Your loan" : "Diagnose",
+      ...this.mark(),
       noResult: !s.hasRun,
       ...this.demo(),
       reportDate: Component.TODAY.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }),
