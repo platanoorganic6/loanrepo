@@ -322,6 +322,34 @@
         </div>
       </div>
 
+      <sc-if value="{{ demoHasFix }}" hint-placeholder-val="{{ true }}">
+      <div style="margin-top:44px; border-top:1px solid var(--color-text); padding-top:26px;">
+        <div style="font-family:var(--font-heading); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:10px;">What no calculator will tell you</div>
+        <h2 style="font-family:var(--font-heading); font-size:clamp(24px,4vw,34px); line-height:1.08; margin:0 0 12px; max-width:28ch;">The moment it could have been stopped</h2>
+        <p style="font-size:16px; line-height:1.6; max-width:70ch; color:var(--color-neutral-800); margin:0 0 20px;">On that loan the rate first rose in <b>{{ demoFixDate }}</b>, from {{ demoFixFrom }}% to {{ demoFixTo }}%. That is when the extra years began accumulating — and it is the point at which a payment would have prevented them. LoanRepo computes that number for your loan, at every reset.</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); border:1px solid var(--color-divider);">
+          <div style="padding:20px 22px; border-right:1px solid var(--color-divider);">
+            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:6px;">Then — {{ demoFixDate }}</div>
+            <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums;">{{ demoFixAmount }}</div>
+            <div style="font-size:12.5px; line-height:1.5; color:var(--color-neutral-700); margin-top:4px;">{{ demoFixPct }} of the balance owed then would have kept the loan on its original schedule</div>
+          </div>
+          <div style="padding:20px 22px; border-right:1px solid var(--color-divider);">
+            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:6px;">Now</div>
+            <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums; color:var(--color-accent-800);">{{ demoFixNow }}</div>
+            <div style="font-size:12.5px; line-height:1.5; color:var(--color-neutral-700); margin-top:4px;">{{ demoFixMultiple }} the earlier figure, for exactly the same outcome</div>
+          </div>
+          <div style="padding:20px 22px;">
+            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:6px;">Why it matters</div>
+            <div style="font-size:13.5px; line-height:1.55; color:var(--color-neutral-800);">Nothing told this borrower the window was open. The rate change was public, the reset date was in the sanction letter, and the two were never put together in front of them.</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin-top:18px;">
+          <button type="button" class="btn btn-primary" onClick="{{ focusForm }}" style="letter-spacing:0.05em; text-transform:uppercase;">Find your number</button>
+          <span style="font-size:12.5px; line-height:1.5; color:var(--color-neutral-700); max-width:52ch;">Free, no signup. The same window opens at every reset — knowing the number in advance is the difference between a choice and a surprise.</span>
+        </div>
+      </div>
+      </sc-if>
+
       <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); margin-top:44px; border-top:1px solid var(--color-text); border-bottom:1px solid var(--color-divider);">
         <div style="padding:20px; border-right:1px solid var(--color-divider);">
           <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums;">{{ repoCount }}</div>
@@ -1938,7 +1966,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "h5";
+  static BUILD = "h6";
   // Stage 2 (₹149/mo tracking) is built but not launched: there is no in-app
   // cancel flow yet, and the plan copy promises one. Flip to true to release.
   static STAGE2 = false;
@@ -2380,10 +2408,20 @@ class Component extends DCLogic {
         const rt = h.newRate / 1200;
         const need = h.bal - (sim.e0 * (1 - Math.pow(1 + rt, -left)) / rt);
         if (need <= 0) return { demoHasFix: false };
+        const leftNow = sim.n - sim.todayM;
+        const rn = sim.nowRate / 1200;
+        const needNow = leftNow > 1
+          ? sim.nowBal - (sim.e0 * (1 - Math.pow(1 + rn, -leftNow)) / rn)
+          : null;
         return {
           demoHasFix: true,
           demoFixAmount: this.short(need),
-          demoFixDate: this.mLabel(h.date)
+          demoFixDate: this.mLabel(h.date),
+          demoFixFrom: h.oldRate.toFixed(2),
+          demoFixTo: h.newRate.toFixed(2),
+          demoFixPct: Math.round((need / h.bal) * 100) + "%",
+          demoFixNow: needNow && needNow > 0 ? this.short(needNow) : "—",
+          demoFixMultiple: needNow && needNow > 0 ? (needNow / need).toFixed(1) + "×" : "—"
         };
       })()
     };
