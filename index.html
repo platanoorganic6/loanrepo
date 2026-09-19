@@ -315,6 +315,9 @@
             <div style="font-family:var(--font-heading); font-weight:600; font-size:58px; line-height:0.9; font-variant-numeric:tabular-nums;">{{ demoDrift }}</div>
             <div style="font-family:var(--font-heading); font-size:16px; letter-spacing:0.04em; text-transform:uppercase; margin-top:6px;">years of tenure</div>
             <div style="font-size:13.5px; line-height:1.5; margin-top:14px; padding-top:14px; border-top:1px solid rgba(242,242,243,0.3);">{{ demoLine }}</div>
+            <sc-if value="{{ demoHasFix }}" hint-placeholder-val="{{ true }}">
+              <div style="font-size:13.5px; line-height:1.5; margin-top:12px; padding-top:12px; border-top:1px solid rgba(242,242,243,0.3);">A payment of <b>{{ demoFixAmount }}</b> in {{ demoFixDate }}, when the rate first rose, would have kept it on the original schedule. Nothing told this borrower the window was open.</div>
+            </sc-if>
           </div>
         </div>
       </div>
@@ -1935,7 +1938,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "h4";
+  static BUILD = "h5";
   // Stage 2 (₹149/mo tracking) is built but not launched: there is no in-app
   // cancel flow yet, and the plan copy promises one. Flip to true to release.
   static STAGE2 = false;
@@ -2368,7 +2371,21 @@ class Component extends DCLogic {
       demoRate1: sim.nowRate.toFixed(2) + "%",
       demoEmi: this.inr(sim.e0) + " · unchanged",
       demoDrift: extra === null ? "—" : "+" + (extra / 12).toFixed(1),
-      demoLine: "A 20-year loan is now a " + total.toFixed(1) + "-year one. The EMI never moved, so no statement ever said so in those words."
+      demoLine: "A 20-year loan is now a " + total.toFixed(1) + "-year one. The EMI never moved, so no statement ever said so in those words.",
+      ...(() => {
+        const h = sim.firstHike;
+        if (!h) return { demoHasFix: false };
+        const left = sim.n - h.m;
+        if (left <= 1) return { demoHasFix: false };
+        const rt = h.newRate / 1200;
+        const need = h.bal - (sim.e0 * (1 - Math.pow(1 + rt, -left)) / rt);
+        if (need <= 0) return { demoHasFix: false };
+        return {
+          demoHasFix: true,
+          demoFixAmount: this.short(need),
+          demoFixDate: this.mLabel(h.date)
+        };
+      })()
     };
   }
 
