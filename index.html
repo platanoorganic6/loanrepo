@@ -322,7 +322,7 @@
       <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); margin-top:44px; border-top:1px solid var(--color-text); border-bottom:1px solid var(--color-divider);">
         <div style="padding:20px; border-right:1px solid var(--color-divider);">
           <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums;">{{ repoCount }}</div>
-          <div style="font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-top:5px;">RBI decisions modelled</div>
+          <div style="font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-top:5px;">Repo rate changes modelled</div>
         </div>
         <div style="padding:20px; border-right:1px solid var(--color-divider);">
           <div style="font-family:var(--font-heading); font-size:30px; font-variant-numeric:tabular-nums;">{{ repoFirstYear }}</div>
@@ -651,6 +651,72 @@
         </div>
       </div>
 
+      <!-- The window between a decision already taken and the reset that
+           applies it to this loan. Nothing here is forecast. -->
+      <sc-if value="{{ hasNeutralise }}" hint-placeholder-val="{{ false }}">
+      <div data-print-keep="true" class="blueprint" style="padding:clamp(22px,3vw,30px); margin-top:26px; background:var(--color-accent-100);">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div style="font-family:var(--font-heading); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--color-accent-700); margin-bottom:8px;">A decision already taken, not yet applied to you</div>
+        <h3 style="font-family:var(--font-heading); font-size:clamp(20px,3.2vw,26px); line-height:1.1; margin:0 0 14px; max-width:34ch;">Your rate goes to {{ neutraliseRate }}% at your reset in {{ neutraliseDate }}.</h3>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:18px; border-top:1px solid var(--color-divider); padding-top:16px;">
+          <div>
+            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:5px;">The change</div>
+            <div style="font-family:var(--font-heading); font-size:23px; font-variant-numeric:tabular-nums;">{{ neutraliseFrom }}% → {{ neutraliseRate }}%</div>
+            <div style="font-size:12.5px; color:var(--color-neutral-700); margin-top:3px;">{{ neutraliseBps }}, already decided</div>
+          </div>
+          <div>
+            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:5px;">What it adds</div>
+            <div style="font-family:var(--font-heading); font-size:23px; font-variant-numeric:tabular-nums;">+{{ neutraliseAdded }} years</div>
+            <div style="font-size:12.5px; color:var(--color-neutral-700); margin-top:3px;">if the EMI stays where it is</div>
+          </div>
+          <div>
+            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:5px;">To stay on your original schedule</div>
+            <div style="font-family:var(--font-heading); font-size:23px; font-variant-numeric:tabular-nums; color:var(--color-accent-800);">{{ neutraliseAmount }}</div>
+            <div style="font-size:12.5px; color:var(--color-neutral-700); margin-top:3px;">{{ neutraliseExact }} · {{ neutralisePctOfBal }} of your balance</div>
+          </div>
+          <div>
+            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:5px;">Before</div>
+            <div style="font-family:var(--font-heading); font-size:23px; font-variant-numeric:tabular-nums;">{{ neutraliseDays }}</div>
+            <div style="font-size:12.5px; color:var(--color-neutral-700); margin-top:3px;">your reset, {{ neutraliseDate }}</div>
+          </div>
+        </div>
+        <sc-if value="{{ neutraliseIsEblr }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:13px; line-height:1.55; color:var(--color-neutral-800); margin-top:16px; border-top:1px dashed var(--color-divider); padding-top:14px; max-width:78ch;">This is not a prediction. The RBI has already moved, and an EBLR loan is repriced at its next reset to the repo rate plus your contractual spread. Paying that amount against the principal before then leaves the loan clearing on the date you originally signed for. Whether it is the right use of the money is your call — chapter nine of the guide covers when it is not.</div>
+        </sc-if>
+        <sc-if value="{{ neutraliseIsMclr }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13px; line-height:1.55; color:var(--color-neutral-800); margin-top:16px; border-top:1px dashed var(--color-divider); padding-top:14px; max-width:78ch;">Treat this as indicative. On MCLR your bank sets the rate from its own cost of funds rather than passing the repo rate through by contract, so the change may be smaller, later, or both. Ask your bank what your rate will be at the next reset before acting on this figure.</div>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <!-- What would have held the schedule, at the moment the rate first
+           rose. Entirely retrospective — no view on where rates go next. -->
+      <sc-if value="{{ hasHindsight }}" hint-placeholder-val="{{ false }}">
+      <div data-print-keep="true" style="margin-top:26px; border-top:1px solid var(--color-text); padding-top:22px;">
+        <div data-print-lede="true" style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:6px;">The moment it could have been stopped</div>
+        <p style="font-size:15px; line-height:1.6; color:var(--color-neutral-800); max-width:70ch; margin:0 0 18px;">Your rate first rose in <b>{{ hindsightDate }}</b>, from {{ hindsightFrom }}% to {{ hindsightTo }}%. That is when the extra years started accumulating — and it is the point at which a payment would have prevented them.</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); border:1px solid var(--color-divider);">
+          <div style="padding:18px 20px; border-right:1px solid var(--color-divider);">
+            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:6px;">Then — {{ hindsightDate }}</div>
+            <div style="font-family:var(--font-heading); font-size:26px; font-variant-numeric:tabular-nums;">{{ hindsightThen }}</div>
+            <div style="font-size:12.5px; color:var(--color-neutral-700); margin-top:3px;">{{ hindsightThenPct }} of the balance you owed then would have kept the loan on its original schedule</div>
+          </div>
+          <sc-if value="{{ hindsightHasNow }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:18px 20px; border-right:1px solid var(--color-divider);">
+            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:6px;">Now</div>
+            <div style="font-family:var(--font-heading); font-size:26px; font-variant-numeric:tabular-nums; color:var(--color-accent-800);">{{ hindsightNow }}</div>
+            <div style="font-size:12.5px; color:var(--color-neutral-700); margin-top:3px;">{{ hindsightMultiple }} the earlier figure, for the same outcome</div>
+          </div>
+          </sc-if>
+          <div style="padding:18px 20px;">
+            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-bottom:6px;">Why it matters</div>
+            <div style="font-size:13.5px; line-height:1.5; color:var(--color-neutral-800);">Nothing told you the window was open. The rate change was public, your reset date was in your sanction letter, and the two together were never put in front of you.</div>
+          </div>
+        </div>
+        <div style="font-size:12.5px; line-height:1.5; color:var(--color-neutral-700); margin-top:12px; max-width:78ch;">This is hindsight, not a recommendation — whether that money was available, or better used elsewhere, only you can say. It is here because the same window opens at every reset, and knowing the number in advance is the difference between a choice and a surprise.</div>
+      </div>
+      </sc-if>
+
       <!-- chart -->
       <figure class="blueprint" style="margin-top:44px; padding:26px 26px 18px;">
         <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
@@ -947,7 +1013,7 @@
 
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:36px; margin-top:52px; align-items:start;">
       <div>
-        <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:14px;">Every MPC decision behind the line</div>
+        <div style="font-family:var(--font-heading); font-size:13px; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:14px;">Every change behind the line</div>
         <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;"><table class="table" style="min-width:520px;">
           <thead><tr><th>Effective</th><th style="text-align:right;">Repo</th><th style="text-align:right;">Change</th></tr></thead>
           <tbody>
@@ -1866,7 +1932,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "g7";
+  static BUILD = "h1";
   // Stage 2 (₹149/mo tracking) is built but not launched: there is no in-app
   // cancel flow yet, and the plan copy promises one. Flip to true to release.
   static STAGE2 = false;
@@ -2583,13 +2649,16 @@ class Component extends DCLogic {
     let bal = principal, rate = startRate, payoffM = null;
     const series = [{ m: 0, bal: principal }];
     const resets = [];
-    let nowBal = principal, nowRate = startRate;
+    let nowBal = principal, nowRate = startRate, firstHike = null;
 
     for (let i = 1; i <= cap; i++) {
       if (i % resetN === 0) {
         const d = this.addMonths(start, i);
         const nr = (d <= Component.TODAY ? this.repoOn(d) : this.repoOn(Component.TODAY)) + spread;
         if (Math.abs(nr - rate) > 0.001) {
+          if (d <= Component.TODAY && nr > rate && !firstHike) {
+            firstHike = { m: i, date: d, bal: bal, oldRate: rate, newRate: nr };
+          }
           if (d <= Component.TODAY) {
             resets.push({
               date: this.mLabel(d), month: "month " + i,
@@ -2618,7 +2687,7 @@ class Component extends DCLogic {
     }
     const promisedNow = promised[Math.min(todayM, n)].bal;
 
-    return { start, startRate, spread, resetN, n, e0, todayM, nowBal, nowRate, payoffM, series, promised, promisedNow, resets, benchmark, principal, tenureYears };
+    return { start, startRate, spread, resetN, n, e0, todayM, nowBal, nowRate, payoffM, series, promised, promisedNow, resets, benchmark, principal, tenureYears , firstHike };
   }
 
   overpayPct(principal, startRate, tenureYears, extraCash) {
@@ -3209,6 +3278,74 @@ class Component extends DCLogic {
         { head: "Verify the spread", body: "Check the sanction letter and latest statement. Your actual spread is more reliable than a default assumption." },
         { head: "Log the next reset", body: "Record the actual rate, EMI, outstanding and remaining months so LoanRepo can reconcile the model with your statement." }
       ],
+      ...(() => {
+        const pendingRate = this.repoOn(Component.TODAY) + r.spread;
+        const k = Math.ceil((r.todayM + 0.001) / r.resetN);
+        const nextReset = this.addMonths(r.start, k * r.resetN);
+        const rising = pendingRate > r.nowRate + 0.005;
+        const monthsLeftOnSchedule = r.n - r.todayM;
+        if (!rising || monthsLeftOnSchedule <= 1 || r.nowBal <= 0) return { hasNeutralise: false };
+
+        const nowTerm = this.remMonths(r.nowBal, r.nowRate, r.e0);
+        const afterTerm = this.remMonths(r.nowBal, pendingRate, r.e0);
+        if (!isFinite(afterTerm)) return { hasNeutralise: false };
+        const added = afterTerm - nowTerm;
+
+        // The balance that amortises over the remaining original term at the
+        // new rate — the present value of the same EMI. Anything above it is
+        // what has to go to stay on the original schedule.
+        const rr = pendingRate / 1200;
+        const sustainable = r.e0 * (1 - Math.pow(1 + rr, -monthsLeftOnSchedule)) / rr;
+        const need = r.nowBal - sustainable;
+        if (need <= 0) return { hasNeutralise: false };
+
+        const days = Math.max(Math.round((nextReset - Component.TODAY) / 86400000), 0);
+        return {
+          hasNeutralise: true,
+          neutraliseRate: pendingRate.toFixed(2),
+          neutraliseFrom: r.nowRate.toFixed(2),
+          neutraliseBps: Math.round((pendingRate - r.nowRate) * 100) + " bps",
+          neutraliseDate: this.mLabel(nextReset),
+          neutraliseDays: days === 0 ? "due now" : days + (days === 1 ? " day" : " days"),
+          neutraliseAdded: (added / 12).toFixed(1),
+          neutraliseAmount: this.short(need),
+          neutraliseExact: this.inr(need),
+          neutralisePctOfBal: Math.round((need / r.nowBal) * 100) + "%",
+          neutraliseIsMclr: r.benchmark === "MCLR",
+          neutraliseIsEblr: r.benchmark !== "MCLR"
+        };
+      })(),
+      ...(() => {
+        const h = r.firstHike;
+        if (!leak || !h) return { hasHindsight: false };
+        const monthsLeftThen = r.n - h.m;
+        if (monthsLeftThen <= 1) return { hasHindsight: false };
+        const rt = h.newRate / 1200;
+        const sustainableThen = r.e0 * (1 - Math.pow(1 + rt, -monthsLeftThen)) / rt;
+        const needThen = h.bal - sustainableThen;
+        if (needThen <= 0) return { hasHindsight: false };
+
+        const monthsLeftNow = r.n - r.todayM;
+        const rn = r.nowRate / 1200;
+        const needNow = monthsLeftNow > 1
+          ? r.nowBal - (r.e0 * (1 - Math.pow(1 + rn, -monthsLeftNow)) / rn)
+          : null;
+
+        return {
+          hasHindsight: true,
+          hindsightDate: this.mLabel(h.date),
+          hindsightFrom: h.oldRate.toFixed(2),
+          hindsightTo: h.newRate.toFixed(2),
+          hindsightThen: this.short(needThen),
+          hindsightThenPct: Math.round((needThen / h.bal) * 100) + "%",
+          hindsightNow: needNow && needNow > 0 ? this.short(needNow) : null,
+          hindsightHasNow: !!(needNow && needNow > 0),
+          hindsightNoNow: !(needNow && needNow > 0),
+          hindsightMultiple: needNow && needNow > 0
+            ? (needNow / needThen).toFixed(1) + "×"
+            : null
+        };
+      })(),
       isLeak: leak,
       isFlat: extraM !== null && !leak && extraM >= -1.2,
       isAhead: extraM !== null && extraM < -1.2,
