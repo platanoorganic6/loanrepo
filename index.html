@@ -1966,7 +1966,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "h6";
+  static BUILD = "h7";
   // Stage 2 (₹149/mo tracking) is built but not launched: there is no in-app
   // cancel flow yet, and the plan copy promises one. Flip to true to release.
   static STAGE2 = false;
@@ -2175,6 +2175,9 @@ class Component extends DCLogic {
     const q = new URLSearchParams({
       amount: String(r.principal),
       start: this.mLabel(r.start),
+      // The display label above is what the book prints; this is what the
+      // server re-simulates from. Two formats, two jobs.
+      start_month: this.state.date,
       tenure: String(r.tenureYears),
       actual: ((r.payoffM || r.n) / 12).toFixed(1),
       rate0: r.startRate.toFixed(2),
