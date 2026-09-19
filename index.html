@@ -1440,8 +1440,11 @@
           <div style="font-family:var(--font-heading); font-size:16px;">Your guide is paid for but not yet saved</div>
           <div style="font-size:12.5px; color:var(--color-neutral-700); margin-top:3px;">A previous attempt was interrupted. Nothing further will be charged.</div>
         </div>
-        <button type="button" class="btn btn-primary" onClick="{{ retryGuide }}" style="font-size:12px; padding:7px 11px;">Finish saving it</button>
+        <button type="button" class="btn btn-primary" onClick="{{ retryGuide }}" disabled="{{ ebookBusy }}" style="font-size:12px; padding:7px 11px;">{{ retryCta }}</button>
       </div>
+      <sc-if value="{{ hasDocMsg }}" hint-placeholder-val="{{ false }}">
+        <div style="border-bottom:1px solid var(--color-divider); padding:0 0 14px; font-size:13px; line-height:1.5; color:var(--color-accent-800); max-width:72ch;">{{ docMsg }}</div>
+      </sc-if>
       </sc-if>
 
       <sc-if value="{{ hasDocuments }}" hint-placeholder-val="{{ false }}">
@@ -1932,7 +1935,7 @@ class Component extends DCLogic {
     { ch: "17", t: "What this book cannot tell you", site: "part", book: "Where the method stops, stated plainly" },
     { ch: "—", t: "Reference: email templates, worksheet, glossary", site: "part", book: "Three email templates to the site's one, plus a glossary" }
   ];
-  static BUILD = "h1";
+  static BUILD = "h4";
   // Stage 2 (₹149/mo tracking) is built but not launched: there is no in-app
   // cancel flow yet, and the plan copy promises one. Flip to true to release.
   static STAGE2 = false;
@@ -2298,54 +2301,41 @@ class Component extends DCLogic {
     }
   }
 
-  // Render the diagnosis on screen to PDF and file it in My Space. This is a
-  // single-page capture of an element already laid out, which rasterises fine
-  // — unlike the 40-page book, which is why that moved to the server.
+  // Ask the server to draw the report. It was captured in the browser with
+  // html2canvas, which returned blank pages on every attempt — the design
+  // system's colours are OKLCH and html2canvas does not support that function.
   storeDiagnosisReport(thenGo) {
     if (!this.state.user || !this.db.enabled) return Promise.resolve();
-    const el = this.resultEl;
-    if (!el) return Promise.resolve();
-    this.setState({ docMsg: "Saving your report to My Space…" });
-    return this.loadHtml2Pdf()
-      .then(ok => {
-        if (!ok) throw new Error("PDF generator could not load");
-        // Controls carry no meaning on paper; the report header is the
-        // opposite — screen-hidden, and wanted in the file.
-        const toggled = [];
-        el.querySelectorAll("[data-print-hide]").forEach(n => {
-          toggled.push([n, n.style.display]);
-          n.style.display = "none";
-        });
-        el.querySelectorAll("[data-report-only]").forEach(n => {
-          toggled.push([n, n.style.display]);
-          n.style.display = "block";
-        });
-        const restore = () => toggled.forEach(([n, v]) => { n.style.display = v; });
-        return window.html2pdf().set({
-          margin: 8,
-          filename: "LoanRepo-Diagnosis.pdf",
-          image: { type: "jpeg", quality: 0.96 },
-          html2canvas: { scale: 1.4, useCORS: true, logging: false },
-          jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
-          pagebreak: { mode: ["css", "legacy"] }
-        }).from(el).outputPdf("blob")
-          .then(blob => { restore(); return blob; })
-          .catch(err => { restore(); throw err; });
-      })
-      .then(blob => {
-        const s = this.state;
-        const title = this.short(Number(s.amount)) + " · " + s.date + " · " + s.benchmark;
-        return this.db.storeDiagnosisReport(blob, title);
-      })
-      .then(res => {
-        if (!res || !res.ok) throw new Error((res && (res.error || res.reason)) || "save-failed");
-        this.setState({ docMsg: "Your report is saved. It's in Downloads below." });
-        this.loadDocuments();
-        if (thenGo) this.go("dash");
-      })
-      .catch(e => this.setState({
-        docMsg: "Couldn't save the report: " + String((e && e.message) || e)
-      }));
+    const s = this.state;
+    if (!s.result) {
+      this.setState({ docMsg: "Run your loan first — there is nothing to save yet." });
+      return Promise.resolve();
+    }
+    this.setState({ docMsg: "Preparing your report…" });
+    return this.db.storeDiagnosisReport({
+      start_month: s.date,
+      amount: Number(s.amount),
+      tenure_years: Number(s.tenure),
+      benchmark: s.benchmark,
+      own_spread: s.useOwnSpread && s.ownSpread ? Number(s.ownSpread) : null
+    }).then(res => {
+      if (!res.ok) {
+        this.setState({ docMsg: "Couldn't save the report: " + this.reportError(res.error) });
+        return;
+      }
+      this.setState({ docMsg: "Your report is saved. It's in Downloads below." });
+      this.loadDocuments();
+      if (thenGo) this.go("dash");
+    });
+  }
+
+  reportError(code) {
+    switch (String(code)) {
+      case "loan-figures-missing": return "your loan details didn't come through. Run the diagnosis again.";
+      case "signin-required": return "your session expired. Sign in again.";
+      case "document-record-failed": return "the file was created but couldn't be filed. Message support.";
+      default: return String(code || "unknown error") + ".";
+    }
   }
 
   loadHtml2Pdf() {
@@ -2964,6 +2954,9 @@ class Component extends DCLogic {
       ...this.errand(),
       ...this.cohort(),
       trackCta: this.isPro ? "Track this loan" : "Track this loan — ₹149/mo",
+      retryCta: s.ebookBusy ? "Working…" : "Finish saving it",
+      hasDocMsg: !!s.docMsg,
+      ebookBusy: !!s.ebookBusy,
       stage2: Component.STAGE2,
       stage2Soon: !Component.STAGE2,
       trackBadge: Component.STAGE2 ? "Ongoing" : "Opening soon",
